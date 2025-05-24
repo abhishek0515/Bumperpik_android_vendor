@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "228726042025",
+    "project_id": "bumperpick-36489",
+    "storage_bucket": "bumperpick-36489.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:228726042025:android:51a647fbe56586238a28b8",
+        "android_client_info": {
+          "package_name": "com.bumperpick.bumperpickvendor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDH7G5sjEI8PQcR_GOsuImeBBZW6Xdh_GQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
