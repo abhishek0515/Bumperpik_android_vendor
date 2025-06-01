@@ -16,6 +16,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.ripple.rememberRipple
@@ -40,6 +42,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -53,14 +56,18 @@ import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Repository.Vendor_Category
 import com.bumperpick.bumperpickvendor.Repository.Vendor_Details
 import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
+import com.bumperpick.bumperpickvendor.Screens.Component.ReviewItemView
 import com.bumperpick.bumperpickvendor.Screens.Component.SecondaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey
+import com.bumperpick.bumperpickvendor.ui.theme.satoshi
+import com.bumperpick.bumperpickvendor.ui.theme.satoshi_bold
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import java.io.File
 
 sealed class VendorDetailScreen(val route: String) {
     object EstablishmentInfo : VendorDetailScreen("establishment_info")
@@ -167,7 +174,7 @@ fun VendorDetailPage(isMobile:Boolean,mobile:String,viewModel: VendorDetailViewm
                     )
                 }
                 composable(VendorDetailScreen.ReviewAndSubmit.route) {
-                    ReviewAndSubmitScreen(
+                    ReviewScreen(
                         mobile=mobile,
                         isMobile=isMobile,
                         navController = navController,
@@ -180,156 +187,7 @@ fun VendorDetailPage(isMobile:Boolean,mobile:String,viewModel: VendorDetailViewm
     }
 }
 
-@Composable
-fun EstablishmentInfoScreen(
-    navController: NavController,
-    viewModel: VendorDetailViewmodel,
-    vendorDetails: Vendor_Details,
-    onBack: () -> Unit,
-    isMobile: Boolean,
-    mobile: String
-) {
-    var establishNameState by remember { mutableStateOf(vendorDetails.Vendor_EstablishName) }
-    var brandState by remember { mutableStateOf(vendorDetails.Vendor_brand) }
-    var emailState by remember { mutableStateOf(if(isMobile)vendorDetails.Vendor_Email else mobile) }
-    var mobileState by remember { mutableStateOf(if(!isMobile)vendorDetails.Vendor_Mobile else mobile) }
 
-    BackHandler {
-        onBack()
-
-    }
-
-    LaunchedEffect(establishNameState, brandState,emailState,mobileState) {
-        viewModel.updateEstablishmentInfo(establishNameState, brandState, email = emailState,mobileState)
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 0.dp)
-    ) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White, RoundedCornerShape(8.dp))
-                .padding(vertical = 16.dp),
-
-        ) {
-
-            Spacer(Modifier.height(20.dp))
-            Text(
-                text = "Step 1 of 3",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                fontFamily = satoshi_regular,
-                color = Color.Black,
-                modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = "Let's get started with the name of your establishment",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Normal,
-                fontFamily = satoshi_medium,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(Modifier.height(20.dp))
-
-          Column(modifier = Modifier.background(grey).fillMaxSize().padding(16.dp)) {
-            Text(
-                text = "Name of Your Establishment",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                fontFamily = satoshi_regular
-            )
-            Spacer(Modifier.height(4.dp))
-            TextFieldView(
-                value = establishNameState,
-                onValueChange = { establishNameState = it },
-                placeholder = "Enter Establishment Name",
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-              Spacer(Modifier.height(12.dp))
-            Text(
-                text = "Outlet / brand name",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                fontFamily = satoshi_regular
-            )
-            Spacer(Modifier.height(4.dp))
-            TextFieldView(
-                value = brandState,
-                onValueChange = { brandState = it },
-                placeholder = "Enter Brand Name",
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-              Spacer(Modifier.height(12.dp))
-              Text(
-                  text = "Email",
-                  fontSize = 16.sp,
-                  fontWeight = FontWeight.Normal,
-                  fontFamily = satoshi_regular
-              )
-              Spacer(Modifier.height(4.dp))
-              TextFieldView(
-                  value = if(isMobile) emailState else mobile,
-                  onValueChange = { if(isMobile){ emailState = it } },
-                  placeholder = "Enter your Email",
-                  modifier = Modifier.fillMaxWidth(),
-                  singleLine = true,
-                  isEnabled = isMobile
-              )
-
-              if(!isMobile){
-                  Spacer(Modifier.height(12.dp))
-                  Text(
-                      text = "Mobile Number",
-                      fontSize = 16.sp,
-                      fontWeight = FontWeight.Normal,
-                      fontFamily = satoshi_regular
-                  )
-                  Spacer(Modifier.height(4.dp))
-                  TextFieldView(
-                      value =mobileState,
-                      onValueChange = {
-                          if (it.length <= 10) mobileState = it
-                      },
-                      placeholder = "Enter your Mobile Number",
-                      modifier = Modifier.fillMaxWidth(),
-                      singleLine = true,
-                      keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-
-                  )
-              }
-        }
-    }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .background(grey)
-                .padding(16.dp)
-        ) {
-            PrimaryButton(
-                text = "Next",
-                onClick = {
-                    viewModel.validateEstablishmentInfo(establishNameState, brandState,emailState,mobileState)
-
-                    if (viewModel.check_errorIs_null()) {
-                        navController.navigate(VendorDetailScreen.CategorySelection.route){
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -490,7 +348,157 @@ fun CategorySelectScreen(
     }
 }
 
+@Composable
+fun EstablishmentInfoScreen(
+    navController: NavController,
+    viewModel: VendorDetailViewmodel,
+    vendorDetails: Vendor_Details,
+    onBack: () -> Unit,
+    isMobile: Boolean,
+    mobile: String
+) {
+    var establishNameState by remember { mutableStateOf(vendorDetails.Vendor_EstablishName) }
+    var brandState by remember { mutableStateOf(vendorDetails.Vendor_brand) }
+    var emailState by remember { mutableStateOf(if(isMobile)vendorDetails.Vendor_Email else mobile) }
+    var mobileState by remember { mutableStateOf(if(!isMobile)vendorDetails.Vendor_Mobile else mobile) }
 
+    BackHandler {
+        onBack()
+
+    }
+
+    LaunchedEffect(establishNameState, brandState,emailState,mobileState) {
+        viewModel.updateEstablishmentInfo(establishNameState, brandState, email = emailState,mobileState)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 0.dp)
+    ) {
+
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .fillMaxSize()
+                .background(Color.White, RoundedCornerShape(8.dp))
+                .padding(vertical = 16.dp),
+
+            ) {
+
+            Spacer(Modifier.height(20.dp))
+            Text(
+                text = "Step 1 of 3",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = satoshi_regular,
+                color = Color.Black,
+                modifier = Modifier.padding(16.dp)
+            )
+            Text(
+                text = "Let's get started with the name of your establishment",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = satoshi_medium,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(Modifier.height(20.dp))
+
+            Column(modifier = Modifier.background(grey).fillMaxSize().padding(16.dp)) {
+                Text(
+                    text = "Name of Your Establishment",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontFamily = satoshi_regular
+                )
+                Spacer(Modifier.height(4.dp))
+                TextFieldView(
+                    value = establishNameState,
+                    onValueChange = { establishNameState = it },
+                    placeholder = "Enter Establishment Name",
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = "Outlet / brand name",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontFamily = satoshi_regular
+                )
+                Spacer(Modifier.height(4.dp))
+                TextFieldView(
+                    value = brandState,
+                    onValueChange = { brandState = it },
+                    placeholder = "Enter Brand Name",
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = "Email",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontFamily = satoshi_regular
+                )
+                Spacer(Modifier.height(4.dp))
+                TextFieldView(
+                    value = if(isMobile) emailState else mobile,
+                    onValueChange = { if(isMobile){ emailState = it } },
+                    placeholder = "Enter your Email",
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isEnabled = isMobile
+                )
+
+                if(!isMobile){
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = "Mobile Number",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = satoshi_regular
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    TextFieldView(
+                        value =mobileState,
+                        onValueChange = {
+                            if (it.length <= 10) mobileState = it
+                        },
+                        placeholder = "Enter your Mobile Number",
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+
+                    )
+                }
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(grey)
+                .padding(16.dp)
+        ) {
+            PrimaryButton(
+                text = "Next",
+                onClick = {
+                    viewModel.validateEstablishmentInfo(establishNameState, brandState,emailState,mobileState)
+
+                    if (viewModel.check_errorIs_null()) {
+                        navController.navigate(VendorDetailScreen.CategorySelection.route){
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
 @Composable
 fun AdditionalDetailsScreen(
     navController: NavController,
@@ -506,11 +514,6 @@ fun AdditionalDetailsScreen(
     var gstPicUrlState by remember { mutableStateOf(vendorDetails.GstPicUrl) }
     var isSameAsAbove by remember { mutableStateOf(true) } // To handle "Same as above" checkbox
     val context = LocalContext.current
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let { gstPicUrlState = context.uriToFile(it)!! }
-    }
 
     LaunchedEffect(establishmentAddressState, outletAddressState, gstNumberState, gstPicUrlState) {
         viewModel.updateAdditionalDetails(
@@ -529,32 +532,28 @@ fun AdditionalDetailsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(grey, RoundedCornerShape(8.dp))
-                .verticalScroll(rememberScrollState())
+                .background(Color.White, RoundedCornerShape(8.dp))
                 .padding(vertical = 16.dp),
 
             ) {
-Column (modifier = Modifier.background(Color.White).fillMaxWidth()){
+            Spacer(Modifier.height(20.dp))
+            Text(
+                text = "Step 3 of 3",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = satoshi_regular,
+                color = Color.Black,
+                modifier = Modifier.padding(16.dp)
+            )
+            Text(
+                text = "Your Address",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = satoshi_medium,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(Modifier.height(20.dp))
 
-
-    Spacer(Modifier.height(20.dp))
-    Text(
-        text = "Step 3 of 3",
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Normal,
-        fontFamily = satoshi_regular,
-        color = Color.Black,
-        modifier = Modifier.padding(16.dp)
-    )
-    Text(
-        text = "Your Address",
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Normal,
-        fontFamily = satoshi_medium,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
-    Spacer(Modifier.height(20.dp))
-}
             Column(modifier = Modifier.background(grey).fillMaxSize().padding(16.dp)) {
                 Text(
                     text = "Establishment Address",
@@ -635,29 +634,7 @@ Column (modifier = Modifier.background(Color.White).fillMaxWidth()){
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                SecondaryButton(
-                    text = "Previous",
-                    onClick = { navController.navigate(VendorDetailScreen.CategorySelection.route) },
-                    modifier = Modifier.weight(1f)
-                )
-                PrimaryButton(
-                    text = "Next",
-                    onClick = {
-                        viewModel.validateAdditionalDetails(establishmentAddressState, outletAddressState, gstNumberState)
-                        if (viewModel.check_errorIs_null()) {
-                            navController.navigate(VendorDetailScreen.ReviewAndSubmit.route)
-                            {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-            }
+
         }
     }
 
@@ -798,134 +775,88 @@ fun GSTCertificateUploadSection(
 }
 
 
+
+@Preview
 @Composable
-fun ReviewAndSubmitScreen(
-    mobile: String,
-    isMobile: Boolean,
-    navController: NavController,
-    viewModel: VendorDetailViewmodel,
-    vendorDetails: Vendor_Details
-) {
-    var submitted by remember { mutableStateOf(false) }
-    val animatedAlpha by animateFloatAsState(
-        targetValue = if (submitted) 1f else 0f,
-        animationSpec = tween(durationMillis = 500)
+fun previewVendor(){
+    val viewmodel:VendorDetailViewmodel= koinViewModel()
+    val sampleVendor = Vendor_Details(
+        Vendor_Id = "VND123456",
+        Vendor_EstablishName = "Sunrise Café",
+        Vendor_brand = "Sunrise Foods Pvt Ltd",
+        Vendor_Email = "contact@sunrisecafe.com",
+        Vendor_Mobile = "+919876543210",
+        Vendor_Category = Vendor_Category(
+            cat_id = "CAT001",
+            cat_name = "Food & Beverages"
+        ),
+        Establisment_Adress = "123 MG Road, Koramangala, Bengaluru, Karnataka 560034",
+        Outlet_Address = "Plot 45, HSR Layout, Bengaluru, Karnataka 560102",
+        GstNumber = "29ABCDE1234F1Z5",
+        GstPicUrl = File("/storage/emulated/0/Documents/sample_gst.jpg")
     )
-BackHandler {navController.navigate(VendorDetailScreen.AdditionalDetails.route)  }
-    Box(
+
+    ReviewScreen(mobile = "9129883621", isMobile = true, rememberNavController(), viewmodel, sampleVendor)
+}
+@Composable
+fun ReviewScreen(  mobile: String,
+                   isMobile: Boolean,
+                   navController: NavController,
+                   viewModel: VendorDetailViewmodel,
+                   vendorDetails: Vendor_Details){
+    BackHandler {navController.navigate(VendorDetailScreen.AdditionalDetails.route)  }
+
+    Column (
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5)) // Light gray background for depth
+            .padding(bottom = 0.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-                //.padding(bottom = 80.dp), // Space for bottom bar
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
-        ) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White)
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    // Progress indicator
-
-
-                    // Title
-                    Text(
-                        text = "Review Your Information",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = satoshi_medium,
-                        color = Color.Black
-                    )
-
-                    // Subtitle
-                    Text(
-                        text = "Please verify all details before submitting",
-                        fontSize = 16.sp,
-                        fontFamily = satoshi_regular,
-                        color = Color(0xFF666666),
-                        lineHeight = 22.sp
-                    )
-
-                    // Details Section
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFF8F8F8))
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        DetailItem("Establishment Name", vendorDetails.Vendor_EstablishName)
-                        Divider(color = Color(0xFFE0E0E0), thickness = 0.5.dp)
-                        DetailItem("Mobile", vendorDetails.Vendor_Mobile)
-                        Divider(color = Color(0xFFE0E0E0), thickness = 0.5.dp)
-                        DetailItem("Email", vendorDetails.Vendor_Email)
-                        Divider(color = Color(0xFFE0E0E0), thickness = 0.5.dp)
-                        DetailItem("Brand", vendorDetails.Vendor_brand)
-                        Divider(color = Color(0xFFE0E0E0), thickness = 0.5.dp)
-                        DetailItem("Category", vendorDetails.Vendor_Category.cat_name)
-                        Divider(color = Color(0xFFE0E0E0), thickness = 0.5.dp)
-                        DetailItem("Establishment Address", vendorDetails.Establisment_Adress)
-                        Divider(color = Color(0xFFE0E0E0), thickness = 0.5.dp)
-                        DetailItem("Outlet Address", vendorDetails.Outlet_Address)
-                        Divider(color = Color(0xFFE0E0E0), thickness = 0.5.dp)
-                        DetailItem("GST Number", vendorDetails.GstNumber)
-                    }
-
-                    // Success Message
-                    if (submitted) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFE6FFE9))
-                                .padding(16.dp)
-                                .alpha(animatedAlpha),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    Icons.Default.Check,
-                                    contentDescription = "Success",
-                                    tint = Color(0xFF00A541),
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Text(
-                                    text = "Registration Successful!",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp,
-                                    color = Color(0xFF00A541),
-                                    fontFamily = satoshi_medium
-                                )
-                            }
-                            Text(
-                                text = "Your vendor ID is ${vendorDetails.Vendor_Id}",
-                                fontSize = 14.sp,
-                                fontFamily = satoshi_regular,
-                                color = Color(0xFF333333)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // Bottom Action Bar
 
         Column(
             modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+
+
+            ) {
+            Row (modifier = Modifier.background(Color.White).fillMaxWidth().padding(top=40.dp, bottom = 20.dp,start = 16.dp, end = 16.dp),){
+                Icon(
+                    imageVector = Icons.Outlined.ArrowBack,
+                    contentDescription = "back",
+                    tint = Color.Black,
+                    modifier = Modifier.clickable {
+                        navController.navigate(VendorDetailScreen.AdditionalDetails.route)}
+                        .align(Alignment.CenterVertically)
+                        .size(24.dp)
+                    )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Preview Information",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontFamily = satoshi_medium,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+                Spacer(Modifier.height(20.dp))
+            }
+            Column(modifier = Modifier.background(grey).fillMaxSize().padding(16.dp)) {
+                ReviewItemView("Name of Establishment",vendorDetails.Vendor_EstablishName)
+                ReviewItemView("Outlet / Brand Name",vendorDetails.Vendor_brand)
+                ReviewItemView("Email",vendorDetails.Vendor_Email)
+                ReviewItemView("Mobile Number",vendorDetails.Vendor_Mobile)
+                ReviewItemView("Selected Category",vendorDetails.Vendor_Category.cat_name)
+                ReviewItemView("Establishment Address",vendorDetails.Establisment_Adress,isExpanded = true)
+                ReviewItemView("Outlet Address",vendorDetails.Outlet_Address,isExpanded = true)
+                ReviewItemView("Gst Number",vendorDetails.GstNumber)
+
+
+            }
+
+        }
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomCenter)
                 .background(Color(0xFFF5F5F5))
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -934,38 +865,14 @@ BackHandler {navController.navigate(VendorDetailScreen.AdditionalDetails.route) 
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SecondaryButton("Previous",
-                    modifier = Modifier.weight(1f),
-                    onClick = {navController.navigate(VendorDetailScreen.AdditionalDetails.route)},)
-                PrimaryButton("Submit",
+
+                PrimaryButton(
+                    text = "Continue the Sign up",
                     onClick = {
-                    viewModel.submitRegistration(if(isMobile)mobile else vendorDetails.Vendor_Mobile)},
-                    modifier = Modifier.weight(1f))
-
-
-                }
+                        viewModel.submitRegistration(if(isMobile)mobile else vendorDetails.Vendor_Mobile)},
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
-    }
-}
-
-@Composable
-fun DetailItem(label: String, value: String) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color(0xFF666666),
-            fontFamily = satoshi_regular
-        )
-        Text(
-            text = value,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.Black,
-            fontFamily = satoshi_medium
-        )
     }
 }

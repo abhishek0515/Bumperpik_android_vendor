@@ -7,15 +7,49 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.bumperpick.bumperpickvendor.Screens.Home.Homepage
+import com.bumperpick.bumperpickvendor.Repository.MarketingOption
+
+import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CreateOfferScreen
+import com.bumperpick.bumperpickvendor.Screens.Home.HomeScreen
+import com.bumperpick.bumperpickvendor.Screens.Home.HomeScreenClicked
+
 import com.bumperpick.bumperpickvendor.Screens.Login.Login
 import com.bumperpick.bumperpickvendor.Screens.OTP.OtpScreen
 import com.bumperpick.bumperpickvendor.Screens.Splash.Splash
+import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionPage
 import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailPage
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOffer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+@Composable
+fun snackbarHostExample(
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+): Pair<SnackbarHostState, suspend (String) -> Unit> {
+    val scope = rememberCoroutineScope()
+
+    val showSnackbar: suspend (String) -> Unit = { message ->
+        snackbarHostState.showSnackbar(message)
+    }
+
+    SnackbarHost(hostState = snackbarHostState)
+
+    return snackbarHostState to showSnackbar
+}
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val (snackbarHostState, showSnackbar) = snackbarHostExample()
+
+    var message by remember { mutableStateOf("") }
+    LaunchedEffect(message) {
+        if(message.isNotEmpty()){
+            showSnackbar(message)
+        }
+    }
 
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
 
@@ -108,7 +142,55 @@ fun AppNavigation() {
 
         // Home Page
         composable(Screen.HomePage.route) {
-            Homepage()
+            HomeScreen {
+                when (it) {
+                   
+                    is HomeScreenClicked.CreateOffer -> {
+                        val islater=it.isLater
+                        val marketingOption=it.marketingOption
+                        when(marketingOption){
+                            MarketingOption.OFFERS -> {
+                                navController.navigate(Screen.CreateOfferScreen.route)
+                            }
+                            MarketingOption.CUSTOMER_ENGAGEMENT -> {}
+                            MarketingOption.CONTEST_FOR_CUSTOMERS -> {}
+                            MarketingOption.SCRATCH_AND_WIN -> {}
+                            MarketingOption.LUCKY_DRAW -> {}
+                            MarketingOption.CAMPAIGNS -> {}
+                            MarketingOption.EVENTS -> {}
+                        }
+                       
+
+                    }
+
+                    is HomeScreenClicked.EditOffer -> {
+                        navController.navigate(Screen.EditOffer.withOfferId(it.offerId))
+                    }
+                }
+            }
+        }
+        composable(Screen.EditOffer.route
+        , arguments = listOf (navArgument(Screen.offerId) {
+                type = NavType.StringType
+            })
+        ){backStackEntry->
+            val offerid = backStackEntry.arguments?.getString(Screen.offerId) ?: ""
+
+
+            EditOffer(offerId =offerid , onBackPressed = {navController.popBackStack()}, onOfferDone = {})        }
+
+        composable(Screen.Subscription.route){
+            SubscriptionPage { navController.popBackStack() }
+        }
+        
+        composable(Screen.CreateOfferScreen.route){
+            CreateOfferScreen(onOfferDone = {
+                message="Your offer has been successfully published and it is live now."
+
+                navController.popBackStack()
+            }, onBack = {
+                navController.popBackStack()
+            })
         }
     }
 }

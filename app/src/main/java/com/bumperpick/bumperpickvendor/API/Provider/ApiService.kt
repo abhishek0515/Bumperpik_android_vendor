@@ -30,7 +30,7 @@ interface ApiService {
 
     @FormUrlEncoded
     @POST("api/vendor/verify-otp")
-    suspend fun vendor_verify_otp(@Field("phone_number") mobile_number: String,@Field("otp") otp: String): Response<success_model>
+    suspend fun vendor_verify_otp(@Field("phone_number") mobile_number: String,@Field("otp") otp: String): Response<verify_otp>
 
     @Multipart
    @POST("api/vendor/register")

@@ -417,10 +417,6 @@ fun Login(
 
     LaunchedEffect (google_uiState.userData){
         if (google_uiState.userData != null) {
-
-
-
-
             onLoginSuccess(google_uiState.userData!!.email.toString(),false)
 
         }

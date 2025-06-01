@@ -1,0 +1,262 @@
+package com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen
+
+import android.net.Uri
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.bumperpick.bumperpickvendor.Repository.OfferModel
+import com.bumperpick.bumperpickvendor.Repository.OfferTemplateType
+import com.bumperpick.bumperpickvendor.Repository.Result
+import com.bumperpick.bumperpickvendor.Repository.Template_Data
+import com.bumperpick.bumperpickvendor.Repository.TextType
+import com.bumperpick.bumperpickvendor.Repository.offerRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+enum class startingChoose{
+    UserBanner,Template
+}
+enum class StringType{
+    BOLD,ITALIC
+}
+enum class BannerText{
+    BrandName,Heading,SubHeading
+}
+enum class HeadingSize(val value: Dp){
+    Large(24.dp),Medium(18.dp),Small(16.dp)
+}
+
+
+class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewModel() {
+
+     private val _offerDetails= MutableStateFlow(OfferModel())
+    val offerDetails: StateFlow<OfferModel> = _offerDetails
+    private val _offerDetail= MutableStateFlow(OfferModel())
+    val offerDetail: StateFlow<OfferModel> = _offerDetail
+
+
+
+    private val _templateData= MutableStateFlow(Template_Data())
+    val templateData: StateFlow<Template_Data> = _templateData
+
+    private val _user_choosed_banner= MutableStateFlow<startingChoose?>(null)
+    val user_choosed_banner: StateFlow<startingChoose?> = _user_choosed_banner
+
+    private val _choosed_Template= MutableStateFlow<OfferTemplateType?>(null)
+    val choosed_Template: StateFlow<OfferTemplateType?> = _choosed_Template
+
+    fun ChoosedBanner(template:startingChoose){
+        _user_choosed_banner.value=template
+    }
+
+    fun updateOffermedialList(list: List<Uri>){
+        _offerDetails.value=offerDetails.value.copy(medialList = ArrayList(list))
+    }
+    fun updateStartDate(date:String){
+        _offerDetails.value=offerDetails.value.copy(offerStartDate = date)
+    }
+    fun updateEndDate(date:String){
+        _offerDetails.value=offerDetails.value.copy(offerEndDate = date)
+    }
+
+    fun ChoosedTemplate(template:OfferTemplateType){
+        _choosed_Template.value=template
+        _offerDetails.value=offerDetails.value.copy(gradientType = template)
+        _user_choosed_banner.value=startingChoose.Template
+    }
+    fun updateUserBanner(BannerImage:Uri){
+        _offerDetails.value=offerDetails.value.copy(BannerImage = BannerImage)
+    }
+    fun update_Logo(Logo:Uri?){
+        _templateData.value=templateData.value.copy( Logo= Logo)
+    }
+    fun updateBrandName(newTextType: TextType) {
+        _templateData.value = _templateData.value.copy(brandName = newTextType)
+    }
+
+    fun updateHeading(newTextType: TextType) {
+        _templateData.value = _templateData.value.copy(heading = newTextType)
+    }
+
+    fun updateGradientType(colorType: ColorType){
+        _templateData.value=templateData.value.copy(gradientType = (colorType))
+    }
+
+    fun updateSubHeading(newTextType: TextType) {
+        _templateData.value = _templateData.value.copy(subHeading = newTextType)
+    }
+    fun changeHeadingSize(HeadingSize:HeadingSize){
+        val headding=templateData.value.heading
+        _templateData.value=templateData.value.copy(heading = templateData.value.heading.copy(fontSize = HeadingSize))
+       
+    }
+
+    fun getOfferDetails(offerId:String){
+        viewModelScope.launch {
+            val result=offerRepository.getOfferDetails(offerId)
+            when(result){
+                is Result.Error ->{
+                    showError(result.message)
+                }
+                Result.Loading -> {
+
+                }
+                is Result.Success -> {
+                    _offerDetail.value=result.data
+
+                }
+            }
+        }
+
+    }
+    fun validateBannerDetail():Boolean{
+        if(_user_choosed_banner.value == startingChoose.UserBanner){
+            if(_offerDetails.value.offerStartDate.isNullOrEmpty()){
+                showError("Please select start date")
+                return false
+            }
+            else if(_offerDetails.value.offerEndDate.isNullOrEmpty()){
+                showError("Please select end date")
+                return false
+            }
+            else if(_offerDetails.value.BannerImage==null){
+                showError("Please select banner")
+                return false
+            }
+        }
+        else if(_user_choosed_banner.value==startingChoose.Template){
+                if(_templateData.value.brandName.text.isEmpty() ){
+                    if(_templateData.value.Logo==null) {
+                        showError("Please enter brand name or choose logo")
+                        return false
+                    }
+                }
+                else if(_templateData.value.heading.text.isNullOrEmpty()){
+                    showError("Please enter heading")
+                    return false
+                }
+                else if(_templateData.value.subHeading.text.isNullOrEmpty()){
+                    showError("Please enter sub heading")
+                    return false
+                }
+                else if(offerDetails.value.discount.text.isEmpty()){
+                    showError("Please enter discount")
+                    return false
+                }
+            else if(offerDetails.value.offerStartDate.isNullOrEmpty()){
+                showError("Please select start date")
+                return false
+            }
+            else if(offerDetails.value.offerEndDate.isNullOrEmpty()){
+                showError("Please select end date")
+                    return false
+                }
+
+            }
+
+        return true
+
+
+    }
+
+    fun validateConfirmOfferScreen():Boolean{
+        if(_offerDetails.value.productTittle.isNullOrEmpty()){
+            showError("Please enter product name")
+            return false
+        }
+        else if(_offerDetails.value.quantity.isNullOrEmpty()){
+            showError("Please enter quantity")
+            return false
+        }
+        else if(_offerDetails.value.productDiscription.isNullOrEmpty()){
+            showError("Please enter product description")
+            return false
+        }
+        else if(_offerDetails.value.termsAndCondition.isNullOrEmpty()){
+            showError("Please enter terms and condition")
+            return false
+        }
+
+        if(_offerDetails.value.medialList.isEmpty()){
+            showError("Please select media")
+            return false
+        }
+        return true
+
+
+    }
+
+    fun updateProductname(name:String){
+        _offerDetails.value=offerDetails.value.copy(productTittle = name)
+    }
+    fun updateProductDescription(name:String){
+        _offerDetails.value=offerDetails.value.copy(productDiscription = name)
+    }
+    fun updateTermsAndCondition(name:String){
+        _offerDetails.value=offerDetails.value.copy(termsAndCondition = name)
+    }
+    fun updateQuantity(name:String){
+        _offerDetails.value=offerDetails.value.copy(quantity = name)
+    }
+    fun updateDissaount(name:TextType){
+        _offerDetails.value=offerDetails.value.copy(discount = name)
+    }
+
+    private val _error=MutableStateFlow("")
+    val error:StateFlow<String> = _error
+
+
+
+    fun showError(message:String){
+        _error.value=message
+    }
+    fun clearError(){
+        _error.value=""
+
+    }
+
+
+    private val _newMediaList = MutableStateFlow<List<MediaItem>>(emptyList())
+    val newMediaList = _newMediaList.asStateFlow()
+
+    private val _deletedMediaList = MutableStateFlow<List<String>>(emptyList())
+    val deletedMediaList = _deletedMediaList.asStateFlow()
+
+    fun addNewMedia(mediaItem: MediaItem) {
+        _newMediaList.value = _newMediaList.value + mediaItem
+    }
+
+    fun removeNewMedia(mediaItem: MediaItem) {
+        _newMediaList.value = _newMediaList.value - mediaItem
+    }
+
+    fun markMediaAsDeleted(mediaUrl: String) {
+        _deletedMediaList.value = _deletedMediaList.value + mediaUrl
+    }
+
+    fun restoreDeletedMedia(mediaUrl: String) {
+        _deletedMediaList.value = _deletedMediaList.value - mediaUrl
+    }
+
+    fun updateOffer(
+        offerId: String,
+        onSuccess: () -> Unit,
+        deletedUrlMedia: ArrayList<String>,
+        newLocalMedia: ArrayList<Uri>
+    ) {
+        // Implementation for updating offer with new and deleted media
+    }
+
+    fun updateNewLocalMediaList(newLocalMediaList: ArrayList<Uri>) {
+
+    }
+
+    fun updateDeletedUrlMediaList(deletedUrlMediaList: ArrayList<String>) {
+
+    }
+
+
+}

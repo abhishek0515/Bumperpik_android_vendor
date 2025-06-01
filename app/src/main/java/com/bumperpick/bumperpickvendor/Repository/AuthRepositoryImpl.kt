@@ -53,6 +53,7 @@ class AuthRepositoryImpl(
             when(verify_Otp) {
                 is ApiResult.Success->{
                     val pair=Pair(verify_Otp.data.is_registered==1,verify_Otp.data.code==200)
+                    dataStoreManager.saveUserId(verify_Otp.data.meta.token)
                     Result.Success(pair)
 
 

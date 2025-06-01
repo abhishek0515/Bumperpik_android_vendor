@@ -4,11 +4,10 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.bumperpick.bumperpickvendor.R
-
 val satoshi = FontFamily(
-    Font(R.font.satoshi, FontWeight.SemiBold),
+    Font(R.font.satoshi_light, FontWeight.SemiBold),
 
-)
+    )
 val satoshi_regular= FontFamily(
     Font(R.font.satoshi_regular)
 )

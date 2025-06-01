@@ -13,13 +13,19 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="CategryPreview">
+      <SelectionState runConfigName="PreviewOffer">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="MagicDosaScreenPreview">
+      <SelectionState runConfigName="TemplateChoosingBottomSheet">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="MagicDosaLocationCardPreview">
+      <SelectionState runConfigName="CalendarExample">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="PreviewOffer (1)">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="preview_picker">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

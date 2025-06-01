@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,7 +10,16 @@ plugins {
 android {
     namespace = "com.bumperpick.bumperpickvendor"
     compileSdk = 35
-
+    applicationVariants.all {
+        if (buildType.name == "debug") {
+            outputs.all {
+                // Cast to ApkVariantOutputImpl to access outputFileName
+                val outputImpl = this as ApkVariantOutputImpl
+                val appName = "BumperPick Vendor" // Change as needed
+                outputImpl.outputFileName = "$appName-${name}.apk"
+            }
+        }
+    }
     defaultConfig {
         applicationId = "com.bumperpick.bumperpickvendor"
         minSdk = 28
@@ -61,7 +72,8 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
+    implementation ("com.google.accompanist:accompanist-pager:0.32.0")
+    implementation ("com.google.accompanist:accompanist-pager-indicators:0.32.0")
 
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")

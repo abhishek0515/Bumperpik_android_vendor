@@ -15,8 +15,20 @@ sealed class Screen(val route: String) {
         }
 
     }
+    object Subscription:Screen("subscription")
     companion object {
         const val MOBILE_KEY = "mobile"
         const val IS_MOBILE="isMobile"
+        const val offerId="offerId"
+
     }
+
+    object CreateOfferScreen:Screen("createOffer")
+    object EditOffer:Screen("editOffer/{$offerId}"){
+        fun withOfferId(offerID:String):String{
+            return "editOffer/$offerID"
+        }
+    }
+
 }
+
