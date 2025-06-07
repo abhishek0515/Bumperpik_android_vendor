@@ -14,6 +14,7 @@ import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
 // Required imports
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
+import android.util.Log
 import android.widget.VideoView
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -105,7 +106,7 @@ fun MoreOfferDetailsScreen(navController: NavController,viewmodel: CreateOfferVi
                   modifier = Modifier.padding(horizontal = 16.dp))
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "product Title *",
+                text = "Product Title *",
                 fontSize = 14.sp,
                 fontFamily = satoshi_regular,
                 fontWeight = FontWeight.Bold,
@@ -121,7 +122,6 @@ fun MoreOfferDetailsScreen(navController: NavController,viewmodel: CreateOfferVi
                 singleLine = true
             )
             Spacer(Modifier.height(10.dp))
-
 
             Spacer(Modifier.height(10.dp))
             Text(
@@ -217,6 +217,7 @@ fun MultipleMediaPicker(
     ) { uris: List<Uri> ->
         val currentImages = selectedMediaList.filter { isImageFile(context, it) }
         val validImages = uris.filter { uri ->
+            Log.d("URI",uri.path.toString())
             val size = context.contentResolver.openInputStream(uri)?.available()?.toLong() ?: 0L
             when {
                 size > 10 * 1024 * 1024 -> {

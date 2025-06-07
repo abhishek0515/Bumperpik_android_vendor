@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.bumperpick.bumperpickvendor.API.FinalModel.Data
+import com.bumperpick.bumperpickvendor.API.FinalModel.Media
 import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.ColorType
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.HeadingSize
@@ -34,17 +36,11 @@ data class Vendor_Details(
 sealed class GoogleSignInState {
     data object Idle : GoogleSignInState()
     data object Loading : GoogleSignInState()
-    data class Success(val userData: GoogleUserData) : GoogleSignInState()
+    data class Success(val email:String,val userAlreadyRegsitered:Boolean ) : GoogleSignInState()
     data class Error(val message: String) : GoogleSignInState()
 }
 
-data class GoogleUserData(
-    val userId: String,
-    val displayName: String?,
-    val email: String?,
-    val profilePictureUrl: String?,
-    val idToken: String
-)
+
 // Data Classes
 data class Plan(
     val name: String,
@@ -101,6 +97,8 @@ data class Template_Data(
     val gradientType: ColorType = ColorType.BLUE,
     val decorativeImageRes: Int = R.drawable.template4
 )
+data class OfferTemplate(val type: OfferTemplateType, var colorType: ColorType)
+
 
 
 enum class OfferTemplateType{
@@ -109,8 +107,9 @@ enum class OfferTemplateType{
 data class OfferModel(
     val BannerImage: Uri?=null,
     val UrlBannerIMage:String="",
-    val UrlMedialList:ArrayList<String> =ArrayList(),
+    val UrlMedialList:List<Media> =ArrayList(),
     val gradientType: OfferTemplateType?=null,
+    val colorType: ColorType= ColorType.BLUE,
     val heading:TextType?=null,
     val HeadingSize:HeadingSize?=null,
     val discount:TextType=TextType(text = ""),
@@ -135,7 +134,9 @@ data class HomeOffer(
     val Media_list:List<String> = emptyList(),
     val discount:String="",
     val startDate:String="",
+    val approval:String="",
     val endDate:String="",
+    val active:String="",
     val offerTitle:String="",
     val offerTag:String="",
     val offerDescription:String="",

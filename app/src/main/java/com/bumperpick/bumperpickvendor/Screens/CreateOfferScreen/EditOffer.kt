@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import coil.compose.AsyncImage
+import com.bumperpick.bumperpickvendor.API.FinalModel.Media
 import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Repository.OfferModel
 
@@ -319,10 +320,12 @@ fun EditOffer(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Combined Media List (URLs + Local URIs)
+             val urls= arrayListOf<Media>()
+                urls.addAll(offerDetail.UrlMedialList)
+
                 val context = LocalContext.current
                 val combinedMediaList = getCombinedMediaList(
-                    UrlMedialList = offerDetail.UrlMedialList ?: arrayListOf(),
+                   urlMediaList = urls,
                     localMediaList = newLocalMediaList,
                     deletedUrlList = deletedUrlMediaList
                 )
@@ -345,7 +348,7 @@ fun EditOffer(
                     items(combinedMediaList.size) { index ->
                         val mediaItem = combinedMediaList[index]
                         val isVideo = if (mediaItem.isUrl) {
-                            isVideoUrl(mediaItem.url)
+                            isVideoUrl(mediaItem.url!!.url)
                         } else {
                             isVideoFile(context, mediaItem.uri!!)
                         }
@@ -359,7 +362,7 @@ fun EditOffer(
                             onDelete = {
                                 if (mediaItem.isUrl) {
                                     // Add to deleted URLs list
-                                    viewmodel.addToDeletedUrlMedia(mediaItem.url)
+                                    viewmodel.addToDeletedUrlMedia(mediaItem.url!!.url)
                                 } else {
                                     // Remove from local media list
                                     viewmodel.removeNewLocalMedia(mediaItem.uri!!)
@@ -563,22 +566,21 @@ fun  EditMediaTypeSelectionDialog(
 // Data class to represent media items
 data class MediaItem(
     val isUrl: Boolean,
-    val url: String = "",
+    val url: Media? = null,
     val uri: Uri? = null
 )
-
-// Helper function to get combined media list
+// Combines URL media and local media (excluding deleted ones)
 fun getCombinedMediaList(
-    UrlMedialList: ArrayList<String>,
-    localMediaList: ArrayList<Uri>,
-    deletedUrlList: ArrayList<String>
+    urlMediaList: List<Media>,
+    localMediaList: List<Uri>,
+    deletedUrlList: List<String>
 ): List<MediaItem> {
     val combinedList = mutableListOf<MediaItem>()
 
-    // Add URL media items (excluding deleted ones)
-    UrlMedialList.forEach { url ->
-        if (!deletedUrlList.contains(url)) {
-            combinedList.add(MediaItem(isUrl = true, url = url))
+    // Add URL media items, skipping those marked for deletion
+    urlMediaList.forEach { media ->
+        if (!deletedUrlList.contains(media.id.toString())) {
+            combinedList.add(MediaItem(isUrl = true, url = media))
         }
     }
 
@@ -589,6 +591,7 @@ fun getCombinedMediaList(
 
     return combinedList
 }
+
 
 // Helper function to check if URL is video
 fun isVideoUrl(url: String): Boolean {

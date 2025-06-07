@@ -1,5 +1,6 @@
 package com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen
 
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -35,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,6 +45,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bumperpick.bumperpickvendor.API.Provider.uriToFile
 import com.bumperpick.bumperpickvendor.Repository.OfferTemplateType
 import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.SimpleImagePicker
@@ -52,6 +55,7 @@ import com.bumperpick.bumperpickvendor.ui.theme.grey
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
 import org.koin.androidx.compose.koinViewModel
+import java.io.File
 
 sealed class CreateOfferScreenViews(val route: String){
     object SelectBanner:CreateOfferScreenViews("select_banner")
@@ -61,10 +65,12 @@ sealed class CreateOfferScreenViews(val route: String){
 
 }
 @Composable
-fun CreateOfferScreen(onOfferDone:()->Unit,onBack:()->Unit, offerViewmodel: CreateOfferViewmodel= koinViewModel()){
+fun CreateOfferScreen(onBack:()->Unit, offerViewmodel: CreateOfferViewmodel= koinViewModel()){
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val error by offerViewmodel.error.collectAsState()
+    var offerAdded by remember { mutableStateOf(false) }
+
     BackHandler { onBack() }
     LaunchedEffect(error) {
         if (error.isNotEmpty()) {
@@ -80,6 +86,24 @@ fun CreateOfferScreen(onOfferDone:()->Unit,onBack:()->Unit, offerViewmodel: Crea
                 SnackbarResult.Dismissed -> {
                     offerViewmodel.clearError()
 
+                }
+            }
+        }
+    }
+    LaunchedEffect(offerAdded) {
+        if (offerAdded) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Your offer request has been sent successfully.",
+                actionLabel = "OK",
+                withDismissAction = true
+            )
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    offerAdded = false
+                }
+
+                SnackbarResult.Dismissed -> {
+                    offerAdded = false
                 }
             }
         }
@@ -131,11 +155,14 @@ fun CreateOfferScreen(onOfferDone:()->Unit,onBack:()->Unit, offerViewmodel: Crea
                    composable(CreateOfferScreenViews.MoreofferDetails.route){
                        MoreOfferDetailsScreen(navController, viewmodel = offerViewmodel)
                    }
-                   composable(CreateOfferScreenViews.OfferPreview.route){
-                       OfferPreviewScreen(navController, viewmodel = offerViewmodel){
-                           onOfferDone()
+                   composable(CreateOfferScreenViews.OfferPreview.route) {
+                       OfferPreviewScreen(navController, viewmodel = offerViewmodel) {  ->
+                           offerAdded=true
+                           onBack()
                        }
                    }
+
+               }
 
 
                }
@@ -143,7 +170,7 @@ fun CreateOfferScreen(onOfferDone:()->Unit,onBack:()->Unit, offerViewmodel: Crea
        }
 
 
-}
+
 
 
 

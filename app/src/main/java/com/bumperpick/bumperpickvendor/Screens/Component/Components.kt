@@ -113,6 +113,7 @@ import kotlinx.coroutines.delay
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
@@ -123,7 +124,10 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailViewmodel
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi
+import org.koin.androidx.compose.koinViewModel
+import java.io.File
 
 
 /**
@@ -422,7 +426,7 @@ fun LocationCard(
                             imageVector = Icons.Outlined.LocationOn,
                             contentDescription = "Location",
                             tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Column {
@@ -452,7 +456,7 @@ fun LocationCard(
                                 imageVector = Icons.Outlined.Notifications,
                                 contentDescription = "Notifications",
                                 tint = Color.White,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
 
@@ -539,6 +543,11 @@ fun BottomNavigationBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun No_offer(onSelectedOffer:(marketingOption:MarketingOption,islater:Boolean)->Unit){
+    val viewmodel=koinViewModel<VendorDetailViewmodel>()
+    val savedetail=viewmodel.savedVendorDetail.collectAsState()
+    LaunchedEffect(Unit) {
+        viewmodel.getSavedVendorDetail()
+    }
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
     var islater by remember { mutableStateOf(false) }
@@ -549,7 +558,12 @@ fun No_offer(onSelectedOffer:(marketingOption:MarketingOption,islater:Boolean)->
         modifier = Modifier.fillMaxSize()
     ) {
 
-        LocationCard()
+        LocationCard(   locationTitle = if(savedetail.value!=null) {
+            savedetail.value!!.establishment_name }
+        else{""},
+            locationSubtitle =if(savedetail.value!=null) {
+                savedetail.value!!.establishment_address
+            } else{""},)
 
         // Action buttons
         Column(
@@ -781,7 +795,7 @@ fun MarketingOptionBottomSheet(
                         .fillMaxWidth()
                         .background(
                             color = if (selectedOption == option)
-                                Color(0xFFFFE5E5) // Light pink background
+                                BtnColor.copy(alpha = 0.1f) // Light pink background
                             else
                                 Color.White,
                             shape = RoundedCornerShape(8.dp)
@@ -805,7 +819,7 @@ fun MarketingOptionBottomSheet(
                             .border(
                                 width = 2.dp,
                                 color = if (selectedOption == option)
-                                    Color(0xFFD32F2F)
+                                   BtnColor
                                 else
                                     Color.Gray,
                                 shape = CircleShape
@@ -817,7 +831,7 @@ fun MarketingOptionBottomSheet(
                                 modifier = Modifier
                                     .size(12.dp)
                                     .background(
-                                        Color(0xFFD32F2F),
+                                      BtnColor,
                                         CircleShape
                                     )
                             )
@@ -836,30 +850,11 @@ fun MarketingOptionBottomSheet(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Next button
-        Button(
-            onClick = {
-                selectedOption?.let { onDoneClick(it) }
-                onDismiss()
-            },
-            enabled = selectedOption != null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFD32F2F), // Red color
-                disabledContainerColor = Color(0xFFE0E0E0)
-            ),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text(
-                text = "Next",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White
-            )
-        }
+      ButtonView(text = "Next") {
+          selectedOption?.let { onDoneClick(it) }
+          onDismiss()
+      }
+
     }
 }
 
@@ -1219,7 +1214,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
 
 
                             .padding(16.dp)
-                            .background(color = Color.White.copy(0.3f), shape = RoundedCornerShape(8.dp))
+                            .background(color = Color.Gray.copy(0.3f), shape = RoundedCornerShape(8.dp))
                             .border(0.5.dp,Color.White, shape = RoundedCornerShape(8.dp)),
                     ){
                         Icon(Icons.Outlined.Delete, contentDescription = null,modifier = Modifier.align(Alignment.Center)    .clickable { showBottomSheet(EditDelete.DELETE(offerModel.offerId)) }.padding(4.dp).size(26.dp), tint = Color.White)
@@ -1232,7 +1227,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                             .align(Alignment.TopEnd)
 
                             .padding(16.dp)
-                            .background(color = Color.White.copy(0.3f), shape = RoundedCornerShape(8.dp))
+                            .background(color = Color.Gray.copy(0.3f), shape = RoundedCornerShape(8.dp))
                             .border(0.5.dp,Color.White, shape = RoundedCornerShape(8.dp)),
                     ){
                         Icon(Icons.Outlined.MoreVert, contentDescription = null,modifier = Modifier.align(Alignment.Center).clickable { showBottomSheet(EditDelete.EDIT(offerModel.offerId)) } .padding(4.dp).size(26.dp), tint = Color.White)
@@ -1275,16 +1270,54 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
 
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                Row (verticalAlignment = Alignment.CenterVertically) {
-                    Image(painter = painterResource(R.drawable.percentage_red), contentDescription = "percentage", modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = offerModel.discount,
-                        fontSize = 15.sp,
-                        fontFamily = satoshi_regular,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                val is_approved=offerModel.approval.equals("accepted")
+                val is_active=offerModel.approval.equals("active")
+                val color = when {
+                    is_approved && is_active -> Color.Green
+                    is_approved && !is_active -> Color.Red
+                    !is_approved -> Color(0xFFFFA500) // Orange color
+                    else -> Color.Gray // fallback (optional)
                 }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                ) {
+                    // Discount row (start)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = painterResource(R.drawable.percentage_red),
+                            contentDescription = "percentage",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = offerModel.discount,
+                            fontSize = 15.sp,
+                            fontFamily = satoshi_regular,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    // Active/Inactive card (end)
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.2f)),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Text(
+                            text = offerModel.active,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black,
+                            fontFamily = satoshi_regular,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+
 
 
 

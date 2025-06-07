@@ -3,9 +3,10 @@ package com.bumperpick.bumperpickvendor.Screens.Login
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bumperpick.bumperpickvendor.API.FinalModel.Data
 import com.bumperpick.bumperpickvendor.Repository.GoogleSignInRepository
 import com.bumperpick.bumperpickvendor.Repository.GoogleSignInState
-import com.bumperpick.bumperpickvendor.Repository.GoogleUserData
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +16,8 @@ import kotlinx.coroutines.launch
 data class GoogleUiState(
     val isLoading: Boolean = false,
     val error: String = "",
-    val userData: GoogleUserData? = null
+    val gotohomeOrRegister: Boolean? = null,
+    val email:String?=null,
 )
 
 class GoogleSignInViewModel(private val googleSignInRepository: GoogleSignInRepository) : ViewModel() {
@@ -33,18 +35,26 @@ class GoogleSignInViewModel(private val googleSignInRepository: GoogleSignInRepo
     fun processSignInResult(data: Intent?) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = "") }
-            val result = googleSignInRepository.processSignInResult(data)
-            result.onSuccess { userData ->
-                _uiState.update { it.copy(isLoading = false, userData = userData, error = "") }
-            }.onFailure { exception ->
-                _uiState.update { it.copy(isLoading = false, error = exception.message ?: "Google sign-in failed") }
+            googleSignInRepository.processSignInResult(data)
+
+            if(signInState.value is GoogleSignInState.Success){
+                if((signInState.value as GoogleSignInState.Success).userAlreadyRegsitered){
+                     _uiState.update { it.copy(gotohomeOrRegister = true, isLoading = false, email = (signInState.value as GoogleSignInState.Success).email) }
+                }
+                else{
+                    _uiState.update { it.copy(gotohomeOrRegister = false, isLoading = false, email = (signInState.value as GoogleSignInState.Success).email) }
+
+                }
+            }
+            else{
+                _uiState.update { it.copy(error = (signInState.value as GoogleSignInState.Error).message, isLoading = false) }
             }
         }
     }
 
     fun signOut() {
         googleSignInRepository.signOut()
-        _uiState.update { it.copy(userData = null, error = "", isLoading = false) }
+        _uiState.update { it.copy(gotohomeOrRegister = false, error = "", isLoading = false) }
     }
 
     fun clearError() {

@@ -16,9 +16,9 @@ class AuthRepositoryImpl(
 
     override suspend fun checkAlreadyLogin(): Result<Boolean> {
         return try {
-            val userId = dataStoreManager.getUserId.firstOrNull()
-            println("USERID $userId")
-            Result.Success(!userId.isNullOrEmpty())
+            val token=dataStoreManager.getToken()?.token
+            Log.d("token splash",token.toString())
+            Result.Success(!token.isNullOrEmpty())
         } catch (e: Exception) {
             Result.Error("Failed to check login status", e)
         }
@@ -53,10 +53,11 @@ class AuthRepositoryImpl(
             when(verify_Otp) {
                 is ApiResult.Success->{
                     val pair=Pair(verify_Otp.data.is_registered==1,verify_Otp.data.code==200)
-                    dataStoreManager.saveUserId(verify_Otp.data.meta.token)
+                    if(verify_Otp.data.is_registered==1){
+                        dataStoreManager.saveToken(verify_Otp.data.meta)
+                        dataStoreManager.save_Vendor_Details(verify_Otp.data.data)
+                    }
                     Result.Success(pair)
-
-
 
                 }
                 is ApiResult.Error-> Result.Error(verify_Otp.message)

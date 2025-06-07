@@ -35,6 +35,7 @@ import com.bumperpick.bumperpickvendor.ui.theme.satoshi
 sealed class HomeScreenClicked() {
     data class CreateOffer(val marketingOption: MarketingOption, val isLater: Boolean=false) : HomeScreenClicked()
     data class EditOffer(val offerId:String):HomeScreenClicked()
+    data object Logout:HomeScreenClicked()
 
 
 
@@ -70,7 +71,7 @@ fun HomeScreen(onClick:(HomeScreenClicked) -> Unit) {
                         })
                     }
                     2->{
-                     AccountScreen()
+                     AccountScreen(logout = {   onClick(HomeScreenClicked.Logout)})
                     }
                 }
 

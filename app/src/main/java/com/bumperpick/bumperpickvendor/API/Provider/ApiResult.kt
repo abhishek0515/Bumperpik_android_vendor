@@ -16,6 +16,12 @@ sealed class ApiResult<out T> {
     data class Success<out T>(val data: T) : ApiResult<T>()
     data class Error(val message: String, val code: Int? = null) : ApiResult<Nothing>()
 }
+fun prepareImageParts(images: List<File>): List<MultipartBody.Part> {
+    return images.mapIndexed { index, file ->
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        MultipartBody.Part.createFormData("media[]", file.name, requestFile)
+    }
+}
 
 suspend fun <T> safeApiCall(api: suspend () -> Response<T>): ApiResult<T> {
     return try {
@@ -28,6 +34,7 @@ suspend fun <T> safeApiCall(api: suspend () -> Response<T>): ApiResult<T> {
             ApiResult.Error("Error: ${response.message()}", response.code())
         }
     } catch (e: Exception) {
+        Log.d("Error",e.localizedMessage ?: "Unknown error")
         ApiResult.Error("Exception: ${e.localizedMessage ?: "Unknown error"}")
     }
 }
@@ -45,6 +52,7 @@ fun Context.uriToFile(uri: Uri): File? {
     val fileName = getFileName(uri) ?: return null
     val inputStream = contentResolver.openInputStream(uri) ?: return null
     val tempFile = File(cacheDir, fileName)
+    Log.d("Offer banner",inputStream.toString())
 
     tempFile.outputStream().use { output ->
         inputStream.copyTo(output)

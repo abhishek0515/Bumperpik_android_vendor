@@ -77,7 +77,12 @@ fun AppNavigation() {
                         launchSingleTop = true
                     }
                 }
-            },)
+            },
+                gotoHome = {
+                    navController.navigate(Screen.HomePage.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                })
         }
 
         // OTP
@@ -166,6 +171,10 @@ fun AppNavigation() {
                     is HomeScreenClicked.EditOffer -> {
                         navController.navigate(Screen.EditOffer.withOfferId(it.offerId))
                     }
+
+                    HomeScreenClicked.Logout ->navController.navigate(Screen.Splash.route){
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             }
         }
@@ -184,11 +193,7 @@ fun AppNavigation() {
         }
         
         composable(Screen.CreateOfferScreen.route){
-            CreateOfferScreen(onOfferDone = {
-                message="Your offer has been successfully published and it is live now."
-
-                navController.popBackStack()
-            }, onBack = {
+            CreateOfferScreen( onBack = {
                 navController.popBackStack()
             })
         }

@@ -55,6 +55,7 @@ import com.bumperpick.bumperpickvendor.API.Provider.uriToFile
 import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Repository.Vendor_Category
 import com.bumperpick.bumperpickvendor.Repository.Vendor_Details
+import com.bumperpick.bumperpickvendor.Screens.Component.ButtonView
 import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.ReviewItemView
 import com.bumperpick.bumperpickvendor.Screens.Component.SecondaryButton
@@ -526,16 +527,16 @@ fun AdditionalDetailsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 0.dp)
     ) {
-
+        // Scrollable content section
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(bottom = 80.dp) // Leave space for the bottom button
+                .verticalScroll(rememberScrollState())
                 .background(Color.White, RoundedCornerShape(8.dp))
-                .padding(vertical = 16.dp),
-
-            ) {
+                .padding(vertical = 16.dp)
+        ) {
             Spacer(Modifier.height(20.dp))
             Text(
                 text = "Step 3 of 3",
@@ -554,7 +555,12 @@ fun AdditionalDetailsScreen(
             )
             Spacer(Modifier.height(20.dp))
 
-            Column(modifier = Modifier.background(grey).fillMaxSize().padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .background(grey)
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 Text(
                     text = "Establishment Address",
                     fontSize = 16.sp,
@@ -566,37 +572,55 @@ fun AdditionalDetailsScreen(
                     value = establishmentAddressState,
                     onValueChange = { establishmentAddressState = it },
                     placeholder = "Enter Establishment Address",
-                    modifier = Modifier.fillMaxWidth().height(100.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
                     singleLine = false
                 )
                 Spacer(Modifier.height(10.dp))
                 Row {
-                    Icon(imageVector = Icons.Outlined.Info, contentDescription = "info", tint = Color.Gray)
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = "info",
+                        tint = Color.Gray
+                    )
                     Spacer(Modifier.width(4.dp))
-                    Text("Invoice will generate on this address", fontSize = 14.sp, color = Color.Gray)
-
+                    Text(
+                        "Invoice will generate on this address",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
                 }
                 Spacer(Modifier.height(12.dp))
-                Row (modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween){
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                    text = "Outlet Address",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = satoshi_regular
-                )
-                    Text(text = "Same as above", fontSize = 16.sp, color = Color.Red,  fontWeight = FontWeight.Normal,
+                        text = "Outlet Address",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = satoshi_regular
+                    )
+                    Text(
+                        text = "Same as above",
+                        fontSize = 16.sp,
+                        color = Color.Red,
+                        fontWeight = FontWeight.Normal,
                         fontFamily = satoshi_regular,
                         modifier = Modifier.clickable {
-                                outletAddressState=establishmentAddressState
-                        })
-                    }
+                            outletAddressState = establishmentAddressState
+                        }
+                    )
+                }
                 Spacer(Modifier.height(6.dp))
                 TextFieldView(
                     value = outletAddressState,
                     onValueChange = { outletAddressState = it },
                     placeholder = "Enter Brand Name",
-                    modifier = Modifier.fillMaxWidth().height(100.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
                     singleLine = false
                 )
                 Spacer(Modifier.height(20.dp))
@@ -609,23 +633,22 @@ fun AdditionalDetailsScreen(
                 Spacer(Modifier.height(6.dp))
                 TextFieldView(
                     value = gstNumberState,
-                    onValueChange = { if(it.length<=15) gstNumberState = it },
+                    onValueChange = { if (it.length <= 15) gstNumberState = it },
                     placeholder = "Enter gst number",
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 Spacer(Modifier.height(8.dp))
 
-               GSTCertificateUploadSection(
-                   onImageSelected = {
-                      gstPicUrlState= it?.let { it1 -> context.uriToFile(it1) }!!
-                   }
-               )
-
-
+                GSTCertificateUploadSection(
+                    onImageSelected = {
+                        gstPicUrlState = it?.let { uri -> context.uriToFile(uri) }!!
+                    }
+                )
             }
         }
 
+        // Fixed bottom button section
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -634,6 +657,11 @@ fun AdditionalDetailsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            ButtonView("Continue") {
+                navController.navigate(VendorDetailScreen.ReviewAndSubmit.route){
+                    popUpTo(0) { inclusive = true }
+                }
+            }
 
         }
     }

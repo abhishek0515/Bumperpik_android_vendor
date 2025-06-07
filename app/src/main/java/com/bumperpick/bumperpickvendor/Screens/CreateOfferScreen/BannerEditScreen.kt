@@ -47,6 +47,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -172,9 +173,9 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
                     TextFieldView(
                         value = offerDetails.quantity ?: "",
                         onValueChange = {
-                            if (it.length <= 2) {
+
                                 viewmodel.updateQuantity(it)
-                            }
+
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         placeholder = "Enter Offer Quantity",
@@ -267,19 +268,31 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
 fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplateType) {
     val templateData by viewmodel.templateData.collectAsState()
     val offerDetails by viewmodel.offerDetails.collectAsState()
+    var brandnameenabled by remember {  mutableStateOf(false)}
+    LaunchedEffect(offerDetails) {
+        if(offerDetails.BannerImage!=null){
+            brandnameenabled=false
+        }
+        else{
+            brandnameenabled=true
+        }
+    }
     Column {
     when(choosedTemplate){
         OfferTemplateType.Template1 ->{
-            Template1(data = templateData)
+
+            Template1(data = templateData.copy())
         }
         OfferTemplateType.Template2 -> {
+
             Template2(data = templateData)
         }
         OfferTemplateType.Template3 -> {
-            Template3(data = templateData)
+
+            Template3(data =  templateData)
         }
         OfferTemplateType.Template4 -> {
-            Template4(data = templateData)
+            Template4(data =  templateData)
         }
     }
         Spacer(modifier = Modifier.height(16.dp))
@@ -348,13 +361,14 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
         TextFieldView(
             value = offerDetails.quantity ?: "",
             onValueChange = {
-                if (it.length <= 2) {
+
                     viewmodel.updateQuantity(it)
-                }
+
             },
             placeholder = "Enter Offer Quantity",
             modifier = Modifier
                 .fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
         )
 
@@ -380,9 +394,10 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
             color = Color.Black,
             modifier = Modifier.padding(vertical = 6.dp)
         )
-        EditableTextTypeView(textType = templateData.brandName, onTextChange = {
+        EditableTextTypeView(textType = templateData.brandName,
+            onTextChange = {
             viewmodel.updateBrandName(it)
-        })
+        }, enabled = brandnameenabled)
         Spacer(modifier = Modifier.height(6.dp))
         OrDividerRow()
         Spacer(modifier = Modifier.height(6.dp))
@@ -393,6 +408,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
             modifier = Modifier.padding(horizontal = 0.dp)
                 .align(Alignment.CenterHorizontally).fillMaxWidth(),
             onImageSelected = {
+
 
                     viewmodel.update_Logo(Logo = it)
 
@@ -551,7 +567,8 @@ fun HeadingSizeSelector(
 fun EditableTextTypeView(
     modifier: Modifier = Modifier,
     textType: TextType,
-    onTextChange: (TextType) -> Unit
+    onTextChange: (TextType) -> Unit,
+    enabled:Boolean=true
 ) {
     var localText by remember { mutableStateOf(textType.text) }
     var isBold by remember { mutableStateOf(textType.bold) }
@@ -583,6 +600,7 @@ Card( modifier = modifier
                 fontFamily = FontFamily.SansSerif,
                 color = textType.color
             ).merge(dynamicStyle),
+            enabled=enabled,
 
             modifier = Modifier
                 .fillMaxWidth()
@@ -664,7 +682,7 @@ fun OfferDateSelector(
         Text(
             text = "Offer Start Date",
             fontSize = 14.sp,
-            fontFamily = satoshi_medium,
+            fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
@@ -707,7 +725,7 @@ fun OfferDateSelector(
         Text(
             text = "Offer End Date",
             fontSize = 14.sp,
-            fontFamily = satoshi_medium,
+            fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )

@@ -1,6 +1,7 @@
 package com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -15,9 +16,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 
-enum class startingChoose{
-    UserBanner,Template
+sealed class startingChoose(){
+    object UserBanner:startingChoose()
+            object Template:startingChoose()
 }
 enum class StringType{
     BOLD,ITALIC
@@ -36,10 +39,15 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
     val offerDetails: StateFlow<OfferModel> = _offerDetails
     private val _offerDetail= MutableStateFlow(OfferModel())
     val offerDetail: StateFlow<OfferModel> = _offerDetail
+    private val _loading =MutableStateFlow(false)
+     val loading =MutableStateFlow(false)
+
+   private val _offerAdded=MutableStateFlow(false)
+    val offerAdded:StateFlow<Boolean> = _offerAdded
 
 
 
-    private val _templateData= MutableStateFlow(Template_Data())
+    private val _templateData= MutableStateFlow(Template_Data(gradientType = offerDetails.value.colorType))
     val templateData: StateFlow<Template_Data> = _templateData
 
     private val _user_choosed_banner= MutableStateFlow<startingChoose?>(null)
@@ -63,6 +71,26 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
     }
 
     fun ChoosedTemplate(template:OfferTemplateType){
+        when(template){
+            OfferTemplateType.Template1 -> {
+                _offerDetail.value=offerDetails.value.copy(colorType = ColorType.BLUE)
+                _templateData.value=templateData.value.copy(gradientType = ColorType.BLUE)
+            }
+            OfferTemplateType.Template2 ->{
+                _offerDetail.value=offerDetails.value.copy(colorType = ColorType.RED)
+                _templateData.value=templateData.value.copy(gradientType = ColorType.RED)
+
+            }
+            OfferTemplateType.Template3 -> {
+            _offerDetail.value=offerDetails.value.copy(colorType = ColorType.ORANGE)
+                _templateData.value=templateData.value.copy(gradientType = ColorType.ORANGE)
+        }
+            OfferTemplateType.Template4 -> {
+                _offerDetail.value=offerDetails.value.copy(colorType = ColorType.PURPLE)
+                _templateData.value=templateData.value.copy(gradientType = ColorType.PURPLE)
+            }
+        }
+
         _choosed_Template.value=template
         _offerDetails.value=offerDetails.value.copy(gradientType = template)
         _user_choosed_banner.value=startingChoose.Template
@@ -83,7 +111,7 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
 
     fun updateGradientType(colorType: ColorType){
         _templateData.value=templateData.value.copy(gradientType = (colorType))
-    }
+          }
 
     fun updateSubHeading(newTextType: TextType) {
         _templateData.value = _templateData.value.copy(subHeading = newTextType)
@@ -94,24 +122,9 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
        
     }
 
-    fun getOfferDetails(offerId:String){
-        viewModelScope.launch {
-            val result=offerRepository.getOfferDetails(offerId)
-            when(result){
-                is Result.Error ->{
-                    showError(result.message)
-                }
-                Result.Loading -> {
 
-                }
-                is Result.Success -> {
-                    _offerDetail.value=result.data
 
-                }
-            }
-        }
 
-    }
     fun validateBannerDetail():Boolean{
         if(_user_choosed_banner.value == startingChoose.UserBanner){
             if(_offerDetails.value.offerStartDate.isNullOrEmpty()){
@@ -205,6 +218,36 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
         _offerDetails.value=offerDetails.value.copy(discount = name)
     }
 
+    fun AddDatatoServer() {
+        viewModelScope.launch {
+                _loading.value=true
+            val result = offerRepository.AddOffer(offerDetails.value)
+
+            Log.d("result",result.toString())
+            when(result){
+                is Result.Error ->{
+                    _loading.value=false
+                    showError(result.message)
+                }
+                Result.Loading -> {
+                    _loading.value=true
+                }
+                is Result.Success -> {
+                    if(result.data.code in 200..300) {
+                        _offerAdded.value = true
+                        _loading.value=false
+                    }
+                    else{
+                        _loading.value=false
+                        showError(result.data.message)
+                    }
+                }
+
+            }
+
+        }
+    }
+
     private val _error=MutableStateFlow("")
     val error:StateFlow<String> = _error
 
@@ -218,6 +261,25 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
 
     }
 
+
+    fun getOfferDetails(offerId:String){
+        viewModelScope.launch {
+            val result=offerRepository.getOfferDetails(offerId)
+            when(result){
+                is Result.Error ->{
+                    showError(result.message)
+                }
+                Result.Loading -> {
+
+                }
+                is Result.Success -> {
+                    _offerDetail.value=result.data
+
+                }
+            }
+        }
+
+    }
 
     private val _newMediaList = MutableStateFlow<List<MediaItem>>(emptyList())
     val newMediaList = _newMediaList.asStateFlow()

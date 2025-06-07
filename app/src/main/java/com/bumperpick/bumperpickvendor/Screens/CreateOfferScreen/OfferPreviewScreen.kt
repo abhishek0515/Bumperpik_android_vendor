@@ -28,11 +28,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,14 +57,16 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.bumperpick.bumperpickvendor.API.Provider.uriToFile
 import com.bumperpick.bumperpickvendor.Misc.CaptureHost
-import com.bumperpick.bumperpickvendor.Misc.saveBitmapToInternalCache
+import com.bumperpick.bumperpickvendor.Misc.saveBitmapToInternalImagesDir
 import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Repository.OfferTemplateType
 import com.bumperpick.bumperpickvendor.Repository.Template_Data
 import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.SecondaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
+import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
@@ -68,8 +74,11 @@ import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
 
 @Composable
 fun OfferPreviewScreen(navController: NavController, viewmodel: CreateOfferViewmodel,
-                       onOfferDone:()->Unit){
+                       onOfferDone:  ()->Unit){
     val offerDetails by viewmodel.offerDetails.collectAsState()
+    var loading by remember { mutableStateOf(false) }
+    val offerAdded by viewmodel.offerAdded.collectAsState()
+    val error by viewmodel.error.collectAsState()
     val userChoosedBanner by viewmodel.user_choosed_banner.collectAsState()
     val templateData by viewmodel.templateData.collectAsState()
     val choosed_Template by viewmodel.choosed_Template.collectAsState()
@@ -77,18 +86,43 @@ fun OfferPreviewScreen(navController: NavController, viewmodel: CreateOfferViewm
     var selectedPreviewMedia by remember { mutableStateOf<Uri?>(null) }
     var isSelectedMediaVideo by remember { mutableStateOf(false) }
     var triggerCapture by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
     BackHandler {
         navController.navigate(CreateOfferScreenViews.MoreofferDetails.route){
             popUpTo(CreateOfferScreenViews.EditBanner.route)
         }
     }
-    val context= LocalContext.current
+    LaunchedEffect(offerAdded){
+        if(offerAdded){
+            onOfferDone()
+        }
+    }
+    LaunchedEffect(error) {
+        if (error.isNotEmpty()) {
+            loading=false
+            val result = snackbarHostState.showSnackbar(
+                message = error,
+                actionLabel = "OK",
+                withDismissAction = true
+            )
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
 
-    if(triggerCapture){
+                    viewmodel.clearError()
+                }
+                SnackbarResult.Dismissed -> {
+                    viewmodel.clearError()
+
+                }
+            }
+        }
+    }
+    val context= LocalContext.current
+    if(userChoosedBanner == startingChoose.Template){
         CaptureHost(
             onCaptured = {
                 bitmap: Bitmap ->
-                val file = saveBitmapToInternalCache(context, bitmap)
+                val file = saveBitmapToInternalImagesDir(context, bitmap)
                 Log.d("IMAGE SAVED",file.absolutePath)
                 val uri = FileProvider.getUriForFile(
                     context,
@@ -103,6 +137,9 @@ fun OfferPreviewScreen(navController: NavController, viewmodel: CreateOfferViewm
             }
         )
     }
+
+
+
 
     Column(
         modifier = Modifier
@@ -246,7 +283,7 @@ fun OfferPreviewScreen(navController: NavController, viewmodel: CreateOfferViewm
            Divider(modifier = Modifier.height(1.dp).padding(horizontal = 16.dp), color = Color.Gray.copy(0.2f))           
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Offer Tag",
+                text = "Offer Quantity",
                 fontSize = 14.sp,
                 fontFamily = satoshi_regular,
                 fontWeight = FontWeight.Bold,
@@ -274,31 +311,47 @@ fun OfferPreviewScreen(navController: NavController, viewmodel: CreateOfferViewm
                 .background(Color.White)
                 .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                SecondaryButton(
-                    text = "Edit details",
-                    onClick = {
-                        navController.navigate(CreateOfferScreenViews.MoreofferDetails.route){
-                            popUpTo(CreateOfferScreenViews.MoreofferDetails.route){
-                                inclusive=true
-                            }
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-                PrimaryButton(
-                    text = "Publish your Offer",
-                    onClick = {
-                        triggerCapture=true
-                        onOfferDone()
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-            }
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SecondaryButton(
+                        text = "Edit details",
+                        onClick = {
+                            navController.navigate(CreateOfferScreenViews.MoreofferDetails.route) {
+                                popUpTo(CreateOfferScreenViews.MoreofferDetails.route) {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    if (loading) {
+                        Box(  modifier = Modifier.weight(1f).height(30.dp).fillMaxWidth().align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(
+                            color = BtnColor,
+
+                        )
+                    }
+                    } else {
+                    PrimaryButton(
+                        text = "Publish your Offer",
+                        onClick = {
+                            Log.d("userType", userChoosedBanner.toString())
+                            loading = true
+
+                            triggerCapture = true
+
+                            viewmodel.AddDatatoServer()
+
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+
+                }
+            }
         }
 
     }

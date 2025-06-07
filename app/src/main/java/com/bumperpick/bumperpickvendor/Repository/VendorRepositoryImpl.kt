@@ -2,11 +2,11 @@ package com.bumperpick.bumperpickvendor.Repository
 
 import DataStoreManager
 import android.util.Log
+import com.bumperpick.bumperpickvendor.API.FinalModel.Data
 import com.bumperpick.bumperpickvendor.API.Provider.ApiResult
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
 import com.bumperpick.bumperpickvendor.API.Provider.safeApiCall
 import com.bumperpick.bumperpickvendor.API.Provider.toMultipartPart
-import com.bumperpick.bumperpickvendor.API.Provider.toPlainTextRequestBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -62,13 +62,19 @@ class VendorRepositoryImpl(private val dataStoreManager: DataStoreManager,val ap
         Log.d("SUBMIT",submitDetail.toString())
         when(submitDetail){
             is ApiResult.Success-> {
-              //  dataStoreManager.saveUserId(submitDetail.data.data.id.toString())
-                return Result.Success(submitDetail.data.data.id.toString())
+                 dataStoreManager.save_Vendor_Details(submitDetail.data.data)
+                dataStoreManager.saveToken(submitDetail.data.meta)
+                return Result.Success(submitDetail.data.data.vendor_id.toString())
             }
             is ApiResult.Error-> return Result.Error(submitDetail.message)
 
         }
 
 
+    }
+
+    override suspend fun getSavedVendorDetail(): Result<Data> {
+        val detail=dataStoreManager.get_Vendor_Details()
+        return if(detail!=null) Result.Success(detail) else Result.Error("No Details Found")
     }
 }

@@ -379,6 +379,7 @@ fun Login(
     viewModel: LoginViewmodel = koinViewModel(),
     googleSignInViewModel: GoogleSignInViewModel = koinViewModel(),
     onLoginSuccess: (mobile_email: String,from_number:Boolean) -> Unit,
+    gotoHome:()->Unit
 ) {
     // Collect UI states
     val uiState by viewModel.uiState.collectAsState()
@@ -415,10 +416,13 @@ fun Login(
         }
     }
 
-    LaunchedEffect (google_uiState.userData){
-        if (google_uiState.userData != null) {
-            onLoginSuccess(google_uiState.userData!!.email.toString(),false)
-
+    LaunchedEffect (google_uiState.gotohomeOrRegister){
+        if (google_uiState.gotohomeOrRegister != null) {
+            if(google_uiState.gotohomeOrRegister!!){
+                gotoHome()
+            }
+            else{onLoginSuccess(google_uiState.email.toString(),false)
+            }
         }
     }
 

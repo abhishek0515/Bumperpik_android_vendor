@@ -184,7 +184,7 @@ class EditOfferViewmodel(
 
 
                 // Call repository to update offer
-                val updatedOffer = offerRepository.updateOffer(currentOffer)
+                val updatedOffer = offerRepository.updateOffer(currentOffer,deletedUrlMedia)
                 _offerDetail.value = currentOffer
 
                 _uiState.value = _uiState.value.copy(

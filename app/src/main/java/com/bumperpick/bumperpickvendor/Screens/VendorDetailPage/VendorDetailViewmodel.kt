@@ -3,6 +3,7 @@ package com.bumperpick.bumperpickvendor.Screens.VendorDetailPage
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bumperpick.bumperpickvendor.API.FinalModel.Data
 import com.bumperpick.bumperpickvendor.Repository.Result
 import com.bumperpick.bumperpickvendor.Repository.VendorRepository
 import com.bumperpick.bumperpickvendor.Repository.Vendor_Category
@@ -19,6 +20,26 @@ class VendorDetailViewmodel(val vendorRepository: VendorRepository) : ViewModel(
 
     private val _vendorDetails = MutableStateFlow(Vendor_Details(Vendor_Id = ""))
     val vendorDetails: StateFlow<Vendor_Details> = _vendorDetails.asStateFlow()
+
+    private val _savedVendorDetail=MutableStateFlow<Data?>(null)
+    val savedVendorDetail:StateFlow<Data?> = _savedVendorDetail.asStateFlow()
+
+    fun getSavedVendorDetail() {
+        viewModelScope.launch {
+            val result = vendorRepository.getSavedVendorDetail()
+            when (result) {
+                is Result.Success -> {
+                    _savedVendorDetail.value = result.data
+                }
+
+                is Result.Error -> {
+                    _savedVendorDetail.value = null
+                }
+
+                Result.Loading -> {}
+            }
+        }
+    }
 
 
 
@@ -143,7 +164,7 @@ class VendorDetailViewmodel(val vendorRepository: VendorRepository) : ViewModel(
         }
     }
 
-fun clearError(){
+    fun clearError(){
 
     _error.value = null
 }

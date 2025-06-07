@@ -83,12 +83,19 @@ import com.bumperpick.bumperpickvendor.Screens.Component.EditDeleteBottomSheet
 
 import com.bumperpick.bumperpickvendor.Screens.Component.HomeOfferView
 import com.bumperpick.bumperpickvendor.Screens.Component.RemoveOfferBottomSheet
+import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailViewmodel
 import org.koin.androidx.compose.koinViewModel
 fun List<HomeOffer>.get_ActiveOffers()=this.filter { it.offerValid==OfferValidation.Valid }
 fun List<HomeOffer>.getExpiredOffers()=this.filter { it.offerValid==OfferValidation.Expired }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String)->Unit) {
+    val vendorDetailViewmodel= koinViewModel<VendorDetailViewmodel>()
+    val savedetail=vendorDetailViewmodel.savedVendorDetail.collectAsState()
+    val delete by viewmodel.delete.collectAsState()
+    LaunchedEffect(Unit) {
+        vendorDetailViewmodel.getSavedVendorDetail()
+    }
     LaunchedEffect(Unit) { viewmodel.getOffers() }
     var selectedId by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState()
@@ -98,10 +105,17 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
     var selectedTabIndex by remember { mutableStateOf(0) }
     val context= LocalContext.current
     val offer by viewmodel.listOfOffers.collectAsState()
-    LaunchedEffect(selectedId) {  println(selectedId) }
+    LaunchedEffect(selectedId) {  println("selectedId $selectedId") }
+    LaunchedEffect(delete) {
+        if(delete.isNotEmpty()){
+            Toast.makeText(context,delete,Toast.LENGTH_SHORT).show()
+            viewmodel.cleardata()
+        }
+    }
    if(showDeleteDialog){
        DeleteExpiredOfferDialog(true, onDismiss = {showDeleteDialog=false}) {
            showDeleteDialog=false
+           viewmodel.deleteOffer(selectedId,"Delete Expired Offer")
            Toast.makeText(context,"Offer Deleted",Toast.LENGTH_SHORT).show()
        }
    }
@@ -109,7 +123,8 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
     // Compute list directly based on offer and selectedTabIndex
     val list = if (selectedTabIndex == 0) {
         offer.get_ActiveOffers()
-    } else {
+    }
+    else {
         offer.getExpiredOffers()
     }
     if(showBottomSheet) {
@@ -142,13 +157,15 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
             onRemoveOffer = {
                 it->
                 println(it)
+                viewmodel.deleteOffer(selectedId,it)
                 showDeleteBottomSheet=false
             })
     }
 
     Column {
         // LocationCard and TabRow remain unchanged (as per original code)
-        LocationCard(content = {
+        LocationCard(
+            content = {
             Card(
                 border = BorderStroke(1.dp, Color.Black),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -216,7 +233,19 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
                         .padding(horizontal = 16.dp)
                 )
             }
-        })
+        },
+
+            locationTitle = if(savedetail.value!=null) {
+                savedetail.value!!.establishment_name }
+            else{""},
+            locationSubtitle =if(savedetail.value!=null) {
+                savedetail.value!!.establishment_address
+            } else{""},
+
+
+
+
+            )
 
         // Display the number of offers based on selectedTabIndex
         Spacer(modifier = Modifier.height(18.dp))
@@ -238,6 +267,7 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
                     when(it){
                         is EditDelete.DELETE ->{
                 showDeleteDialog=true
+                            selectedId=it.offerId
                         }
                         is EditDelete.EDIT -> {
                             println(it.offerId)

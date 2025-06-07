@@ -56,18 +56,26 @@ import org.koin.androidx.compose.koinViewModel
 import java.io.File
 import java.io.FileOutputStream
 
-fun saveBitmapToInternalCache(context: Context, bitmap: Bitmap): File {
+fun saveBitmapToInternalImagesDir(context: Context, bitmap: Bitmap): File {
  // Convert hardware bitmap to software-compatible before saving
  val safeBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
   bitmap.copy(Bitmap.Config.ARGB_8888, true)
  } else bitmap
 
- val file = File(context.cacheDir, "subscription_card_${System.currentTimeMillis()}.png")
+ // Target folder inside internal storage for FileProvider
+ val imagesDir = File(context.filesDir, "images").apply {
+  if (!exists()) mkdirs()
+ }
+
+ // Create the image file
+ val file = File(imagesDir, "subscription_card_${System.currentTimeMillis()}.png")
  FileOutputStream(file).use { out ->
   safeBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
  }
- return file
+
+ return file // Can be used with FileProvider.getUriForFile(...) later
 }
+
 
 @Composable
 fun CaptureHost(
@@ -91,6 +99,7 @@ fun CaptureHost(
  )
 
  LaunchedEffect(Unit) {
+
   delay(100) // Let compose and layout
 
   viewRef.value?.let { view ->
