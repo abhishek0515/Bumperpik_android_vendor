@@ -658,8 +658,11 @@ fun AdditionalDetailsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ButtonView("Continue") {
-                navController.navigate(VendorDetailScreen.ReviewAndSubmit.route){
+                viewModel.validateAdditionalDetails(establishmentAddressState, outletAddressState,gstNumberState,gstPicUrlState)
+                if (viewModel.check_errorIs_null()) {
+                navController.navigate(VendorDetailScreen.ReviewAndSubmit.route) {
                     popUpTo(0) { inclusive = true }
+                }
                 }
             }
 

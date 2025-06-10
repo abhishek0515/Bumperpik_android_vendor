@@ -1,8 +1,10 @@
 package com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bumperpick.bumperpickvendor.Repository.HomeOffer
 import com.bumperpick.bumperpickvendor.Repository.OfferModel
 import com.bumperpick.bumperpickvendor.Repository.Result
 import com.bumperpick.bumperpickvendor.Repository.VendorRepository
@@ -29,8 +31,8 @@ class EditOfferViewmodel(
     val uiState: StateFlow<EditofferUiState> = _uiState.asStateFlow()
 
     // Offer Details
-    private val _offerDetail = MutableStateFlow(OfferModel())
-    val offerDetail: StateFlow<OfferModel> = _offerDetail.asStateFlow()
+    private val _offerDetail = MutableStateFlow(HomeOffer())
+    val offerDetail: StateFlow<HomeOffer> = _offerDetail.asStateFlow()
 
     // Media Management
     private val _newLocalMediaList = MutableStateFlow<ArrayList<Uri>>(arrayListOf())
@@ -46,25 +48,28 @@ class EditOfferViewmodel(
      */
     fun getOfferDetails(offerId: String) {
         viewModelScope.launch {
-            try {
-                _uiState.value = _uiState.value.copy(isLoading = true, isError = false)
+            _uiState.value = _uiState.value.copy(isLoading = true, isError = false)
 
-                val offerDetails = offerRepository.getOfferDetails(offerId)
-                when(offerDetails){
-                    is Result.Error ->{
+            try {
+                when (val offerDetails = offerRepository.getOfferDetails(offerId)) {
+                    is Result.Error -> {
                         showError(offerDetails.message)
-                    }
-                    Result.Loading -> {
-                        _uiState.value = _uiState.value.copy(isLoading = true)
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            isError = true,
+                            errorMessage = offerDetails.message
+                        )
                     }
 
                     is Result.Success -> {
-                        _offerDetail.value = offerDetails.data
+                        _offerDetail.value = offerDetails.data?:HomeOffer()
+                        _uiState.value = _uiState.value.copy(isLoading = false)
+                    }
+
+                    Result.Loading -> {
+                        // Optional: can ignore or log, usually not emitted here
                     }
                 }
-
-
-                _uiState.value = _uiState.value.copy(isLoading = false)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -79,14 +84,14 @@ class EditOfferViewmodel(
      * Update product name
      */
     fun updateProductname(name: String) {
-        _offerDetail.value = _offerDetail.value.copy(productTittle = name)
+        _offerDetail.value = _offerDetail.value.copy(offerTitle = name)
     }
 
     /**
      * Update product description
      */
     fun updateProductDescription(description: String) {
-        _offerDetail.value = _offerDetail.value.copy(productDiscription = description)
+        _offerDetail.value = _offerDetail.value.copy(offerDescription = description)
     }
 
     /**
@@ -100,14 +105,14 @@ class EditOfferViewmodel(
      * Update offer start date
      */
     fun updateStartDate(startDate: String) {
-        _offerDetail.value = _offerDetail.value.copy(offerStartDate = startDate)
+        _offerDetail.value = _offerDetail.value.copy(startDate = startDate)
     }
 
     /**
      * Update offer end date
      */
     fun updateEndDate(endDate: String) {
-        _offerDetail.value = _offerDetail.value.copy(offerEndDate = endDate)
+        _offerDetail.value = _offerDetail.value.copy(endDate = endDate)
     }
 
     /**
@@ -173,6 +178,8 @@ class EditOfferViewmodel(
     ) {
         viewModelScope.launch {
             try {
+                Log.d("deletedUrlMedia",deletedUrlMedia.toString())
+                Log.d("newLocalMedia",newLocalMedia.toString())
                 _uiState.value = _uiState.value.copy(isLoading = true, isError = false)
 
                 // Validate required fields
@@ -184,20 +191,24 @@ class EditOfferViewmodel(
 
 
                 // Call repository to update offer
-                val updatedOffer = offerRepository.updateOffer(currentOffer,deletedUrlMedia)
+                val updatedOffer = offerRepository.updateOffer(currentOffer,deletedUrlMedia,newLocalMedia)
                 _offerDetail.value = currentOffer
+                when(updatedOffer){
+                    is Result.Error ->  _uiState.value = _uiState.value.copy(isError = true, errorMessage = updatedOffer.message, isLoading = false)
+                    Result.Loading -> _uiState.value = _uiState.value.copy(isLoading = true)
+                    is Result.Success -> {
+                        _uiState.value = _uiState.value.copy(isSuccess = true, successMessage = "Offer updated successfully", isLoading = false)
+                        onSuccess()
+                    }
+                }
 
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    isSuccess = true,
-                    successMessage = "Offer updated successfully"
-                )
+
 
                 // Reset media lists after successful update
                 _newLocalMediaList.value = arrayListOf()
                 _deletedUrlMediaList.value = arrayListOf()
 
-                onSuccess()
+
 
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -214,13 +225,13 @@ class EditOfferViewmodel(
     /**
      * Validate offer data before submission
      */
-    private fun validateOfferData(offer: OfferModel): Boolean {
+    private fun validateOfferData(offer: HomeOffer): Boolean {
         when {
-            offer.productTittle.isNullOrBlank() -> {
+            offer.offerTitle.isNullOrBlank() -> {
                 showError("Product title is required")
                 return false
             }
-            offer.productDiscription.isNullOrBlank() -> {
+            offer.offerDescription.isNullOrBlank() -> {
                 showError("Product description is required")
                 return false
             }
@@ -228,11 +239,11 @@ class EditOfferViewmodel(
                 showError("Terms and conditions are required")
                 return false
             }
-            offer.offerStartDate.isNullOrBlank() -> {
+            offer.startDate.isNullOrBlank() -> {
                 showError("Start date is required")
                 return false
             }
-            offer.offerEndDate.isNullOrBlank() -> {
+            offer.endDate.isNullOrBlank() -> {
                 showError("End date is required")
                 return false
             }
@@ -276,21 +287,12 @@ class EditOfferViewmodel(
         )
     }
 
-    /**
-     * Reset offer details
-     */
-    fun resetOfferDetails() {
-        _offerDetail.value = OfferModel()
-        _newLocalMediaList.value = arrayListOf()
-        _deletedUrlMediaList.value = arrayListOf()
-        _uiState.value = EditofferUiState()
-    }
 
     /**
      * Get total media count (existing + new)
      */
     fun getTotalMediaCount(): Int {
-        val existingCount = (_offerDetail.value.UrlMedialList?.size ?: 0) - _deletedUrlMediaList.value.size
+        val existingCount = (_offerDetail.value.media?.size ?: 0) - _deletedUrlMediaList.value.size
         val newCount = _newLocalMediaList.value.size
         return maxOf(0, existingCount) + newCount
     }

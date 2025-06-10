@@ -1,6 +1,7 @@
 package com.bumperpick.bumperpickvendor.Screens.Component
 
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -97,7 +98,6 @@ import com.bumperpick.bumperpickvendor.Repository.OfferTemplateType
 import com.bumperpick.bumperpickvendor.Repository.OfferValidation
 import com.bumperpick.bumperpickvendor.Repository.Template_Data
 import com.bumperpick.bumperpickvendor.Repository.TextType
-import com.bumperpick.bumperpickvendor.Repository.demoOffers
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.ColorType
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CreateOfferViewmodel
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.HeadingSize
@@ -124,6 +124,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import com.bumperpick.bumperpickvendor.API.FinalModel.Media
 import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailViewmodel
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi
 import org.koin.androidx.compose.koinViewModel
@@ -153,7 +154,7 @@ fun PrimaryButton(
     ) {
         Text(
             text = text,
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             fontFamily = satoshi_medium
         )
     }
@@ -1417,13 +1418,7 @@ private fun ImageSliderItem(
         )
 
 }
-@Preview
-@Composable
-fun HomeOfferViewPreview() {
-    val offer= demoOffers.get(0);
 
-    HomeOfferView(offer)
-}
 
 @Composable
 fun DottedDivider(

@@ -1,7 +1,7 @@
 package com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen
 
-import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bumperpick.bumperpickvendor.API.FinalModel.Media
 import com.bumperpick.bumperpickvendor.R
-import com.bumperpick.bumperpickvendor.Repository.OfferModel
+import com.bumperpick.bumperpickvendor.Repository.HomeOffer
 
 import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
@@ -74,7 +74,7 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun ProductDetailsSection(
-    offerDetail: OfferModel,
+    offerDetail: HomeOffer,
     viewmodel: EditOfferViewmodel
 ) {
     var showStartCalendar by remember { mutableStateOf(false) }
@@ -84,15 +84,15 @@ fun ProductDetailsSection(
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
     // Initialize dates from offer detail when available
-    LaunchedEffect(offerDetail.offerStartDate, offerDetail.offerEndDate) {
-        offerDetail.offerStartDate?.let { dateString ->
+    LaunchedEffect(offerDetail.startDate, offerDetail.endDate) {
+        offerDetail.startDate?.let { dateString ->
             try {
                 startDate = LocalDate.parse(dateString, formatter)
             } catch (e: Exception) {
                 // Handle parsing error
             }
         }
-        offerDetail.offerEndDate?.let { dateString ->
+        offerDetail.endDate?.let { dateString ->
             try {
                 endDate = LocalDate.parse(dateString, formatter)
             } catch (e: Exception) {
@@ -112,7 +112,7 @@ fun ProductDetailsSection(
         )
         Spacer(Modifier.height(4.dp))
         TextFieldView(
-            value = offerDetail.productTittle ?: "",
+            value = offerDetail.offerTitle ?: "",
             onValueChange = { viewmodel.updateProductname(it) },
             placeholder = "Enter Product Title",
             singleLine = true
@@ -129,7 +129,7 @@ fun ProductDetailsSection(
         )
         // Product Description
         TextFieldView(
-            value = offerDetail.productDiscription ?: "",
+            value = offerDetail.offerDescription ?: "",
             onValueChange = { viewmodel.updateProductDescription(it) },
             placeholder = "Enter Product Description",
             singleLine = false,
@@ -155,11 +155,11 @@ fun ProductDetailsSection(
 
         Spacer(modifier = Modifier.height(16.dp))
         OfferDateSelector(
-            offerStartDate = offerDetail.offerStartDate,
-            offerEndDate = offerDetail.offerEndDate,
+            offerStartDate = offerDetail.startDate,
+            offerEndDate = offerDetail.endDate,
             onStartClick = { showStartCalendar = true },
             onEndClick = {
-                if (offerDetail.offerStartDate.isNullOrEmpty()) {
+                if (offerDetail.startDate.isEmpty()) {
                     viewmodel.showError("Please choose start date first")
                 } else {
                     showEndCalendar = true
@@ -220,7 +220,10 @@ fun EditOffer(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris ->
         if (uris.isNotEmpty()) {
-            viewmodel.addMultipleLocalMedia(uris)
+            uris.forEach{
+                viewmodel.addNewLocalMedia(it)
+            }
+
         }
     }
 
@@ -308,8 +311,9 @@ fun EditOffer(
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                 ) {
+                    println("offer image :- ${offerDetail.brand_logo_url}")
                     AsyncImage(
-                        model = offerDetail.UrlBannerIMage,
+                        model = offerDetail.brand_logo_url,
                         contentDescription = "Banner Image",
                         modifier = Modifier
                             .fillMaxSize()
@@ -320,15 +324,16 @@ fun EditOffer(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-             val urls= arrayListOf<Media>()
-                urls.addAll(offerDetail.UrlMedialList)
+
 
                 val context = LocalContext.current
                 val combinedMediaList = getCombinedMediaList(
-                   urlMediaList = urls,
+                   urlMediaList = offerDetail.media,
                     localMediaList = newLocalMediaList,
                     deletedUrlList = deletedUrlMediaList
                 )
+
+                Log.d("CombinedMediaList",combinedMediaList.toString())
 
                 // Media Row with Add Button
                 LazyRow(
@@ -347,6 +352,7 @@ fun EditOffer(
 
                     items(combinedMediaList.size) { index ->
                         val mediaItem = combinedMediaList[index]
+                        println("mediaItem $mediaItem")
                         val isVideo = if (mediaItem.isUrl) {
                             isVideoUrl(mediaItem.url!!.url)
                         } else {
@@ -411,7 +417,7 @@ fun EditOffer(
                             offerId = offerId,
                             deletedUrlMedia = deletedUrlMediaList,
                             newLocalMedia = newLocalMediaList,
-                            onSuccess = { /* Success handled in LaunchedEffect */ }
+                            onSuccess = { onBackPressed() }
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -651,8 +657,9 @@ fun EnhancedMediaPreviewItem(
                 )
             } else {
                 // Display image (both URL and local)
+                println("mediaItemII ${mediaItem.url.toString()}")
                 AsyncImage(
-                    model = if (mediaItem.isUrl) mediaItem.url else mediaItem.uri,
+                    model = if (mediaItem.isUrl) mediaItem.url?.url else mediaItem.uri,
                     contentDescription = "Media Preview",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

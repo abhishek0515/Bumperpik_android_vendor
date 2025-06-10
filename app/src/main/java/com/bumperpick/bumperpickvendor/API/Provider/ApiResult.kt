@@ -31,7 +31,7 @@ suspend fun <T> safeApiCall(api: suspend () -> Response<T>): ApiResult<T> {
             response.body()?.let { ApiResult.Success(it) }
                 ?: ApiResult.Error("Empty body", response.code())
         } else {
-            ApiResult.Error("Error: ${response.message()}", response.code())
+            ApiResult.Error("Error: ${response.body()}", response.code())
         }
     } catch (e: Exception) {
         Log.d("Error",e.localizedMessage ?: "Unknown error")

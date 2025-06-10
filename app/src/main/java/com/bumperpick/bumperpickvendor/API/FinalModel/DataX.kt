@@ -2,7 +2,7 @@ package com.bumperpick.bumperpickvendor.API.FinalModel
 
 data class DataX(
     val approval: String,
-    val brand_logo_url: String,
+    val brand_logo_url: String?,
     val brand_name: String,
     val description: String,
     val discount: String,

@@ -53,9 +53,12 @@ class AuthRepositoryImpl(
             when(verify_Otp) {
                 is ApiResult.Success->{
                     val pair=Pair(verify_Otp.data.is_registered==1,verify_Otp.data.code==200)
+                    dataStoreManager.save_Vendor_Details(verify_Otp.data.data)
+                    Log.d("VENDOR DETAILS",verify_Otp.data.data.toString())
                     if(verify_Otp.data.is_registered==1){
                         dataStoreManager.saveToken(verify_Otp.data.meta)
-                        dataStoreManager.save_Vendor_Details(verify_Otp.data.data)
+
+
                     }
                     Result.Success(pair)
 

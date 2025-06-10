@@ -262,7 +262,7 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
     }
 
 
-    fun getOfferDetails(offerId:String){
+    /*fun getOfferDetails(offerId:String){
         viewModelScope.launch {
             val result=offerRepository.getOfferDetails(offerId)
             when(result){
@@ -280,7 +280,7 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
         }
 
     }
-
+*/
     private val _newMediaList = MutableStateFlow<List<MediaItem>>(emptyList())
     val newMediaList = _newMediaList.asStateFlow()
 

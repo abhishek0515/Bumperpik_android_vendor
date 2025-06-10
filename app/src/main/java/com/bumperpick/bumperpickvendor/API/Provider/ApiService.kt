@@ -34,18 +34,30 @@ interface ApiService {
    @POST("api/vendor/register")
    suspend fun register_vendor(
         @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
-        @Part gst_certificate: MultipartBody.Part?
+    //    @Part gst_certificate: MultipartBody.Part?
    ):Response<VendorLoginModel>
    @GET("api/categories")
    suspend fun getCategory():Response<Category_Model>
    @FormUrlEncoded
    @POST("api/vendor/auth-google")
    suspend fun auth_google(@Field("email") email:String):Response<VendorLoginModel>
+
+
    @Multipart
    @POST("api/vendor/offers-update/{id}")
-   suspend fun updateOffer(  @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
-                           @Part deletedmedia: List<MultipartBody.Part?>,
-       @Part media: List<MultipartBody.Part?>):Response<OfferUpdateModel>
+   suspend fun updateOffer(
+       @Path("id") id:String,
+       @PartMap data: HashMap<String, @JvmSuppressWildcards RequestBody>,
+
+   ):Response<OfferUpdateModel>
+
+    @FormUrlEncoded
+    @POST("api/vendor/offers-update/{id}")
+    suspend fun updateOffer2(
+        @Path("id") id: String,
+        @FieldMap data: Map<String, String>
+    ): Response<OfferUpdateModel>
+
    @Multipart
    @POST("api/vendor/offers-store")
    suspend fun addOffers(
@@ -53,7 +65,7 @@ interface ApiService {
        @Part brandlogo: MultipartBody.Part?,
        @Part media: List<MultipartBody.Part?>  // Note: same name used repeatedly for media[]
    ):Response<success_model>
-   @GET("api/offers")
+   @GET("api/vendor/offers")
    suspend fun homeOffers(@Query("token")token: String):Response<HomeOfferModel>
     @FormUrlEncoded
     @POST("api/vendor/offers-destroy/{id}")

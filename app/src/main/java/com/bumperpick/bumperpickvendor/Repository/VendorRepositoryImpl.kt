@@ -10,6 +10,7 @@ import com.bumperpick.bumperpickvendor.API.Provider.toMultipartPart
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import kotlin.random.Random
 
 
 class VendorRepositoryImpl(private val dataStoreManager: DataStoreManager,val apiService: ApiService):VendorRepository {
@@ -41,24 +42,29 @@ class VendorRepositoryImpl(private val dataStoreManager: DataStoreManager,val ap
      }
     }
 
-    override suspend fun SavedDetail(details: Vendor_Details,number:String): Result<String> {
+    override suspend fun SavedDetail( details: Vendor_Details,number:String): Result<String> {
 
         val map = mutableMapOf<String, RequestBody>()
         Log.d("NUMBER",number)
+        val new_details=details.copy(Vendor_Id =(1..1000).random().toString(),Vendor_Mobile = number)
+        Log.d("DETAILS",new_details.toString())
+        val vendorid= dataStoreManager.get_Vendor_Details()?.vendor_id.toString()
 
-        map["establishment_name"] = details.Vendor_EstablishName.toRequestBody("text/plain".toMediaType())
-        map["brand_name"] = details.Vendor_brand.toRequestBody("text/plain".toMediaType())
-        map["email"] = details.Vendor_Email.toRequestBody("text/plain".toMediaType())
+
+        map["establishment_name"] = new_details.Vendor_EstablishName.toRequestBody("text/plain".toMediaType())
+        map["brand_name"] = new_details.Vendor_brand.toRequestBody("text/plain".toMediaType())
+        map["email"] = new_details.Vendor_Email.toRequestBody("text/plain".toMediaType())
         map["phone_number"] = number.toRequestBody("text/plain".toMediaType())
-        map["category_id"] = details.Vendor_Category.cat_id.toRequestBody("text/plain".toMediaType())
-        map["establishment_address"] = details.Establisment_Adress.toRequestBody("text/plain".toMediaType())
-        map["outlet_address"] = details.Outlet_Address.toRequestBody("text/plain".toMediaType())
-        map["gst_number"] = details.GstNumber.toRequestBody("text/plain".toMediaType())
+        map["category_id"] = new_details.Vendor_Category.cat_id.toRequestBody("text/plain".toMediaType())
+        map["establishment_address"] = new_details.Establisment_Adress.toRequestBody("text/plain".toMediaType())
+        map["outlet_address"] = new_details.Outlet_Address.toRequestBody("text/plain".toMediaType())
+        map["gst_number"] = new_details.GstNumber.toRequestBody("text/plain".toMediaType())
+        map["vendor_id"] =vendorid.toString().toRequestBody("text/plain".toMediaType())
 
 
         val image=details.GstPicUrl!!.toMultipartPart()
         Log.d("MAP",map.toString())
-        val submitDetail=safeApiCall { apiService.register_vendor(map,image) }
+        val submitDetail=safeApiCall { apiService.register_vendor(map,) }
         Log.d("SUBMIT",submitDetail.toString())
         when(submitDetail){
             is ApiResult.Success-> {
