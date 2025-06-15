@@ -1403,7 +1403,7 @@ fun AutoImageSlider(
 }
 
 @Composable
-private fun ImageSliderItem(
+ fun ImageSliderItem(
     imageUrl: String,
     modifier: Modifier = Modifier
 ) {

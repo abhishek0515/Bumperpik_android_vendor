@@ -17,6 +17,7 @@ import com.bumperpick.bumperpickvendor.Screens.Login.GoogleSignInViewModel
 import com.bumperpick.bumperpickvendor.Screens.Login.LoginViewmodel
 import com.bumperpick.bumperpickvendor.Screens.OTP.OtpViewModel
 import com.bumperpick.bumperpickvendor.Screens.OfferPage.OfferViewmodel
+import com.bumperpick.bumperpickvendor.Screens.QrScreen.QrScreenViewmodel
 import com.bumperpick.bumperpickvendor.Screens.Splash.SplashViewmodel
 import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionViewModel
 import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailViewmodel
@@ -69,6 +70,7 @@ val appModule = module {
     viewModel { OfferViewmodel(get()) }
     viewModel { EditOfferViewmodel(get()) }
     viewModel { AccountViewmodel(get(),get ()) }
+    viewModel { QrScreenViewmodel(get(),get ()) }
 
 
 

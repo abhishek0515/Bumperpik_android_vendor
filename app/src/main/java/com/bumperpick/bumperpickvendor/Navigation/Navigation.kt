@@ -1,6 +1,5 @@
 package com.bumperpick.bumperpickvendor.Navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,8 +20,7 @@ import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailPage
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOffer
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.bumperpick.bumperpickvendor.Screens.QrScreen.QRScannerScreen
 
 @Composable
 fun snackbarHostExample(
@@ -175,6 +173,8 @@ fun AppNavigation() {
                     HomeScreenClicked.Logout ->navController.navigate(Screen.Splash.route){
                         popUpTo(0) { inclusive = true }
                     }
+
+                    HomeScreenClicked.ScanQR -> navController.navigate(Screen.ScanQR.route)
                 }
             }
         }
@@ -196,6 +196,12 @@ fun AppNavigation() {
             CreateOfferScreen( onBack = {
                 navController.popBackStack()
             })
+        }
+        composable(Screen.ScanQR.route){
+             QRScannerScreen {
+                 navController.popBackStack()
+             }
+
         }
     }
 }

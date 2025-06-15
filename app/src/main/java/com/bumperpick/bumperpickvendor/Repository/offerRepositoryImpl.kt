@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.compose.ui.platform.LocalContext
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataX
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 import com.bumperpick.bumperpickvendor.API.Provider.ApiResult
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
@@ -109,6 +110,7 @@ class offerRepositoryImpl(val apiService: ApiService,val dataStoreManager: DataS
                 val offerList:ArrayList<HomeOffer> =ArrayList()
 
                 res.forEach {
+                    Log.d("Offer",it.toString())
                     offerList.add(
                         HomeOffer(
                             offerId = it.id.toString(),
@@ -313,6 +315,20 @@ class offerRepositoryImpl(val apiService: ApiService,val dataStoreManager: DataS
             val token=dataStoreManager.getToken()?.token
             val result= safeApiCall { apiService.offer_destroy(id=id, token = token?:"", delete = delete)  }
 
+            when(result){
+                is ApiResult.Error -> return Result.Error(result.message)
+                is ApiResult.Success ->return Result.Success(result.data)
+            }
+        }
+        catch (e:Exception){
+            return Result.Error(e.message.toString())
+        }
+    }
+
+    override suspend fun QrCodeData(customer_id: String, offer_id: String): Result<QrModel> {
+        try {
+            val token=dataStoreManager.getToken()?.token
+            val result= safeApiCall { apiService.getQrOfferDetail(offer_id = offer_id, token = token?:"", customer_id = customer_id)  }
             when(result){
                 is ApiResult.Error -> return Result.Error(result.message)
                 is ApiResult.Success ->return Result.Success(result.data)

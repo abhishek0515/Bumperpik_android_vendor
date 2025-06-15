@@ -53,6 +53,12 @@ android {
 
 dependencies {
     implementation ("com.auth0:java-jwt:4.4.0")
+    implementation ("androidx.camera:camera-camera2:1.3.0")
+    implementation ("androidx.camera:camera-lifecycle:1.3.0")
+    implementation ("androidx.camera:camera-view:1.3.0")
+    implementation ("androidx.camera:camera-core:1.3.0")
+    implementation ("com.google.mlkit:barcode-scanning:17.2.0")
+    implementation ("com.google.accompanist:accompanist-permissions:0.28.0")
 
     implementation ("androidx.credentials:credentials:1.2.2")
     implementation ("androidx.credentials:credentials-play-services-auth:1.2.2")

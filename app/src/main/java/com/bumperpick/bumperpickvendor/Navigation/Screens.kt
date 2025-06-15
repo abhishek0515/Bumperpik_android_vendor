@@ -30,5 +30,7 @@ sealed class Screen(val route: String) {
         }
     }
 
+    object ScanQR:Screen("scanQR")
+
 }
 

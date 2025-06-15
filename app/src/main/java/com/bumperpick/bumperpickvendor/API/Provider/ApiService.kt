@@ -2,6 +2,7 @@ package com.bumperpick.bumperpickvendor.API.Provider
 
 import com.bumperpick.bumperpickvendor.API.FinalModel.HomeOfferModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.VendorLoginModel
 import com.bumperpick.bumperpickvendor.API.Model.Category_Model
 import com.bumperpick.bumperpickvendor.API.Model.success_model
@@ -67,6 +68,10 @@ interface ApiService {
    ):Response<success_model>
    @GET("api/vendor/offers")
    suspend fun homeOffers(@Query("token")token: String):Response<HomeOfferModel>
+    @FormUrlEncoded
+   @POST("api/vendor/cart-offers/details")
+   suspend fun getQrOfferDetail(@Field("offer_id") offer_id:String,@Field("token")token:String,@Field("customer_id")customer_id:String):Response<QrModel>
+
     @FormUrlEncoded
     @POST("api/vendor/offers-destroy/{id}")
     suspend fun offer_destroy(@Path("id") id:String, @Field("token")token:String,@Field("deleted_reason")delete:String):Response<success_model>
