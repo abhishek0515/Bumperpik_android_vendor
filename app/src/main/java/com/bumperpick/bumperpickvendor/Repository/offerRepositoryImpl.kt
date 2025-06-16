@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataX
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 import com.bumperpick.bumperpickvendor.API.Provider.ApiResult
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
@@ -19,6 +20,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
@@ -264,6 +266,7 @@ class offerRepositoryImpl(val apiService: ApiService,val dataStoreManager: DataS
     }
 }*/
 
+    // Updated repository function
     override suspend fun updateOffer(
         offerModel: HomeOffer,
         deleted_image: List<String>,
@@ -272,41 +275,104 @@ class offerRepositoryImpl(val apiService: ApiService,val dataStoreManager: DataS
         try {
             val vendorDetails = dataStoreManager.get_Vendor_Details()
             val token = dataStoreManager.getToken()?.token
-            val map = HashMap<String, String>() // Change to String instead of RequestBody
 
-            vendorDetails?.vendor_id?.let {
-                map["vendor_id"] = it.toString()
-            }
-            offerModel.Type?.name?.let {
-                map["offer_template"] = it
-            }
-            map["image_appearance"] = "green"
-            map["heading"] = offerModel.offerTitle ?: ""
-            map["discount"] = "20%"
-            map["brand_name"] = offerModel.brand_logo_url ?: ""
-            map["title"] = offerModel.offerTitle ?: ""
-            map["description"] = offerModel.offerDescription ?: ""
-            map["terms"] = offerModel.termsAndCondition ?: ""
-            map["start_date"] = offerModel.startDate ?: ""
-            map["end_date"] = offerModel.endDate ?: ""
-            map["token"] = token.toString()
+            // Prepare individual RequestBody parts
+            val vendorId = (vendorDetails?.vendor_id?.toString() ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
 
-            Log.d("Offer update map", map.toString())
+            val offerTemplate = (offerModel.Type?.name ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val imageAppearance = "green"
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val heading = (offerModel.offerTitle ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val discount = "20%"
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val brandName = (offerModel.brand_logo_url ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val title = (offerModel.offerTitle ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val description = (offerModel.offerDescription ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val terms = (offerModel.termsAndCondition ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val startDate = (offerModel.startDate ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val endDate = (offerModel.endDate ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val tokenBody = (token ?: "")
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            // Handle deleted images as comma-separated string or JSON array
+            val deleteMediaIds = if (deleted_image.isNotEmpty()) {
+                deleted_image.joinToString(",").toRequestBody("text/plain".toMediaTypeOrNull())
+            } else {
+                "".toRequestBody("text/plain".toMediaTypeOrNull())
+            }
+
+            // Prepare media files
+            val mediaParts = mutableListOf<MultipartBody.Part>()
+            newLocalMedia.forEachIndexed { index, uri ->
+                try {
+                    val file = uriToFile(context, uri)
+                    if (file != null && file.exists()) {
+                        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+                        val part = MultipartBody.Part.createFormData(
+                            "media[$index]",
+                            file.name,
+                            requestFile
+                        )
+                        mediaParts.add(part)
+                    }
+                } catch (e: Exception) {
+                    Log.e("UpdateOffer", "Error processing media file at index $index: ${e.message}")
+                }
+            }
+
+            Log.d("UpdateOffer", "Vendor ID: ${vendorDetails?.vendor_id}")
+            Log.d("UpdateOffer", "Offer Template: ${offerModel.Type?.name}")
+            Log.d("UpdateOffer", "Title: ${offerModel.offerTitle}")
+            Log.d("UpdateOffer", "Deleted Images: $deleted_image")
+            Log.d("UpdateOffer", "New Media Count: ${mediaParts.size}")
 
             val editOffer = safeApiCall {
                 apiService.updateOffer2(
-                    data = map,
-                    id = offerModel.offerId
+                    id = offerModel.offerId,
+                    vendorId = vendorId,
+                    offerTemplate = offerTemplate,
+                    imageAppearance = imageAppearance,
+                    heading = heading,
+                    discount = discount,
+                    brandName = brandName,
+                    title = title,
+                    description = description,
+                    terms = terms,
+                    startDate = startDate,
+                    endDate = endDate,
+                    token = tokenBody,
+                  //  deleteMediaIds = deleteMediaIds,
+                   // media = mediaParts
                 )
             }
 
-            return when(editOffer) {
+            return when (editOffer) {
                 is ApiResult.Error -> Result.Error(editOffer.message)
                 is ApiResult.Success -> Result.Success(editOffer.data)
             }
 
         } catch (e: Exception) {
-            return Result.Error(e.message.toString())
+            Log.e("UpdateOffer", "Exception in updateOffer: ${e.message}", e)
+            return Result.Error(e.message ?: "Unknown error occurred")
         }
     }
 
@@ -329,10 +395,29 @@ class offerRepositoryImpl(val apiService: ApiService,val dataStoreManager: DataS
         try {
             val token=dataStoreManager.getToken()?.token
             val result= safeApiCall { apiService.getQrOfferDetail(offer_id = offer_id, token = token?:"", customer_id = customer_id)  }
+
             when(result){
                 is ApiResult.Error -> return Result.Error(result.message)
                 is ApiResult.Success ->return Result.Success(result.data)
             }
+        }
+        catch (e:Exception){
+            return Result.Error(e.message.toString())
+        }
+    }
+
+    override suspend fun OfferRedeem(
+        customer_id: String,
+        offer_id: String
+    ): Result<offerRedeemModel> {
+        try {
+            val token=dataStoreManager.getToken()?.token
+            val result= safeApiCall { apiService.offer_redeem(offer_id = offer_id, token = token?:"", customer_id = customer_id )}
+            when(result){
+                is ApiResult.Error -> return Result.Error(result.message)
+                is ApiResult.Success ->return Result.Success(result.data)
+            }
+
         }
         catch (e:Exception){
             return Result.Error(e.message.toString())

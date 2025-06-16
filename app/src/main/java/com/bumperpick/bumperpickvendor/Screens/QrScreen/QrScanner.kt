@@ -23,11 +23,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,6 +38,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -85,6 +89,69 @@ import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.koin.androidx.compose.koinViewModel
+@Composable
+fun OfferRedeemedSuccessScreen(offer: Offer,
+    onGoBackHome: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF5F5F5))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+       Image(painter = painterResource(id = R.drawable.success_badge), contentDescription = "Offer Redeemed", modifier = Modifier.size(80.dp))
+
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Title
+        Text(
+            text = "Offer Redeemed Successfully! 🎉",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1F2937),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Subtitle
+        Text(
+            text = "Enjoy your deal! Offer has been successfully applied",
+            fontSize = 16.sp,
+            color = Color(0xFF6B7280),
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Savings info
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(painter = painterResource(R.drawable.percentage_red), contentDescription = null, modifier = Modifier.size(36.dp))
+
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text =offer.description,
+                fontSize = 16.sp,
+                color = Color(0xFF374151),
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(80.dp))
+
+       ButtonView("Go back to home", onClick = onGoBackHome)
+    }
+}
+
 
 
 @Composable
@@ -96,21 +163,33 @@ fun OfferDetailsPage(
 ) {
     val otpSent by viewmodel.is_otpsend.collectAsState()
     val otpVerified by viewmodel.verify_otpsend.collectAsState()
+    val offerredeemed by viewmodel._offer_redeemed.collectAsState()
     val uiState by viewmodel.uiState.collectAsState()
-
+    var showSucessScreen by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
     // Local state for OTP input
     var otpInput by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
-
     // Handle OTP verification success
-    LaunchedEffect(otpVerified) {
+    LaunchedEffect(otpVerified,showSucessScreen,offerredeemed) {
         if (otpVerified) {
-            otpVerified() // Call the callback
+            loading=true
+            viewmodel.redeem_offer(customer.customer_id.toString(),offerDetail.id.toString())
+
+
+
         }
+        if(offerredeemed){
+            showSucessScreen=true
+        }
+
     }
 
+if(showSucessScreen){
+
+    OfferRedeemedSuccessScreen(offer = offerDetail, onGoBackHome = {otpVerified()})
+}
+    else{
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
@@ -163,7 +242,8 @@ fun OfferDetailsPage(
                     onValueChange = {
                         otpInput = it
                     },
-                    otpCompleted = {}
+                    otpCompleted = {},
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
 
@@ -251,13 +331,14 @@ fun OfferDetailsPage(
             }
         }
     }
+    }
 }
 @Composable
 fun BrandCard(offer: Offer) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp),
+            .height(180.dp),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, color = Color.Gray),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -269,37 +350,55 @@ fun BrandCard(offer: Offer) {
     }
 }
 
+
+
 @Composable
-fun OtpInputSection(
-    otp: String,
-    onOtpChange: (String) -> Unit,
-    onVerifyClick: () -> Unit
-) {
-    Text(
-        "Enter OTP",
-        fontSize = 18.sp,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center
-    )
-    Spacer(modifier = Modifier.height(12.dp))
+fun ErrorMessage(message: String) {
     Box(
         modifier = Modifier
-            .background(Color.Transparent)
             .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
     ) {
-        OtpView(
-            numberOfOtp = 4,
-            value = otp,
-            onValueChange = onOtpChange,
-            otpCompleted = {}, // Optional: auto-submit
-            modifier = Modifier.align(Alignment.Center)
-        )
-    }
-    Spacer(modifier = Modifier.height(24.dp))
-    ButtonView("Verify OTP", onClick = onVerifyClick)
-}
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE0E0)),
+            elevation = CardDefaults.cardElevation(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(20.dp).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = "Error",
+                    tint = Color.Red,
+                    modifier = Modifier.size(48.dp)
+                )
 
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Something went wrong",
+                    style = MaterialTheme.typography.titleMedium.copy(color = Color.Red)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = Color.Black.copy(alpha = 0.8f)
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun OfferOtpScreen(
@@ -309,6 +408,9 @@ fun OfferOtpScreen(
 ) {
     val context = LocalContext.current
 
+
+
+
     val viewmodel:QrScreenViewmodel= koinViewModel()
 
     val uiState by viewmodel.uiState.collectAsState()
@@ -316,7 +418,11 @@ fun OfferOtpScreen(
         viewmodel.fetchOfferDetail(customerId = userId, offerId = offerId)
     }
      when(uiState){
-         is UiState.Error -> Toast.makeText(context, (uiState as UiState.Error).message, Toast.LENGTH_SHORT).show()
+         is UiState.Error ->{
+             ErrorMessage(message = "Error in fetching offer details")
+
+            // Toast.makeText(context, (uiState as UiState.Error).message, Toast.LENGTH_SHORT).show()
+         }
          UiState.Loading -> {
              Box(modifier = Modifier.fillMaxSize()) {
                  CircularProgressIndicator(color = BtnColor, modifier = Modifier.size(60.dp).align(Alignment.Center))
@@ -327,12 +433,14 @@ fun OfferOtpScreen(
 
          }
          is UiState.Success -> {
+
              OfferDetailsPage(
                  offerDetail = (uiState as UiState.Success<QrModel>).data.offer,
                  customer = (uiState as UiState.Success<QrModel>).data.customer,
                  viewmodel = viewmodel,
                  otpVerified = {
-                     Toast.makeText(context, "OTP Verified Successfully", Toast.LENGTH_SHORT).show()
+
+                     Toast.makeText(context, "Offer Successfully applied", Toast.LENGTH_SHORT).show()
                      onGoHome()
                  })
          }

@@ -4,6 +4,7 @@ import com.bumperpick.bumperpickvendor.API.FinalModel.HomeOfferModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.VendorLoginModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpickvendor.API.Model.Category_Model
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable.Param
@@ -52,13 +53,25 @@ interface ApiService {
 
    ):Response<OfferUpdateModel>
 
-    @FormUrlEncoded
+    @Multipart
     @POST("api/vendor/offers-update/{id}")
     suspend fun updateOffer2(
         @Path("id") id: String,
-        @FieldMap data: Map<String, String>
+        @Part("vendor_id") vendorId: RequestBody,
+        @Part("offer_template") offerTemplate: RequestBody,
+        @Part("image_appearance") imageAppearance: RequestBody,
+        @Part("heading") heading: RequestBody,
+        @Part("discount") discount: RequestBody,
+        @Part("brand_name") brandName: RequestBody,
+        @Part("title") title: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part("terms") terms: RequestBody,
+        @Part("start_date") startDate: RequestBody,
+        @Part("end_date") endDate: RequestBody,
+        @Part("token") token: RequestBody,
+       // @Part("delete_media_ids") deleteMediaIds: RequestBody, // Pass as comma-separated string
+      //  @Part media: List<MultipartBody.Part>
     ): Response<OfferUpdateModel>
-
    @Multipart
    @POST("api/vendor/offers-store")
    suspend fun addOffers(
@@ -75,4 +88,7 @@ interface ApiService {
     @FormUrlEncoded
     @POST("api/vendor/offers-destroy/{id}")
     suspend fun offer_destroy(@Path("id") id:String, @Field("token")token:String,@Field("deleted_reason")delete:String):Response<success_model>
+
+    @POST("api/vendor/cart-offers/redeem")
+    suspend fun offer_redeem(@Query("offer_id") offer_id:String,@Query("token")token:String,@Query("customer_id")customer_id:String):Response<offerRedeemModel>
 }

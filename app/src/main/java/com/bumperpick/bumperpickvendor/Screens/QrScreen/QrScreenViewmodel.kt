@@ -1,5 +1,6 @@
 package com.bumperpick.bumperpickvendor.Screens.QrScreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
@@ -59,14 +60,45 @@ class QrScreenViewmodel(val offer_Repository: offerRepository,val authRepository
         viewModelScope.launch {
             _uiState.value=UiState.Loading
             val result=offer_Repository.QrCodeData(customer_id = customerId, offer_id = offerId)
+
+            Log.d("DATA","$customerId $offerId")
             when(result){
-                is Result.Error -> _uiState.value=UiState.Error(result.message)
+                is Result.Error -> {
+                    Log.d("message",result.message)
+                    _uiState.value=UiState.Error(result.message)}
                 Result.Loading -> _uiState.value=UiState.Loading
                 is Result.Success -> _uiState.value=UiState.Success(result.data)
             }
 
         }
 
+    }
+
+    private val __offer_redeemed=MutableStateFlow<Boolean>(false)
+    val _offer_redeemed:StateFlow<Boolean> = __offer_redeemed
+
+
+    fun redeem_offer(customerId:String,offerId:String){
+        viewModelScope.launch {
+            _uiState.value=UiState.Loading
+            val result=offer_Repository.OfferRedeem(customerId,offerId)
+            when(result){
+                is Result.Error -> {
+                    Log.d("message",result.message)
+                    _uiState.value=UiState.Error(result.message)}
+
+                Result.Loading -> _uiState.value=UiState.Loading
+                is Result.Success -> {
+                    val result=result.data
+                    if(result.code>=200 && result.code<300){
+                        __offer_redeemed.value=true
+                    }
+                    else{
+                        _uiState.value=UiState.Error(result.message)
+                    }
+                }
+            }
+        }
     }
 
 
