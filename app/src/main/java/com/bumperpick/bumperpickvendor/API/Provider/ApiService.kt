@@ -5,6 +5,10 @@ import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.VendorLoginModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.update_profile_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.vendor_details_model
 import com.bumperpick.bumperpickvendor.API.Model.Category_Model
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable.Param
@@ -36,7 +40,7 @@ interface ApiService {
    @POST("api/vendor/register")
    suspend fun register_vendor(
         @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
-    //    @Part gst_certificate: MultipartBody.Part?
+        @Part gst_certificate: MultipartBody.Part
    ):Response<VendorLoginModel>
    @GET("api/categories")
    suspend fun getCategory():Response<Category_Model>
@@ -45,13 +49,24 @@ interface ApiService {
    suspend fun auth_google(@Field("email") email:String):Response<VendorLoginModel>
 
 
-   @Multipart
-   @POST("api/vendor/offers-update/{id}")
-   suspend fun updateOffer(
-       @Path("id") id:String,
-       @PartMap data: HashMap<String, @JvmSuppressWildcards RequestBody>,
-
-   ):Response<OfferUpdateModel>
+    @FormUrlEncoded
+    @POST("api/vendor/offers-update/{id}")
+    suspend fun updateOffer(
+        @Path("id") offerId: String,
+        @Field("vendor_id") vendorId: String,
+        @Field("offer_template") offerTemplate: String,
+        @Field("image_appearance") imageAppearance: String,
+        @Field("heading") heading: String,
+        @Field("discount") discount: String,
+        @Field("brand_name") brandName: String,
+        @Field("title") title: String,
+        @Field("description") description: String,
+        @Field("terms") terms: String,
+        @Field("start_date") startDate: String,
+        @Field("end_date") endDate: String,
+        @Field("token") token: String,
+   //     @Field("delete_media_ids") deleteMediaIds: String
+    ): Response<OfferUpdateModel>
 
     @Multipart
     @POST("api/vendor/offers-update/{id}")
@@ -91,4 +106,24 @@ interface ApiService {
 
     @POST("api/vendor/cart-offers/redeem")
     suspend fun offer_redeem(@Query("offer_id") offer_id:String,@Query("token")token:String,@Query("customer_id")customer_id:String):Response<offerRedeemModel>
+
+    @GET("api/vendor/profile")
+    suspend fun FetchProfile(@Query("token")token: String):Response<vendor_details_model>
+    @Multipart
+    @POST("api/vendor/profile/update")
+    suspend fun UpdateProfile(
+        @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
+        @Part image:MultipartBody.Part,
+    ):Response<update_profile_model>
+
+
+    @GET("api/subscriptions")
+    suspend fun Fetch_subs():Response<subscription_model>
+
+    @POST("api/vendor/select-subscription")
+    @FormUrlEncoded
+    suspend fun Vendor_subs_choose(@Field("subscription_id")subscription_id:String,@Field("token")token: String):Response<select_subs_model>
+
+
+
 }

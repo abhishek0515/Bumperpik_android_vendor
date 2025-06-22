@@ -12,31 +12,38 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
 
-sealed class ApiResult<out T> {
-    data class Success<out T>(val data: T) : ApiResult<T>()
-    data class Error(val message: String, val code: Int? = null) : ApiResult<Nothing>()
+sealed class ApiResult<out T, out E> {
+    data class Success<out T>(val data: T) : ApiResult<T, Nothing>()
+    data class Error<out E>(val error: E, val code: Int? = null) : ApiResult<Nothing, E>()
 }
+
+
+suspend fun <T, E> safeApiCall(
+    api: suspend () -> Response<T>,
+    errorBodyParser: (String) -> E
+): ApiResult<T, E> {
+    return try {
+        val response = api()
+        Log.d("RESPONSE", response.body().toString())
+        if (response.isSuccessful) {
+            response.body()?.let { ApiResult.Success(it) }
+                ?: ApiResult.Error(errorBodyParser("Empty body"), response.code())
+        } else {
+            val errorBody = response.errorBody()?.string().orEmpty()
+            val parsedError = errorBodyParser(errorBody)
+            Log.d("Error", errorBody)
+            ApiResult.Error(parsedError, response.code())
+        }
+    } catch (e: Exception) {
+        Log.d("Exception", e.localizedMessage ?: "Unknown error")
+        ApiResult.Error(errorBodyParser(e.localizedMessage ?: "Unknown error"))
+    }
+}
+
 fun prepareImageParts(images: List<File>): List<MultipartBody.Part> {
     return images.mapIndexed { index, file ->
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
         MultipartBody.Part.createFormData("media[]", file.name, requestFile)
-    }
-}
-
-suspend fun <T> safeApiCall(api: suspend () -> Response<T>): ApiResult<T> {
-    return try {
-        val response = api()
-        Log.d("RESPONES",response.body().toString())
-        if (response.isSuccessful) {
-            response.body()?.let { ApiResult.Success(it) }
-                ?: ApiResult.Error("Empty body", response.code())
-        } else {
-            Log.d("Error",response.body().toString())
-            ApiResult.Error("Error: ${response.body()}", response.code())
-        }
-    } catch (e: Exception) {
-        Log.d("Error",e.localizedMessage ?: "Unknown error")
-        ApiResult.Error("Exception: ${e.localizedMessage ?: "Unknown error"}")
     }
 }
 fun File.toMultipartPart(

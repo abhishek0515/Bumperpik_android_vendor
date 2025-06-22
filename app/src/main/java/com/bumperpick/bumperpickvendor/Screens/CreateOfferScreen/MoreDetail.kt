@@ -56,6 +56,7 @@ import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
+import java.io.File
 
 @Composable
 fun MoreOfferDetailsScreen(navController: NavController,viewmodel: CreateOfferViewmodel){

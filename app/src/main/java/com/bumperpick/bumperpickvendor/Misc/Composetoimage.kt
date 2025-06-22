@@ -42,9 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
-import com.bumperpick.bumperpickvendor.Repository.Feature
-import com.bumperpick.bumperpickvendor.Repository.FeatureType
-import com.bumperpick.bumperpickvendor.Repository.Plan
+
 import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionCard
 import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionViewModel
 import kotlinx.coroutines.Dispatchers

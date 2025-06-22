@@ -32,5 +32,7 @@ sealed class Screen(val route: String) {
 
     object ScanQR:Screen("scanQR")
 
+    object EditAccount:Screen("edit_account")
+
 }
 

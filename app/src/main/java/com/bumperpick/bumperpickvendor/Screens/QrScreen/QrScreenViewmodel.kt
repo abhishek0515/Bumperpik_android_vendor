@@ -80,21 +80,22 @@ class QrScreenViewmodel(val offer_Repository: offerRepository,val authRepository
 
     fun redeem_offer(customerId:String,offerId:String){
         viewModelScope.launch {
-            _uiState.value=UiState.Loading
+
             val result=offer_Repository.OfferRedeem(customerId,offerId)
             when(result){
                 is Result.Error -> {
                     Log.d("message",result.message)
-                    _uiState.value=UiState.Error(result.message)}
+                  }
 
                 Result.Loading -> _uiState.value=UiState.Loading
                 is Result.Success -> {
                     val result=result.data
                     if(result.code>=200 && result.code<300){
                         __offer_redeemed.value=true
+
                     }
                     else{
-                        _uiState.value=UiState.Error(result.message)
+                       
                     }
                 }
             }

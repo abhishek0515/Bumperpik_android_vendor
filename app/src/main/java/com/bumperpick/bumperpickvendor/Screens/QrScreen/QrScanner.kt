@@ -90,7 +90,8 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.koin.androidx.compose.koinViewModel
 @Composable
-fun OfferRedeemedSuccessScreen(offer: Offer,
+fun OfferRedeemedSuccessScreen(
+    offer: Offer,
     onGoBackHome: () -> Unit = {}
 ) {
     Column(
@@ -101,12 +102,14 @@ fun OfferRedeemedSuccessScreen(offer: Offer,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-       Image(painter = painterResource(id = R.drawable.success_badge), contentDescription = "Offer Redeemed", modifier = Modifier.size(80.dp))
-
+        Image(
+            painter = painterResource(id = R.drawable.success_badge),
+            contentDescription = "Offer Redeemed",
+            modifier = Modifier.size(80.dp)
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Title
         Text(
             text = "Offer Redeemed Successfully! 🎉",
             fontSize = 24.sp,
@@ -117,7 +120,6 @@ fun OfferRedeemedSuccessScreen(offer: Offer,
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Subtitle
         Text(
             text = "Enjoy your deal! Offer has been successfully applied",
             fontSize = 16.sp,
@@ -128,18 +130,20 @@ fun OfferRedeemedSuccessScreen(offer: Offer,
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Savings info
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Image(painter = painterResource(R.drawable.percentage_red), contentDescription = null, modifier = Modifier.size(36.dp))
-
+            Image(
+                painter = painterResource(R.drawable.percentage_red),
+                contentDescription = null,
+                modifier = Modifier.size(36.dp)
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text =offer.description,
+                text = offer.description,
                 fontSize = 16.sp,
                 color = Color(0xFF374151),
                 fontWeight = FontWeight.Medium
@@ -148,11 +152,9 @@ fun OfferRedeemedSuccessScreen(offer: Offer,
 
         Spacer(modifier = Modifier.height(80.dp))
 
-       ButtonView("Go back to home", onClick = onGoBackHome)
+        ButtonView("Go back to home", onClick = onGoBackHome)
     }
 }
-
-
 
 @Composable
 fun OfferDetailsPage(
@@ -162,177 +164,199 @@ fun OfferDetailsPage(
     otpVerified: () -> Unit
 ) {
     val otpSent by viewmodel.is_otpsend.collectAsState()
-    val otpVerified by viewmodel.verify_otpsend.collectAsState()
+    val otpVerifiedState by viewmodel.verify_otpsend.collectAsState()
     val offerredeemed by viewmodel._offer_redeemed.collectAsState()
     val uiState by viewmodel.uiState.collectAsState()
     var showSucessScreen by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    // Local state for OTP input
     var otpInput by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-    // Handle OTP verification success
-    LaunchedEffect(otpVerified,showSucessScreen,offerredeemed) {
-        if (otpVerified) {
-            loading=true
-            viewmodel.redeem_offer(customer.customer_id.toString(),offerDetail.id.toString())
 
-
-
-        }
-        if(offerredeemed){
+    // Handle OTP verification and offer redemption flow
+    LaunchedEffect(otpVerifiedState, offerredeemed) {
+        if (otpVerifiedState && !showSucessScreen) {
+            viewmodel.redeem_offer(customer.customer_id.toString(), offerDetail.id.toString())
             showSucessScreen=true
         }
-
+        if (offerredeemed) {
+            showSucessScreen = true
+        }
     }
 
-if(showSucessScreen){
+    if (showSucessScreen) {
+        OfferRedeemedSuccessScreen(offer = offerDetail, onGoBackHome = { otpVerified() })
+    } else {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .background(Color.White)
+                .padding(16.dp)
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-    OfferRedeemedSuccessScreen(offer = offerDetail, onGoBackHome = {otpVerified()})
-}
-    else{
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .background(Color.White)
-            .padding(16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
+            BrandCard(offerDetail)
 
-        // Brand Card
-        BrandCard(offerDetail)
+            Spacer(modifier = Modifier.height(24.dp))
+            Text("Offer Details", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("Offer Details", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(offerDetail.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = BtnColor)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(offerDetail.description, fontSize = 16.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(18.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(offerDetail.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = BtnColor)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(offerDetail.description, fontSize = 16.sp, color = Color.Gray)
-        Spacer(modifier = Modifier.height(18.dp))
-
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Text("Offer ID: ${offerDetail.id}", fontSize = 14.sp, color = Color.Gray, modifier = Modifier.align(Alignment.CenterStart))
-            Text("Customer ID: ${customer.customer_id}", fontSize = 14.sp, color = Color.Gray,modifier = Modifier.align(Alignment.CenterEnd))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Divider(thickness = 0.5.dp, color = Color.LightGray)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Customer Info", fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-        Spacer(modifier = Modifier.height(12.dp))
-        Text("Phone Number: ${customer.phone_number}", fontSize = 16.sp,modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-        Spacer(modifier = Modifier.height(16.dp))
-        Divider(thickness = 0.5.dp, color = Color.LightGray)
-        Spacer(modifier = Modifier.height(16.dp))
-        // OTP Verification Section
-        // OTP logic
-        if (!otpSent) {
-            ButtonView("Send OTP") {
-                viewmodel.sendotp(customer.phone_number)
-            }
-        } else {
-            // OTP Input Section
-            Column (modifier = Modifier.fillMaxSize().align(Alignment.CenterHorizontally), verticalArrangement = Arrangement.Center){
-                Text("Enter OTP sent to ${customer.phone_number}", fontSize = 14.sp, color = Color.Gray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OtpView(numberOfOtp = 4,
-                    value = otpInput,
-                    onValueChange = {
-                        otpInput = it
-                    },
-                    otpCompleted = {},
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    "Offer ID: ${offerDetail.id}",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterStart)
                 )
+                Text(
+                    "Customer ID: ${customer.customer_id}",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                )
+            }
 
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(thickness = 0.5.dp, color = Color.LightGray)
+            Spacer(modifier = Modifier.height(16.dp))
 
+            Text(
+                "Customer Info",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                "Phone Number: ${customer.phone_number}",
+                fontSize = 16.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(thickness = 0.5.dp, color = Color.LightGray)
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+            // OTP logic
+            if (!otpSent) {
+                ButtonView("Send OTP") {
+                    viewmodel.sendotp(customer.phone_number)
+                }
+            } else {
+                // OTP Input Section
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    // Resend OTP button
-                  /*  TextButton(
-                        onClick = {
-                            viewmodel.sendotp(customer.phone_number)
-                            otpInput = "" // Clear input on resend
+                    Text(
+                        "Enter OTP sent to ${customer.phone_number}",
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OtpView(
+                        numberOfOtp = 4,
+                        value = otpInput,
+                        onValueChange = { newValue ->
+                            // Only allow numeric input and limit to 4 digits
+                            if (newValue.length <= 4 && newValue.all { it.isDigit() }) {
+                                otpInput = newValue
+                            }
                         },
+                        otpCompleted = {},
+                        modifier = Modifier
+                    )
 
+                    Spacer(modifier = Modifier.height(16.dp))
 
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Text("Resend OTP")
-                    }*/
-
-                    // Verify OTP button
-                    ButtonView(text = "Verify OTP") {
-                        if (otpInput.length == 4) {
-                            viewmodel.verifyOtp(customer.phone_number, otpInput)
-                        } else {
-                            Toast.makeText(context, "Please enter valid 4-digit OTP", Toast.LENGTH_SHORT).show()
+                        ButtonView(text = "Verify OTP") {
+                            when {
+                                otpInput.length != 4 -> {
+                                    Toast.makeText(context, "Please enter valid 4-digit OTP", Toast.LENGTH_SHORT).show()
+                                }
+                                !otpInput.all { it.isDigit() } -> {
+                                    Toast.makeText(context, "OTP should contain only numbers", Toast.LENGTH_SHORT).show()
+                                }
+                                else -> {
+                                    viewmodel.verifyOtp(customer.phone_number, otpInput)
+                                }
+                            }
                         }
                     }
-
                 }
             }
-        }
 
-        // Handle UI State (Loading, Error)
-        when (uiState) {
-            is UiState.Loading -> {
-                Spacer(modifier = Modifier.height(16.dp))
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+            // Handle UI State (Loading, Error)
+            when (uiState) {
+                is UiState.Loading -> {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+                is UiState.Error -> {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.1f))
+                    ) {
+                        Text(
+                            text = (uiState as UiState.Error).message,
+                            color = Color.Red,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+                else -> {
+                    // Success or Empty state - no additional UI needed
+                }
             }
-            is UiState.Error -> {
+
+            // Success message when OTP is verified
+            if (otpVerifiedState) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.1f))
+                    colors = CardDefaults.cardColors(containerColor = Color.Green.copy(alpha = 0.1f))
                 ) {
-                    Text(
-                        text = (uiState as UiState.Error).message,
-                        color = Color.Red,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-            else -> {
-                // Success or Empty state - no additional UI needed
-            }
-        }
-
-        // Success message when OTP is verified
-        if (otpVerified) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.Green.copy(alpha = 0.1f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Success",
-                        tint = Color.Green
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "OTP Verified Successfully!",
-                        color = Color.Green,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Success",
+                            tint = Color.Green
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "OTP Verified Successfully!",
+                            color = Color.Green,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }
-    }
     }
 }
+
 @Composable
 fun BrandCard(offer: Offer) {
     Card(
@@ -343,14 +367,10 @@ fun BrandCard(offer: Offer) {
         border = BorderStroke(1.dp, color = Color.Gray),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-
     ) {
         ImageSliderItem(imageUrl = offer.brand_logo_url)
-
     }
 }
-
-
 
 @Composable
 fun ErrorMessage(message: String) {
@@ -370,7 +390,8 @@ fun ErrorMessage(message: String) {
         ) {
             Column(
                 modifier = Modifier
-                    .padding(20.dp).fillMaxWidth(),
+                    .padding(20.dp)
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
@@ -407,46 +428,43 @@ fun OfferOtpScreen(
     onGoHome: () -> Unit
 ) {
     val context = LocalContext.current
-
-
-
-
-    val viewmodel:QrScreenViewmodel= koinViewModel()
-
+    val viewmodel: QrScreenViewmodel = koinViewModel()
     val uiState by viewmodel.uiState.collectAsState()
-    LaunchedEffect(key1 = Unit){
+
+    LaunchedEffect(userId, offerId) {
         viewmodel.fetchOfferDetail(customerId = userId, offerId = offerId)
     }
-     when(uiState){
-         is UiState.Error ->{
-             ErrorMessage(message = "Error in fetching offer details")
 
-            // Toast.makeText(context, (uiState as UiState.Error).message, Toast.LENGTH_SHORT).show()
-         }
-         UiState.Loading -> {
-             Box(modifier = Modifier.fillMaxSize()) {
-                 CircularProgressIndicator(color = BtnColor, modifier = Modifier.size(60.dp).align(Alignment.Center))
-             }
-         }
-
-         UiState.Empty -> {
-
-         }
-         is UiState.Success -> {
-
-             OfferDetailsPage(
-                 offerDetail = (uiState as UiState.Success<QrModel>).data.offer,
-                 customer = (uiState as UiState.Success<QrModel>).data.customer,
-                 viewmodel = viewmodel,
-                 otpVerified = {
-
-                     Toast.makeText(context, "Offer Successfully applied", Toast.LENGTH_SHORT).show()
-                     onGoHome()
-                 })
-         }
-     }
+    when (val currentState = uiState) {
+        is UiState.Error -> {
+            ErrorMessage(message = "Error in fetching offer details")
+        }
+        UiState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(
+                    color = BtnColor,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.Center)
+                )
+            }
+        }
+        UiState.Empty -> {
+            ErrorMessage(message = "No offer details available")
+        }
+        is UiState.Success -> {
+            OfferDetailsPage(
+                offerDetail = (currentState.data as QrModel).offer,
+                customer = (currentState.data as QrModel).customer,
+                viewmodel = viewmodel,
+                otpVerified = {
+                    Toast.makeText(context, "Offer Successfully applied", Toast.LENGTH_SHORT).show()
+                    onGoHome()
+                }
+            )
+        }
+    }
 }
-
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
 @OptIn(ExperimentalPermissionsApi::class)
@@ -479,10 +497,11 @@ fun QRScannerScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Surface(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)) {
-
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             if (cameraPermissionState.status.isGranted) {
                 if (scanned) {
                     OfferOtpScreen(
@@ -499,56 +518,74 @@ fun QRScannerScreen(
                                 val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
 
                                 cameraProviderFuture.addListener({
-                                    val cameraProvider = cameraProviderFuture.get()
-                                    val preview = Preview.Builder().build().apply {
-                                        setSurfaceProvider(previewView.surfaceProvider)
-                                    }
+                                    try {
+                                        val cameraProvider = cameraProviderFuture.get()
+                                        val preview = Preview.Builder().build().apply {
+                                            setSurfaceProvider(previewView.surfaceProvider)
+                                        }
 
-                                    val analysis = ImageAnalysis.Builder().build().apply {
-                                        setAnalyzer(ContextCompat.getMainExecutor(ctx)) { imageProxy ->
-                                            val mediaImage = imageProxy.image
-                                            if (mediaImage != null && !scanned) {
-                                                val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                                                BarcodeScanning.getClient().process(image)
-                                                    .addOnSuccessListener { barcodes ->
-                                                        barcodes.forEach { barcode ->
-                                                            val raw = barcode.rawValue
-                                                            try {
-                                                                if (!raw.isNullOrEmpty()) {
-                                                                    val json = JSONObject(raw)
-                                                                    val uid = json.optString("user_id", "")
-                                                                    val oid = json.optString("offer_id", "")
-                                                                    if (uid.isNotEmpty() && oid.isNotEmpty()) {
-                                                                        scanned = true
-                                                                        userId = uid
-                                                                        offerId = oid
-                                                                    } else {
-                                                                        error = "QR code is missing required data."
+                                        val analysis = ImageAnalysis.Builder()
+                                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                                            .build()
+                                            .apply {
+                                                setAnalyzer(ContextCompat.getMainExecutor(ctx)) { imageProxy ->
+                                                    val mediaImage = imageProxy.image
+                                                    if (mediaImage != null && !scanned) {
+                                                        val image = InputImage.fromMediaImage(
+                                                            mediaImage,
+                                                            imageProxy.imageInfo.rotationDegrees
+                                                        )
+                                                        BarcodeScanning.getClient().process(image)
+                                                            .addOnSuccessListener { barcodes ->
+                                                                barcodes.firstOrNull()?.let { barcode ->
+                                                                    val raw = barcode.rawValue
+                                                                    if (!raw.isNullOrEmpty()) {
+                                                                        try {
+                                                                            val json = JSONObject(raw)
+                                                                            val uid = json.optString("user_id", "")
+                                                                            val oid = json.optString("offer_id", "")
+
+                                                                            when {
+                                                                                uid.isEmpty() -> {
+                                                                                    error = "QR code is missing user ID."
+                                                                                }
+                                                                                oid.isEmpty() -> {
+                                                                                    error = "QR code is missing offer ID."
+                                                                                }
+                                                                                else -> {
+                                                                                    scanned = true
+                                                                                    userId = uid
+                                                                                    offerId = oid
+                                                                                }
+                                                                            }
+                                                                        } catch (e: Exception) {
+                                                                            error = "Invalid QR format."
+                                                                        }
                                                                     }
                                                                 }
-                                                            } catch (e: Exception) {
-                                                                error = "Invalid QR format."
                                                             }
-                                                        }
+                                                            .addOnFailureListener {
+                                                                error = "Failed to scan QR code."
+                                                            }
+                                                            .addOnCompleteListener {
+                                                                imageProxy.close()
+                                                            }
+                                                    } else {
                                                         imageProxy.close()
                                                     }
-                                                    .addOnFailureListener {
-                                                        error = "Failed to scan QR code."
-                                                        imageProxy.close()
-                                                    }
-                                            } else {
-                                                imageProxy.close()
+                                                }
                                             }
-                                        }
-                                    }
 
-                                    cameraProvider.unbindAll()
-                                    cameraProvider.bindToLifecycle(
-                                        context as LifecycleOwner,
-                                        CameraSelector.DEFAULT_BACK_CAMERA,
-                                        preview,
-                                        analysis
-                                    )
+                                        cameraProvider.unbindAll()
+                                        cameraProvider.bindToLifecycle(
+                                            context as LifecycleOwner,
+                                            CameraSelector.DEFAULT_BACK_CAMERA,
+                                            preview,
+                                            analysis
+                                        )
+                                    } catch (exc: Exception) {
+                                        error = "Failed to start camera."
+                                    }
                                 }, ContextCompat.getMainExecutor(ctx))
                                 previewView
                             }
@@ -613,6 +650,3 @@ fun QRScannerScreen(
         }
     }
 }
-
-
-

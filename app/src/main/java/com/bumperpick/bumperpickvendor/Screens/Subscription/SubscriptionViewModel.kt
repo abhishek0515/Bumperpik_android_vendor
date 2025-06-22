@@ -2,85 +2,75 @@ package com.bumperpick.bumperpickvendor.Screens.Subscription
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
 import com.bumperpick.bumperpickvendor.Repository.BillingCycle
-import com.bumperpick.bumperpickvendor.Repository.Feature
-import com.bumperpick.bumperpickvendor.Repository.FeatureType
-import com.bumperpick.bumperpickvendor.Repository.Plan
+
+import com.bumperpick.bumperpickvendor.Repository.Result
 import com.bumperpick.bumperpickvendor.Repository.VendorRepository
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class SubscriptionViewModel(val vendorRepository: VendorRepository) : ViewModel() {
-    private val _plans = MutableStateFlow(
-        listOf(
-            Plan(
-                name = "Platinum",
-                basePrice = 575,
-                gradientColors = listOf(Color(0xFFD9D8D6), Color(0xFFE5E4E2),Color(0xFFF1F0ED),Color(0xFFEDEBE5)),
-                features = listOf(
-                    Feature("Logo on home screen", FeatureType.INCLUDED),
-                    Feature("Offer booking facility for customers with payment", FeatureType.INCLUDED),
-                    Feature( "Reminder to customers", FeatureType.INCLUDED),
-                    Feature("Monthly viewers/redemption data with analysis", FeatureType.INCLUDED),
-                    Feature("Instant offer with flash message", FeatureType.UNLIMITED),
-                    Feature("Offer upload per quarter", FeatureType.UNLIMITED),
-                    Feature("Scratch and win contest", FeatureType.UNLIMITED),
-                    Feature("Lucky draw", FeatureType.UNLIMITED),
-                    Feature("Contests", FeatureType.LIMITED, "5"),
-                    Feature("Upload/LIVE telecast", FeatureType.LIMITED, "5")
-                )
-            ),
-            Plan(
-                name = "Golden",
-                basePrice = 375,
-                gradientColors = listOf(Color(0xFFF9F295), Color(0xFFE0AA3E),Color(0xFFFAF398), Color(0xFFB88A44)),
-                features = listOf(
-                    Feature("Logo on home screen", FeatureType.INCLUDED),
-                    Feature("Offer booking facility for customers with payment", FeatureType.INCLUDED),
-                    Feature("Reminder to customers", FeatureType.INCLUDED),
-                    Feature("Monthly viewers/redemption data with analysis", FeatureType.INCLUDED),
-                    Feature("Instant offer with flash message", FeatureType.UNLIMITED),
-                    Feature("Offer upload per quarter", FeatureType.UNLIMITED),
-                    Feature("Scratch and win contest", FeatureType.LIMITED, "10"),
-                    Feature("Lucky draw", FeatureType.LIMITED, "10"),
-                    Feature("Contests", FeatureType.LIMITED, "3"),
-                    Feature("Upload/LIVE telecast", FeatureType.LIMITED, "3")
-                )
-            ),
-            Plan(
-                name = "Silver",
-                basePrice = 175,
-                gradientColors = listOf(Color(0xFFD4D5D7), Color(0xFFBCBCBC),Color(0xFFE7E7E7),Color(0xFF777779)),
-                features = listOf(
-                    Feature("Logo on home screen", FeatureType.INCLUDED),
-                    Feature("Offer booking facility for customers with payment", FeatureType.INCLUDED),
-                    Feature("Reminder to customers", FeatureType.INCLUDED),
-                    Feature("Monthly viewers/redemption data with analysis", FeatureType.INCLUDED),
-                    Feature("Instant offer with flash message", FeatureType.LIMITED, "50"),
-                    Feature("Offer upload per quarter", FeatureType.LIMITED, "20"),
-                    Feature("Scratch and win contest", FeatureType.LIMITED, "5"),
-                    Feature("Lucky draw", FeatureType.LIMITED, "5"),
-                    Feature("Contests", FeatureType.LIMITED, "2"),
-                    Feature("Upload/LIVE telecast", FeatureType.LIMITED, "2")
-                )
-            )
-        )
-    )
-    val plans = _plans.asStateFlow()
+class SubscriptionViewModel(private val vendorRepository: VendorRepository) : ViewModel() {
 
+    // UI State sealed class for better state management
+    sealed class UiState<out T> {
+        object Loading : UiState<Nothing>()
+        data class Success<T>(val data: T) : UiState<T>()
+        data class Error(val message: String) : UiState<Nothing>()
+    }
+
+    // Subscription state
+    private val _subscriptionState = MutableStateFlow<UiState<subscription_model>>(UiState.Loading)
+    val subscriptionState = _subscriptionState.asStateFlow()
+
+    // Buy subscription state
+    private val _buySubscriptionState = MutableStateFlow<UiState<select_subs_model>?>(null)
+    val buySubscriptionState = _buySubscriptionState.asStateFlow()
+
+    // Billing cycle selection
     private val _selectedBillingCycle = MutableStateFlow(BillingCycle.MONTHLY)
     val selectedBillingCycle = _selectedBillingCycle.asStateFlow()
 
-    fun updateBillingCycle(cycle: BillingCycle) {
+    // Selected subscription ID
+    private val _selectedSubsId = MutableStateFlow("")
+    val selectedSubsId = _selectedSubsId.asStateFlow()
+
+    init {
+        fetchSubscription()
+    }
+
+    fun fetchSubscription() {
+        viewModelScope.launch {
+            _subscriptionState.value = UiState.Loading
+
+            try {
+                val result = vendorRepository.fetchSubscription()
+                _subscriptionState.value = when (result) {
+                    is Result.Error -> UiState.Error(result.message)
+                    Result.Loading -> UiState.Loading
+                    is Result.Success -> UiState.Success(result.data)
+                }
+            } catch (e: Exception) {
+                _subscriptionState.value = UiState.Error("Failed to fetch subscription: ${e.message}")
+            }
+        }
+    }
+
+    fun updateBillingCycle(cycle: BillingCycle, subsId: String) {
         _selectedBillingCycle.value = cycle
+        _selectedSubsId.value = subsId
     }
 
     fun calculatePrice(basePrice: Int, cycle: BillingCycle): Int {
         return when (cycle) {
             BillingCycle.MONTHLY -> basePrice
             BillingCycle.QUARTERLY -> (basePrice * 3 * 0.85).toInt() // 15% discount
-            BillingCycle.ANNUALLY -> (basePrice * 12 * 0.7).toInt() // 30% discount
+            BillingCycle.ANNUALLY -> (basePrice * 12 * 0.70).toInt() // 30% discount
         }
     }
 
@@ -90,5 +80,66 @@ class SubscriptionViewModel(val vendorRepository: VendorRepository) : ViewModel(
             BillingCycle.QUARTERLY -> "3 months"
             BillingCycle.ANNUALLY -> "12 months"
         }
+    }
+
+    fun getDiscountPercentage(cycle: BillingCycle): Int {
+        return when (cycle) {
+            BillingCycle.MONTHLY -> 0
+            BillingCycle.QUARTERLY -> 15
+            BillingCycle.ANNUALLY -> 30
+        }
+    }
+
+    fun buySubscription() {
+        val currentSubsId = _selectedSubsId.value
+        if (currentSubsId.isEmpty()) {
+            _buySubscriptionState.value = UiState.Error("Please select a subscription")
+            return
+        }
+
+        viewModelScope.launch {
+            _buySubscriptionState.value = UiState.Loading
+
+            try {
+                val result = vendorRepository.selectSubsVendor(id = currentSubsId)
+                _buySubscriptionState.value = when (result) {
+                    is Result.Error -> UiState.Error(result.message)
+                    Result.Loading -> UiState.Loading
+                    is Result.Success -> UiState.Success(result.data)
+                }
+            } catch (e: Exception) {
+                _buySubscriptionState.value = UiState.Error("Failed to buy subscription: ${e.message}")
+            }
+        }
+    }
+
+    fun clearBuySubscriptionState() {
+        _buySubscriptionState.value = null
+    }
+
+    fun clearError() {
+        when (val currentState = _subscriptionState.value) {
+            is UiState.Error -> _subscriptionState.value = UiState.Loading
+            else -> { /* No action needed */ }
+        }
+
+        when (val currentState = _buySubscriptionState.value) {
+            is UiState.Error -> _buySubscriptionState.value = null
+            else -> { /* No action needed */ }
+        }
+    }
+
+    // Helper function to get current subscription data
+    fun getCurrentSubscription(): subscription_model? {
+        return when (val state = _subscriptionState.value) {
+            is UiState.Success -> state.data
+            else -> null
+        }
+    }
+
+    // Helper function to check if loading
+    fun isLoading(): Boolean {
+        return _subscriptionState.value is UiState.Loading ||
+                _buySubscriptionState.value is UiState.Loading
     }
 }

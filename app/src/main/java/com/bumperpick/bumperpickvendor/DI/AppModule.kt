@@ -2,17 +2,21 @@ package com.bumperpick.bumperpickvendor.DI
 
 // AppModule.kt
 import DataStoreManager
+import com.bumperpick.bumperpickvendor.API.FinalModel.Feature
+import com.bumperpick.bumperpickvendor.API.FinalModel.FeatureDeserializer
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
 import com.bumperpick.bumperpickvendor.Repository.AuthRepository
 import com.bumperpick.bumperpickvendor.Repository.AuthRepositoryImpl
 import com.bumperpick.bumperpickvendor.Repository.GoogleSignInRepository
+import com.bumperpick.bumperpickvendor.Repository.OfferRepositoryImpl
 import com.bumperpick.bumperpickvendor.Repository.VendorRepository
 import com.bumperpick.bumperpickvendor.Repository.VendorRepositoryImpl
 import com.bumperpick.bumperpickvendor.Repository.offerRepository
-import com.bumperpick.bumperpickvendor.Repository.offerRepositoryImpl
+
 import com.bumperpick.bumperpickvendor.Screens.Account.AccountViewmodel
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CreateOfferViewmodel
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOfferViewmodel
+import com.bumperpick.bumperpickvendor.Screens.EditAccountScreen.EditAccountViewModel
 import com.bumperpick.bumperpickvendor.Screens.Login.GoogleSignInViewModel
 import com.bumperpick.bumperpickvendor.Screens.Login.LoginViewmodel
 import com.bumperpick.bumperpickvendor.Screens.OTP.OtpViewModel
@@ -21,6 +25,7 @@ import com.bumperpick.bumperpickvendor.Screens.QrScreen.QrScreenViewmodel
 import com.bumperpick.bumperpickvendor.Screens.Splash.SplashViewmodel
 import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionViewModel
 import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailViewmodel
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -36,6 +41,10 @@ val networkModule = module {
 
 val appModule = module {
     single {
+        val gson = GsonBuilder()
+            .registerTypeAdapter(Feature::class.java, FeatureDeserializer())
+            .create()
+
         val okHttpClient = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -45,7 +54,7 @@ val appModule = module {
         Retrofit.Builder()
             .baseUrl("http://13.50.109.14/")
             .client(okHttpClient) // attach custom OkHttpClient
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
@@ -57,7 +66,7 @@ val appModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(),get()) }
     single <VendorRepository>{ VendorRepositoryImpl(get (),get()) }
     single { GoogleSignInRepository(get(),get (),get ()) }
-    single <offerRepository>{ offerRepositoryImpl(get(),get(),get()) }
+    single <offerRepository>{ OfferRepositoryImpl(get(),get(),get()) }
 
     // ViewModel
     viewModel { SplashViewmodel(get()) }
@@ -71,6 +80,7 @@ val appModule = module {
     viewModel { EditOfferViewmodel(get()) }
     viewModel { AccountViewmodel(get(),get ()) }
     viewModel { QrScreenViewmodel(get(),get ()) }
+    viewModel { EditAccountViewModel(get()) }
 
 
 

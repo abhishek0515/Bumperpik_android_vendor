@@ -19,7 +19,9 @@ import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionPage
 import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailPage
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.bumperpick.bumperpickvendor.Screens.Account.AccountClick
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOffer
+import com.bumperpick.bumperpickvendor.Screens.EditAccountScreen.EditAccount
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.QRScannerScreen
 
 @Composable
@@ -155,7 +157,9 @@ fun AppNavigation() {
                             MarketingOption.OFFERS -> {
                                 navController.navigate(Screen.CreateOfferScreen.route)
                             }
-                            MarketingOption.CUSTOMER_ENGAGEMENT -> {}
+                            MarketingOption.CUSTOMER_ENGAGEMENT -> {
+                                navController.navigate(Screen.Subscription.route)
+                            }
                             MarketingOption.CONTEST_FOR_CUSTOMERS -> {}
                             MarketingOption.SCRATCH_AND_WIN -> {}
                             MarketingOption.LUCKY_DRAW -> {}
@@ -169,10 +173,26 @@ fun AppNavigation() {
                     is HomeScreenClicked.EditOffer -> {
                         navController.navigate(Screen.EditOffer.withOfferId(it.offerId))
                     }
+                  is  HomeScreenClicked.AccountClicked->{
+                      val accountclick=it.AccountClick
+                      when(accountclick){
+                          AccountClick.EditProfile -> {
+                              navController.navigate(Screen.EditAccount.route)
 
-                    HomeScreenClicked.Logout ->navController.navigate(Screen.Splash.route){
-                        popUpTo(0) { inclusive = true }
-                    }
+                          }
+                          AccountClick.Logout -> {
+                              navController.navigate(Screen.Splash.route) {
+                                  popUpTo(0) { inclusive = true }
+                              }
+                          }
+                          AccountClick.Subscription ->
+                              {
+
+                              }
+                      }
+                  }
+
+
 
                     HomeScreenClicked.ScanQR -> navController.navigate(Screen.ScanQR.route)
                 }
@@ -189,7 +209,7 @@ fun AppNavigation() {
             EditOffer(offerId =offerid , onBackPressed = {navController.popBackStack()}, onOfferDone = {})        }
 
         composable(Screen.Subscription.route){
-            SubscriptionPage { navController.popBackStack() }
+            SubscriptionPage(gotoHome = {}, onClick = { navController.popBackStack()})
         }
         
         composable(Screen.CreateOfferScreen.route){
@@ -202,6 +222,12 @@ fun AppNavigation() {
                  navController.popBackStack()
              }
 
+        }
+
+        composable(Screen.EditAccount.route){
+            EditAccount {
+                navController.popBackStack()
+            }
         }
     }
 }

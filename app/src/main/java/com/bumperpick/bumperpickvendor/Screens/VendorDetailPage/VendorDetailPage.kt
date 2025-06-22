@@ -60,6 +60,7 @@ import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.ReviewItemView
 import com.bumperpick.bumperpickvendor.Screens.Component.SecondaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
+import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionPage
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi
@@ -75,6 +76,7 @@ sealed class VendorDetailScreen(val route: String) {
     object CategorySelection : VendorDetailScreen("category_selection")
     object AdditionalDetails : VendorDetailScreen("additional_details")
     object ReviewAndSubmit : VendorDetailScreen("review_and_submit")
+    object SubscriptionScreen:VendorDetailScreen("subscription")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,7 +100,8 @@ fun VendorDetailPage(isMobile:Boolean,mobile:String,viewModel: VendorDetailViewm
     LaunchedEffect(success) {
         if (success!=null) {
             Log.d("ID",success.toString())
-            gotoHome()
+            navController.navigate(VendorDetailScreen.SubscriptionScreen.route)
+
         }
     }
     LaunchedEffect(error){
@@ -182,6 +185,9 @@ fun VendorDetailPage(isMobile:Boolean,mobile:String,viewModel: VendorDetailViewm
                         viewModel = viewModel,
                         vendorDetails = vendorDetails
                     )
+                }
+                composable(VendorDetailScreen.SubscriptionScreen.route){
+                    SubscriptionPage(gotoHome = gotoHome, onClick = {navController.popBackStack()})
                 }
             }
         }

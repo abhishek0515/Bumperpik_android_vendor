@@ -30,7 +30,11 @@ data class Vendor_Details(
     val Establisment_Adress:String="",
     val Outlet_Address:String="",
     val GstNumber:String="",
-    val GstPicUrl: File?=null
+    val GstPicUrl: File?=null,
+    val userImage:File?=null,
+    val openingTime:String="",
+    val closingTime:String="",
+    val url_profile_image:String=""
 
 )
 sealed class GoogleSignInState {
@@ -42,24 +46,6 @@ sealed class GoogleSignInState {
 
 
 // Data Classes
-data class Plan(
-    val name: String,
-    val basePrice: Int,
-    val gradientColors: List<Color>,
-    val features: List<Feature>
-)
-
-data class Feature(
-    val name: String,
-    val type: FeatureType,
-    val value: String? = null
-)
-
-enum class FeatureType {
-    INCLUDED,
-    UNLIMITED,
-    LIMITED
-}
 
 enum class BillingCycle(val displayName: String) {
     MONTHLY("Monthly"),

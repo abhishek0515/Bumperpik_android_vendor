@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumperpick.bumperpickvendor.Repository.MarketingOption
+import com.bumperpick.bumperpickvendor.Screens.Account.AccountClick
 import com.bumperpick.bumperpickvendor.Screens.Account.AccountScreen
 import com.bumperpick.bumperpickvendor.Screens.Component.BottomNavigationBar
 import com.bumperpick.bumperpickvendor.Screens.Component.LocationCard
@@ -40,8 +41,8 @@ import com.bumperpick.bumperpickvendor.ui.theme.satoshi
 sealed class HomeScreenClicked() {
     data class CreateOffer(val marketingOption: MarketingOption, val isLater: Boolean=false) : HomeScreenClicked()
     data class EditOffer(val offerId:String):HomeScreenClicked()
-    data object Logout:HomeScreenClicked()
     data object ScanQR:HomeScreenClicked()
+    data class AccountClicked(val AccountClick:AccountClick):HomeScreenClicked()
 
 
 
@@ -77,7 +78,7 @@ fun HomeScreen(onClick:(HomeScreenClicked) -> Unit) {
                         })
                     }
                     2->{
-                     AccountScreen(logout = {   onClick(HomeScreenClicked.Logout)})
+                     AccountScreen(onClick = {it->onClick(HomeScreenClicked.AccountClicked(it))  })
                     }
                 }
                if(selectedTab!=2) {

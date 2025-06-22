@@ -221,6 +221,7 @@ fun TextFieldView(
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = containerColor,
+            disabledTextColor = Color.Black,
 
             focusedContainerColor = containerColor,
             disabledContainerColor = containerColor,
@@ -233,9 +234,12 @@ fun TextFieldView(
 }
 
 @Composable
-fun ButtonView(text:String,btnColor:Color= BtnColor,modifier: Modifier=Modifier,horizontal_padding:Dp=16.dp,onClick:()->Unit,) {
+fun ButtonView(text:String,
+               enabled: Boolean=true,
+               btnColor:Color= BtnColor,textColor:Color=Color.White,modifier: Modifier=Modifier,horizontal_padding:Dp=16.dp,onClick:()->Unit,) {
     Button(
         onClick = { onClick() },
+        enabled=enabled,
         modifier = modifier
 
             .fillMaxWidth()
@@ -248,7 +252,7 @@ fun ButtonView(text:String,btnColor:Color= BtnColor,modifier: Modifier=Modifier,
         shape = RoundedCornerShape(16.dp)
 
     ) {
-        Text(text, color = Color.White, fontFamily = satoshi_regular, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(text, color = textColor, fontFamily = satoshi_regular, fontWeight = FontWeight.Bold, fontSize = 18.sp)
     }
 }
 
