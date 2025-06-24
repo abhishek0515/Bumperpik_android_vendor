@@ -15,6 +15,7 @@ import com.google.android.gms.common.internal.safeparcel.SafeParcelable.Param
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
@@ -49,44 +50,32 @@ interface ApiService {
    suspend fun auth_google(@Field("email") email:String):Response<VendorLoginModel>
 
 
+
+    // For updates with media (multipart)
+
+    @POST("api/vendor/offers-update/{id}")
+    suspend fun updateOfferWithMedia(
+        @Path("id") id: String,
+        @Body requestBody: RequestBody
+    ): Response<OfferUpdateModel>
+    // For text-only updates (form-encoded)
     @FormUrlEncoded
     @POST("api/vendor/offers-update/{id}")
-    suspend fun updateOffer(
-        @Path("id") offerId: String,
-        @Field("vendor_id") vendorId: String,
-        @Field("offer_template") offerTemplate: String,
-        @Field("image_appearance") imageAppearance: String,
-        @Field("heading") heading: String,
-        @Field("discount") discount: String,
-        @Field("brand_name") brandName: String,
-        @Field("title") title: String,
-        @Field("description") description: String,
-        @Field("terms") terms: String,
-        @Field("start_date") startDate: String,
-        @Field("end_date") endDate: String,
-        @Field("token") token: String,
-   //     @Field("delete_media_ids") deleteMediaIds: String
-    ): Response<OfferUpdateModel>
-
-    @Multipart
-    @POST("api/vendor/offers-update/{id}")
-    suspend fun updateOffer2(
-        @Path("id") id: String,
-        @Part("vendor_id") vendorId: RequestBody,
-        @Part("offer_template") offerTemplate: RequestBody,
-        @Part("image_appearance") imageAppearance: RequestBody,
-        @Part("heading") heading: RequestBody,
-        @Part("discount") discount: RequestBody,
-        @Part("brand_name") brandName: RequestBody,
-        @Part("title") title: RequestBody,
-        @Part("description") description: RequestBody,
-        @Part("terms") terms: RequestBody,
-        @Part("start_date") startDate: RequestBody,
-        @Part("end_date") endDate: RequestBody,
-        @Part("token") token: RequestBody,
-       // @Part("delete_media_ids") deleteMediaIds: RequestBody, // Pass as comma-separated string
-      //  @Part media: List<MultipartBody.Part>
-    ): Response<OfferUpdateModel>
+    suspend fun updateOfferTextOnly(
+        @Path("id") id: String?,
+        @Field("vendor_id", encoded = false) vendorId: String,
+        @Field("offer_template", encoded = false) offerTemplate: String,
+        @Field("image_appearance", encoded = false) imageAppearance: String,
+        @Field("heading", encoded = false) heading: String,
+        @Field("discount", encoded = false) discount: String,
+        @Field("brand_name", encoded = false) brandName: String,
+        @Field("title", encoded = false) title: String,
+        @Field("description", encoded = false) description: String,
+        @Field("terms", encoded = false) terms: String,
+        @Field("start_date", encoded = false) startDate: String,
+        @Field("end_date", encoded = false) endDate: String,
+        @Field("token", encoded = false) token: String
+    ): Response< OfferUpdateModel>
    @Multipart
    @POST("api/vendor/offers-store")
    suspend fun addOffers(
@@ -122,7 +111,11 @@ interface ApiService {
 
     @POST("api/vendor/select-subscription")
     @FormUrlEncoded
-    suspend fun Vendor_subs_choose(@Field("subscription_id")subscription_id:String,@Field("token")token: String):Response<select_subs_model>
+    suspend fun Vendor_subs_choose(
+        @Field("payment_transaction_id")transaction_id:String,
+        @Field("subscription_id")subscription_id:String,
+        @Field("status")status:Int,
+        @Field("token")token: String):Response<select_subs_model>
 
 
 

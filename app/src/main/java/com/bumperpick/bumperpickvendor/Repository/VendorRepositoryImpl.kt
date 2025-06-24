@@ -133,7 +133,12 @@ class VendorRepositoryImpl(
             Result.Error("Failed to get saved vendor details: ${e.message}")
         }
     }
-
+    fun generateCustomTransactionId(length: Int = 16): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return (1..length)
+            .map { chars.random() }
+            .joinToString("")
+    }
     override suspend fun fetchSubscription(): Result<subscription_model> {
         return try {
             val subscription= safeApiCall(
@@ -168,7 +173,9 @@ class VendorRepositoryImpl(
         return try {
             val token=dataStoreManager.getToken()!!.token
             val add_subs= safeApiCall(
-                api = {apiService.Vendor_subs_choose(subscription_id = id,token=token)},
+                api = {apiService.Vendor_subs_choose(subscription_id = id,token=token,
+                    transaction_id =generateCustomTransactionId(8),
+                    status = 1)},
                 errorBodyParser = {
                         json->
                     try {

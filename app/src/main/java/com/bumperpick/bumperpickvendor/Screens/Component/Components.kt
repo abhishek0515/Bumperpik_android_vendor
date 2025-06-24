@@ -553,7 +553,7 @@ fun No_offer(onSelectedOffer:(marketingOption:MarketingOption,islater:Boolean)->
     LaunchedEffect(Unit) {
         viewmodel.getSavedVendorDetail()
     }
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
     var islater by remember { mutableStateOf(false) }
    Surface(modifier = Modifier.background(Color.White), color = Color.White) {
@@ -733,7 +733,7 @@ fun MarketingOptionBottomSheet(
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color.Black,
-            lineHeight = 26.sp,
+            lineHeight = 24.sp,
             modifier = Modifier.padding(bottom = 16.dp,start = 16.dp,end = 16.dp)
         )
         val offer_option=MarketingOption.OFFERS
@@ -812,6 +812,7 @@ fun MarketingOptionBottomSheet(
                 ) {
                     Text(
                         text = option.title,
+                        fontFamily = satoshi_regular,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.Black
@@ -1832,3 +1833,77 @@ fun RemoveOfferBottomSheet(
         }
     }
 }
+
+
+enum class MetalType {
+    GOLDEN,
+    SILVER,
+    PLATINUM
+}
+
+fun getMetalBrush(metalType: MetalType): Brush {
+    return when (metalType) {
+        MetalType.GOLDEN -> Brush.horizontalGradient(
+            colors = listOf(
+                Color(0xFFD4AF37), // Dark gold
+                Color(0xFFFFD700), // Bright gold
+                Color(0xFFDAA520)  // Goldenrod
+            )
+        )
+
+        MetalType.SILVER -> Brush.horizontalGradient(
+            colors = listOf(
+                Color(0xFFC0C0C0), // Silver
+                Color(0xFFFFFFFF), // White highlight
+                Color(0xFF999999), // Dark silver
+                Color(0xFFE5E5E5)  // Light silver
+            )
+        )
+
+        MetalType.PLATINUM -> Brush.horizontalGradient(
+            colors = listOf(
+                Color(0xFF8C92AC), // Platinum blue-gray
+                Color(0xFFE5E4E2), // Platinum white
+                Color(0xFF71797E), // Dark platinum
+                Color(0xFFBCC6CC)  // Light platinum
+            )
+        )
+    }
+}
+
+// Alternative function with string parameter
+fun getMetalBrush(metalType: String): Brush {
+    return when (metalType) {
+        "Gold", "GOLD" -> getMetalBrush(MetalType.GOLDEN)
+        "Silver" -> getMetalBrush(MetalType.SILVER)
+        "Platinum" -> getMetalBrush(MetalType.PLATINUM)
+        else -> getMetalBrush(MetalType.GOLDEN) // Default to golden
+    }
+}
+
+// Individual functions for each metal type
+fun getGoldenBrush(): Brush = Brush.horizontalGradient(
+    colors = listOf(
+        Color(0xFFD4AF37),
+        Color(0xFFFFD700),
+        Color(0xFFDAA520)
+    )
+)
+
+fun getSilverBrush(): Brush = Brush.horizontalGradient(
+    colors = listOf(
+        Color(0xFFC0C0C0),
+        Color(0xFFFFFFFF),
+        Color(0xFF999999),
+        Color(0xFFE5E5E5)
+    )
+)
+
+fun getPlatinumBrush(): Brush = Brush.horizontalGradient(
+    colors = listOf(
+        Color(0xFF8C92AC),
+        Color(0xFFE5E4E2),
+        Color(0xFF71797E),
+        Color(0xFFBCC6CC)
+    )
+)

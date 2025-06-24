@@ -41,6 +41,7 @@ val networkModule = module {
 
 val appModule = module {
     single {
+
         val gson = GsonBuilder()
             .registerTypeAdapter(Feature::class.java, FeatureDeserializer())
             .create()
@@ -49,11 +50,18 @@ val appModule = module {
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val original = chain.request()
+                val requestBuilder = original.newBuilder()
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                val request = requestBuilder.build()
+                chain.proceed(request)
+            }
             .build()
 
         Retrofit.Builder()
             .baseUrl("http://13.50.109.14/")
-            .client(okHttpClient) // attach custom OkHttpClient
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
@@ -77,7 +85,7 @@ val appModule = module {
     viewModel { SubscriptionViewModel(get()) }
     viewModel { CreateOfferViewmodel(get()) }
     viewModel { OfferViewmodel(get()) }
-    viewModel { EditOfferViewmodel(get()) }
+    viewModel { EditOfferViewmodel(get(),get(),get()) }
     viewModel { AccountViewmodel(get(),get ()) }
     viewModel { QrScreenViewmodel(get(),get ()) }
     viewModel { EditAccountViewModel(get()) }

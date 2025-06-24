@@ -119,7 +119,7 @@ fun AccountScreen(onClick:(AccountClick)->Unit,viewmodel: AccountViewmodel= koin
                 AccountUi_state.Empty -> {}
                 is AccountUi_state.Error -> {
                     Box(){
-                        Text(text = uiState.message, color = BtnColor, fontSize = 18.sp, modifier = Modifier.fillMaxSize(), textAlign =TextAlign.Center)
+                        Text(text = uiState.message, color = BtnColor, fontSize = 18.sp, modifier = Modifier.fillMaxWidth(), textAlign =TextAlign.Center)
                     }
                 }
                 is AccountUi_state.GetProfile ->{

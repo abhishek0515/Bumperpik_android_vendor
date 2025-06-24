@@ -1,6 +1,7 @@
 package com.bumperpick.bumperpickvendor.Repository
 
 import DataStoreManager
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -184,7 +185,27 @@ class OfferRepositoryImpl(
             }
         }
     }
+    fun String.toPart(): RequestBody {
+        return this.toRequestBody("text/plain".toMediaTypeOrNull())
+    }
 
+    fun prepareImagePart(file: File,name:String): MultipartBody.Part {
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        return MultipartBody.Part.createFormData(name, file.name, requestFile)
+    }
+    fun getFileFromUri(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val file = File(context.cacheDir, "temp_${System.currentTimeMillis()}")
+
+            inputStream?.copyTo(file.outputStream())
+            inputStream?.close()
+
+            file
+        } catch (e: Exception) {
+            null
+        }
+    }
     override suspend fun updateOffer(
         offerModel: HomeOffer,
         deletedImage: List<String>,
@@ -193,55 +214,58 @@ class OfferRepositoryImpl(
         return try {
             val vendorDetails = dataStoreManager.get_Vendor_Details()
             val token = dataStoreManager.getToken()?.token
+            Log.d("token",token.toString())
 
-            // Prepare string values for @FormUrlEncoded
-            val vendorId = vendorDetails?.vendor_id?.toString() ?: ""
-            val offerTemplate = offerModel.Type?.name ?: ""
-            val imageAppearance = "green"
-            val heading = offerModel.offerTitle ?: ""
-            val discount = "20%"
-            val brandName = offerModel.brand_logo_url ?: ""
-            val title = offerModel.offerTitle ?: ""
-            val description = offerModel.offerDescription ?: ""
-            val terms = offerModel.termsAndCondition ?: ""
-            val startDate = offerModel.startDate ?: ""
-            val endDate = offerModel.endDate ?: ""
-            val tokenString = token ?: ""
-
-            // Handle deleted images as comma-separated string
-            val deleteMediaIds = if (deletedImage.isNotEmpty()) {
-                deletedImage.joinToString(",")
+            // Prepare media list only if not empty
+            val medialist = if (newLocalMedia.isNotEmpty()) {
+                newLocalMedia.mapNotNull { uri ->
+                    val file = getFileFromUri(context, uri)
+                    file?.let { prepareImagePart(it, it.name) }
+                }
             } else {
-                ""
+                emptyList()
             }
 
-            // Note: File uploads (newLocalMedia) cannot be handled with @FormUrlEncoded
-            // You'll need to handle them separately or use a different approach
+            // Prepare string values
+            val vendorId = vendorDetails?.vendor_id.toString()
+            val offerTemplate = offerModel.Type?.name.toString()
+            val imageAppearance = "green"
+            val heading = offerModel.offerTitle.toString()
+            val discount = offerModel.discount
+            val brandName = offerModel.brand_logo_url.toString()
+            val title = offerModel.offerTitle.toString()
+            val description = offerModel.offerDescription.toString()
+            val terms = offerModel.termsAndCondition.toString()
+            val startDate = offerModel.startDate.toString()
+            val endDate = offerModel.endDate.toString()
 
-            Log.d("UpdateOffer", "Vendor ID: ${vendorDetails?.vendor_id}")
-            Log.d("UpdateOffer", "Offer Template: ${offerModel.Type?.name}")
-            Log.d("UpdateOffer", "Title: ${offerModel.offerTitle}")
-            Log.d("UpdateOffer", "Deleted Images: $deletedImage")
-            Log.d("UpdateOffer", "New Media Count: ${newLocalMedia.size} (Note: Cannot upload with @FormUrlEncoded)")
+
+
+            Log.d("UpdateOffer", "Media list size: ${medialist.size}")
+            Log.d("UpdateOffer", "Deleted images: ${deletedImage.size}")
 
             val editOffer = safeApiCall(
                 api = {
-                    apiService.updateOffer(
-                        offerId = offerModel.offerId,
-                        vendorId = vendorId,
-                        offerTemplate = offerTemplate,
-                        imageAppearance = imageAppearance,
-                        heading = heading,
-                        discount = discount,
-                        brandName = brandName,
-                        title = title,
-                        description = description,
-                        terms = terms,
-                        startDate = startDate,
-                        endDate = endDate,
-                        token = tokenString,
-                        // deleteMediaIds = deleteMediaIds
+
+                    apiService.updateOfferTextOnly(
+                        id = offerModel.offerId,
+                        vendorId=vendorId,
+                        offerTemplate="offerTemplate",
+                        imageAppearance="imageAppearance",
+                        heading=heading,
+                        discount=discount,
+                        brandName=brandName,
+                        title=title,
+                        description=description,
+                        terms=terms,
+                        startDate=startDate,
+                        endDate=endDate,
+                        token=token?:""
+
+
+
                     )
+
                 },
                 errorBodyParser = { json ->
                     try {

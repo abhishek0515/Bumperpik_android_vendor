@@ -2,6 +2,7 @@ package com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen
 
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -212,7 +213,7 @@ fun EditOffer(
     val uiState by viewmodel.uiState.collectAsState()
     val newLocalMediaList by viewmodel.newLocalMediaList.collectAsState()
     val deletedUrlMediaList by viewmodel.deletedUrlMediaList.collectAsState()
-
+    val context= LocalContext.current
     var showMediaTypeDialog by remember { mutableStateOf(false) }
 
     // Media picker launchers
@@ -417,7 +418,9 @@ fun EditOffer(
                             offerId = offerId,
                             deletedUrlMedia = deletedUrlMediaList,
                             newLocalMedia = newLocalMediaList,
-                            onSuccess = { onBackPressed() }
+                            onSuccess = {
+                                Toast.makeText(context,"Offer Updated",Toast.LENGTH_SHORT).show()
+                            }
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),

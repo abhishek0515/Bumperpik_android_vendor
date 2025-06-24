@@ -623,7 +623,7 @@ fun AdditionalDetailsScreen(
                 TextFieldView(
                     value = outletAddressState,
                     onValueChange = { outletAddressState = it },
-                    placeholder = "Enter Brand Name",
+                    placeholder = "Enter Outlet Address",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp),

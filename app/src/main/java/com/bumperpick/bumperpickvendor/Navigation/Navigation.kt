@@ -158,7 +158,7 @@ fun AppNavigation() {
                                 navController.navigate(Screen.CreateOfferScreen.route)
                             }
                             MarketingOption.CUSTOMER_ENGAGEMENT -> {
-                                navController.navigate(Screen.Subscription.route)
+
                             }
                             MarketingOption.CONTEST_FOR_CUSTOMERS -> {}
                             MarketingOption.SCRATCH_AND_WIN -> {}
@@ -187,6 +187,7 @@ fun AppNavigation() {
                           }
                           AccountClick.Subscription ->
                               {
+                                  navController.navigate(Screen.Subscription.route)
 
                               }
                       }
@@ -209,7 +210,9 @@ fun AppNavigation() {
             EditOffer(offerId =offerid , onBackPressed = {navController.popBackStack()}, onOfferDone = {})        }
 
         composable(Screen.Subscription.route){
-            SubscriptionPage(gotoHome = {}, onClick = { navController.popBackStack()})
+            SubscriptionPage(gotoHome = {
+                navController.popBackStack()
+            }, onClick = { navController.popBackStack()})
         }
         
         composable(Screen.CreateOfferScreen.route){
