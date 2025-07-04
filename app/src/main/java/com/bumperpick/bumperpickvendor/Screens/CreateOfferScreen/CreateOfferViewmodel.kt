@@ -156,8 +156,8 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
                 showError("Please select start date")
                 return false
             }
-            else if(_offerDetails.value.offerEndDate.isNullOrEmpty()){
-                showError("Please select end date")
+         else if(_offerDetails.value.quantity==null){
+                showError("Please enter quantity")
                 return false
             }
             else if(_offerDetails.value.subcat_id==null){
@@ -175,6 +175,10 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
                         showError("Please enter brand name or choose logo")
                         return false
                     }
+                }
+                else if(_offerDetails.value.quantity==null){
+                    showError("Please enter quantity")
+                    return false
                 }
                 else if(_templateData.value.heading.text.isNullOrEmpty()){
                     showError("Please enter heading")
@@ -196,10 +200,7 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
                 showError("Please select start date")
                 return false
             }
-            else if(offerDetails.value.offerEndDate.isNullOrEmpty()){
-                showError("Please select end date")
-                    return false
-                }
+
 
             }
 
@@ -213,10 +214,7 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
             showError("Please enter product name")
             return false
         }
-        else if(_offerDetails.value.quantity.isNullOrEmpty()){
-            showError("Please enter quantity")
-            return false
-        }
+
         else if(_offerDetails.value.productDiscription.isNullOrEmpty()){
             showError("Please enter product description")
             return false
@@ -244,7 +242,7 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
     fun updateTermsAndCondition(name:String){
         _offerDetails.value=offerDetails.value.copy(termsAndCondition = name)
     }
-    fun updateQuantity(name:String){
+    fun updateQuantity(name:String?){
         _offerDetails.value=offerDetails.value.copy(quantity = name)
     }
     fun updateDissaount(name:TextType){

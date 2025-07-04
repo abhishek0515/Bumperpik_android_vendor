@@ -45,6 +45,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -104,6 +106,15 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    var quantity_enabled by remember { mutableStateOf(false) }
+    LaunchedEffect(quantity_enabled) {
+        if(quantity_enabled){
+            viewmodel.updateQuantity("UNTIL STOCK LAST")
+        }
+        else{
+            viewmodel.updateQuantity(null)
+        }
+    }
     LaunchedEffect(Unit) {
         viewmodel.getSubCategory()
     }
@@ -188,7 +199,34 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
                         modifier = Modifier
                             .fillMaxWidth(),
                         singleLine = true,
+                        isEnabled = !quantity_enabled
                     )
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "Until stock end",
+                            fontSize = 16.sp,
+                            fontFamily = satoshi_regular,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            color = Color.Gray,
+
+                            )
+
+                        Switch(modifier = Modifier.align(Alignment.CenterEnd),
+                            checked = quantity_enabled,
+                            onCheckedChange = { quantity_enabled = it },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = BtnColor,
+                                uncheckedThumbColor = Color.White,
+                                uncheckedTrackColor = Color.Gray
+                            )
+                        )
+                    }
+
+
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         text = "Offer Sub-Category",
                         fontSize = 14.sp,
