@@ -4,6 +4,7 @@ import DataStoreManager
 import android.util.Log
 import com.bumperpick.bumperpickvendor.API.FinalModel.Data
 import com.bumperpick.bumperpickvendor.API.FinalModel.error_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.update_profile_model
@@ -139,7 +140,7 @@ class VendorRepositoryImpl(
             .map { chars.random() }
             .joinToString("")
     }
-    override suspend fun fetchSubscription(): Result<subscription_model> {
+    override suspend fun fetchSubscription(): Result<newsubscriptionModel> {
         return try {
             val subscription= safeApiCall(
                 api = {apiService.Fetch_subs()},
@@ -240,6 +241,7 @@ class VendorRepositoryImpl(
 
     override suspend fun updateProfile( vendorDetails: Vendor_Details):Result<update_profile_model> {
       return try {
+          Log.d("update_profile",vendorDetails.toString())
           val token=dataStoreManager.getToken()!!.token
           val image = prepareImagePart(name="image", file = vendorDetails.userImage!!)
           val map = mutableMapOf<String, RequestBody>()
@@ -252,8 +254,8 @@ class VendorRepositoryImpl(
           map["establishment_address"]=vendorDetails.Vendor_EstablishName.toPart()
           map["outlet_address"]=vendorDetails.Outlet_Address.toPart()
           map["gst_number"]=vendorDetails.GstNumber.toPart()
-          map["opening_time"]=vendorDetails.openingTime.toPart()
-          map["closing_time"]=vendorDetails.closingTime.toPart()
+          map["start_time"]=vendorDetails.openingTime!!.toPart()
+          map["close_time"]=vendorDetails.closingTime!!.toPart()
 
 
           val update= safeApiCall(

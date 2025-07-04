@@ -3,14 +3,11 @@ package com.bumperpick.bumperpickvendor.Screens.Subscription
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
-import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
 import com.bumperpick.bumperpickvendor.Repository.BillingCycle
-
 import com.bumperpick.bumperpickvendor.Repository.Result
 import com.bumperpick.bumperpickvendor.Repository.VendorRepository
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,19 +19,16 @@ class SubscriptionViewModel(private val vendorRepository: VendorRepository) : Vi
         object Loading : UiState<Nothing>()
         data class Success<T>(val data: T) : UiState<T>()
         data class Error(val message: String) : UiState<Nothing>()
+        object Idle : UiState<Nothing>()
     }
 
     // Subscription state
-    private val _subscriptionState = MutableStateFlow<UiState<subscription_model>>(UiState.Loading)
+    private val _subscriptionState = MutableStateFlow<UiState<newsubscriptionModel>>(UiState.Loading)
     val subscriptionState = _subscriptionState.asStateFlow()
 
     // Buy subscription state
-    private val _buySubscriptionState = MutableStateFlow<UiState<select_subs_model>?>(null)
+    private val _buySubscriptionState = MutableStateFlow<UiState<select_subs_model>>(UiState.Idle)
     val buySubscriptionState = _buySubscriptionState.asStateFlow()
-
-    // Billing cycle selection
-    private val _selectedBillingCycle = MutableStateFlow(BillingCycle.MONTHLY)
-    val selectedBillingCycle = _selectedBillingCycle.asStateFlow()
 
     // Selected subscription ID
     private val _selectedSubsId = MutableStateFlow("")
@@ -47,7 +41,6 @@ class SubscriptionViewModel(private val vendorRepository: VendorRepository) : Vi
     fun fetchSubscription() {
         viewModelScope.launch {
             _subscriptionState.value = UiState.Loading
-
             try {
                 val result = vendorRepository.fetchSubscription()
                 _subscriptionState.value = when (result) {
@@ -61,9 +54,17 @@ class SubscriptionViewModel(private val vendorRepository: VendorRepository) : Vi
         }
     }
 
-    fun updateBillingCycle(cycle: BillingCycle, subsId: String) {
-        _selectedBillingCycle.value = cycle
+    fun updateSelectedSubscription(subsId: String) {
         _selectedSubsId.value = subsId
+        // Update the subscription state to reflect the selected subscription
+        val currentSubscription = getCurrentSubscription()
+        currentSubscription?.data?.let { plans ->
+            val allPlans = plans.getAllPlans()
+            val selectedPlan = allPlans.flatMap { it.second }.find { it.id.toString() == subsId }
+            selectedPlan?.let {
+                // Optionally, you can trigger additional logic here if needed
+            }
+        }
     }
 
     fun calculatePrice(basePrice: Int, cycle: BillingCycle): Int {
@@ -99,7 +100,6 @@ class SubscriptionViewModel(private val vendorRepository: VendorRepository) : Vi
 
         viewModelScope.launch {
             _buySubscriptionState.value = UiState.Loading
-
             try {
                 val result = vendorRepository.selectSubsVendor(id = currentSubsId)
                 _buySubscriptionState.value = when (result) {
@@ -114,7 +114,7 @@ class SubscriptionViewModel(private val vendorRepository: VendorRepository) : Vi
     }
 
     fun clearBuySubscriptionState() {
-        _buySubscriptionState.value = null
+        _buySubscriptionState.value = UiState.Idle
     }
 
     fun clearError() {
@@ -124,13 +124,13 @@ class SubscriptionViewModel(private val vendorRepository: VendorRepository) : Vi
         }
 
         when (val currentState = _buySubscriptionState.value) {
-            is UiState.Error -> _buySubscriptionState.value = null
+            is UiState.Error -> _buySubscriptionState.value = UiState.Idle
             else -> { /* No action needed */ }
         }
     }
 
     // Helper function to get current subscription data
-    fun getCurrentSubscription(): subscription_model? {
+    fun getCurrentSubscription(): newsubscriptionModel? {
         return when (val state = _subscriptionState.value) {
             is UiState.Success -> state.data
             else -> null

@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bumperpick.bumperpickvendor.API.FinalModel.Subcategory
 import com.bumperpick.bumperpickvendor.Repository.OfferModel
 import com.bumperpick.bumperpickvendor.Repository.OfferTemplateType
 import com.bumperpick.bumperpickvendor.Repository.Result
@@ -35,15 +36,35 @@ enum class HeadingSize(val value: Dp){
 
 class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewModel() {
 
-     private val _offerDetails= MutableStateFlow(OfferModel())
-    val offerDetails: StateFlow<OfferModel> = _offerDetails
+         private val _offerDetails= MutableStateFlow(OfferModel())
+        val offerDetails: StateFlow<OfferModel> = _offerDetails
     private val _offerDetail= MutableStateFlow(OfferModel())
     val offerDetail: StateFlow<OfferModel> = _offerDetail
     private val _loading =MutableStateFlow(false)
      val loading =MutableStateFlow(false)
+    
+    
 
    private val _offerAdded=MutableStateFlow(false)
     val offerAdded:StateFlow<Boolean> = _offerAdded
+    
+    private val _subCatList= MutableStateFlow<List<Subcategory>>(emptyList())
+    val subCatList:StateFlow<List<Subcategory>> =_subCatList
+    
+    fun getSubCategory() {
+        viewModelScope.launch {
+
+
+            val data = offerRepository.getSubcategory()
+            when(data){
+                is Result.Error -> {
+                    Log.d("ERROR",data.message)
+                }
+                Result.Loading -> {}
+                is Result.Success -> {_subCatList.value=data.data}
+            }
+        }
+    }
 
 
 
@@ -122,6 +143,10 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
        
     }
 
+    fun updateSubCat(subcatId:Int){
+        _offerDetails.value=offerDetails.value.copy(subcat_id =subcatId)
+    }
+
 
 
 
@@ -133,6 +158,10 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
             }
             else if(_offerDetails.value.offerEndDate.isNullOrEmpty()){
                 showError("Please select end date")
+                return false
+            }
+            else if(_offerDetails.value.subcat_id==null){
+                showError("Please select Sub Category")
                 return false
             }
             else if(_offerDetails.value.BannerImage==null){
@@ -153,6 +182,10 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
                 }
                 else if(_templateData.value.subHeading.text.isNullOrEmpty()){
                     showError("Please enter sub heading")
+                    return false
+                }
+                else if(_offerDetails.value.subcat_id==null){
+                    showError("Please select Sub Category")
                     return false
                 }
                 else if(offerDetails.value.discount.text.isEmpty()){

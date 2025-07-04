@@ -1,5 +1,6 @@
 package com.bumperpick.bumperpickvendor.Screens.EditAccountScreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumperpick.bumperpickvendor.Repository.Result
@@ -68,8 +69,8 @@ class EditAccountViewModel(val vendorRepository: VendorRepository): ViewModel() 
         originalVendorDetails = vendorDetails
         _uiState.value = _uiState.value.copy(
             vendorDetails = vendorDetails,
-            openingTime = vendorDetails.openingTime,
-            closingTime = vendorDetails.closingTime
+            openingTime = vendorDetails.openingTime?:"",
+            closingTime = vendorDetails.closingTime?:""
         )
         checkIfSaveEnabled()
     }
@@ -235,12 +236,13 @@ class EditAccountViewModel(val vendorRepository: VendorRepository): ViewModel() 
                 }
 
                 // Create final vendor details with updated opening/closing times
-                val finalDetails = currentDetails.copy(
+         /*       val finalDetails = currentDetails.copy(
                     openingTime = _uiState.value.openingTime,
                     closingTime = _uiState.value.closingTime
                 )
-
-                val updateProfile=vendorRepository.updateProfile(finalDetails)
+*/
+                Log.d("currentDetails",currentDetails.toString())
+                val updateProfile=vendorRepository.updateProfile(currentDetails)
                 when(updateProfile){
                     is Result.Error -> {
                         _uiState.value=_uiState.value.copy(errorMessage = updateProfile.message, isLoading = false)
@@ -250,8 +252,8 @@ class EditAccountViewModel(val vendorRepository: VendorRepository): ViewModel() 
 
                     }
                     is Result.Success ->{
-                        _uiState.value = _uiState.value.copy(isLoading = false, vendorDetails = finalDetails)
-                        onSuccess(finalDetails)
+                        _uiState.value = _uiState.value.copy(isLoading = false, vendorDetails = currentDetails)
+                        onSuccess(currentDetails)
                     }
                 }
 

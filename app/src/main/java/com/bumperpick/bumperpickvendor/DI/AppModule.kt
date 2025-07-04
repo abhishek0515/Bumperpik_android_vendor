@@ -7,6 +7,10 @@ import com.bumperpick.bumperpickvendor.API.FinalModel.FeatureDeserializer
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
 import com.bumperpick.bumperpickvendor.Repository.AuthRepository
 import com.bumperpick.bumperpickvendor.Repository.AuthRepositoryImpl
+import com.bumperpick.bumperpickvendor.Repository.Event2Repository
+import com.bumperpick.bumperpickvendor.Repository.EventRepository
+import com.bumperpick.bumperpickvendor.Repository.EventRepository2Impl
+import com.bumperpick.bumperpickvendor.Repository.EventRepositoryImpl
 import com.bumperpick.bumperpickvendor.Repository.GoogleSignInRepository
 import com.bumperpick.bumperpickvendor.Repository.OfferRepositoryImpl
 import com.bumperpick.bumperpickvendor.Repository.VendorRepository
@@ -17,6 +21,8 @@ import com.bumperpick.bumperpickvendor.Screens.Account.AccountViewmodel
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CreateOfferViewmodel
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOfferViewmodel
 import com.bumperpick.bumperpickvendor.Screens.EditAccountScreen.EditAccountViewModel
+import com.bumperpick.bumperpickvendor.Screens.Event2.Events2Viewmodel
+import com.bumperpick.bumperpickvendor.Screens.Events.EventsViewmodel
 import com.bumperpick.bumperpickvendor.Screens.Login.GoogleSignInViewModel
 import com.bumperpick.bumperpickvendor.Screens.Login.LoginViewmodel
 import com.bumperpick.bumperpickvendor.Screens.OTP.OtpViewModel
@@ -75,7 +81,8 @@ val appModule = module {
     single <VendorRepository>{ VendorRepositoryImpl(get (),get()) }
     single { GoogleSignInRepository(get(),get (),get ()) }
     single <offerRepository>{ OfferRepositoryImpl(get(),get(),get()) }
-
+    single <EventRepository>{EventRepositoryImpl(get(),get(),get())}
+    single <Event2Repository>{ EventRepository2Impl(get(),get(),get()) }
     // ViewModel
     viewModel { SplashViewmodel(get()) }
     viewModel { LoginViewmodel(get(),get()) }
@@ -89,6 +96,8 @@ val appModule = module {
     viewModel { AccountViewmodel(get(),get ()) }
     viewModel { QrScreenViewmodel(get(),get ()) }
     viewModel { EditAccountViewModel(get()) }
+    viewModel { EventsViewmodel(get()) }
+    viewModel { Events2Viewmodel(get())}
 
 
 

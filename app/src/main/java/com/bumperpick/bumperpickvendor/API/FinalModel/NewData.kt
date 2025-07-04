@@ -1,6 +1,6 @@
 package com.bumperpick.bumperpickvendor.API.FinalModel
 
-data class Data(
+data class NewData(
     val brand_name: String,
     val category: CategoryX,
     val created_at: String,

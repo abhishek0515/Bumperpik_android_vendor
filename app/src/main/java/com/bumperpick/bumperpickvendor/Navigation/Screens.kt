@@ -20,6 +20,8 @@ sealed class Screen(val route: String) {
         const val MOBILE_KEY = "mobile"
         const val IS_MOBILE="isMobile"
         const val offerId="offerId"
+        const val campaignId="campaignId"
+        const val eventId="eventId"
 
     }
 
@@ -33,6 +35,32 @@ sealed class Screen(val route: String) {
     object ScanQR:Screen("scanQR")
 
     object EditAccount:Screen("edit_account")
+
+    object Mysubs:Screen("my_subs")
+
+    object Campaign:Screen("campaign")
+
+    object AddCampaign:Screen("addCampaign")
+
+    object CampaignDetail:Screen("campaignDetail/{$campaignId}"){
+        fun withcampaignId(campaignId:String):String{
+            return "campaignDetail/$campaignId"
+        }
+    }
+
+    object EditCampaign:Screen("EditCampaign/{$campaignId}"){
+        fun withcampaignId(campaignId:String):String{
+            return "EditCampaign/$campaignId"
+        }
+    }
+
+    object AddEvent:Screen("addEvent")
+    object Event:Screen("event")
+    object EventEdit:Screen("eventDetail/{$eventId}"){
+        fun withEventId(eventId:String):String{
+            return "eventDetail/$eventId"
+        }
+    }
 
 }
 

@@ -1,9 +1,14 @@
 package com.bumperpick.bumperpickvendor.API.Provider
 
+import com.bumperpick.bumperpickvendor.API.FinalModel.EventModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.EventRegisterModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.HomeOfferModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.NewEventDetailModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.NewEventmodel
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.VendorLoginModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
@@ -107,7 +112,7 @@ interface ApiService {
 
 
     @GET("api/subscriptions")
-    suspend fun Fetch_subs():Response<subscription_model>
+    suspend fun Fetch_subs():Response<newsubscriptionModel>
 
     @POST("api/vendor/select-subscription")
     @FormUrlEncoded
@@ -118,5 +123,53 @@ interface ApiService {
         @Field("token")token: String):Response<select_subs_model>
 
 
+    @POST("api/vendor/campaigns/store")
+    @Multipart
+    suspend fun Addcampaigns(
+        @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
+        @Part banner:MultipartBody.Part,
+    ):Response<EventRegisterModel>
+
+    @GET("api/vendor/campaigns")
+    suspend fun getcampaigns(
+        @Query("token")token:String
+    ):Response<EventModel>
+
+
+    @GET("api/vendor/campaigns/show/{id}")
+    suspend fun getcampaignDetail(@Path("id")id:String,@Query("token")token:String):Response<EventRegisterModel>
+    @POST("api/vendor/campaigns/destroy/{id}")
+    @FormUrlEncoded
+    suspend fun campaigns_destroy(@Path("id")id:String,@Field("token")token:String):Response<success_model>
+
+    @POST("api/vendor/campaigns/update/{id}")
+    @Multipart
+    suspend fun campaignUpdate(@Path("id")id:String, @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>, @Part banner:MultipartBody.Part,):Response<success_model>
+
+
+
+    @GET("api/vendor/events")
+    suspend fun getevents(
+        @Query("token")token:String
+    ):Response<NewEventmodel>
+
+
+    @POST("api/vendor/events/store")
+    @Multipart
+    suspend fun Addevents(
+        @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
+        @Part banner:MultipartBody.Part,
+    ):Response<NewEventDetailModel>
+
+    @GET("api/vendor/events/show/{id}")
+    suspend fun getEventDetail(@Path("id")id:String,@Query("token")token:String):Response<NewEventDetailModel>
+
+    @POST("api/vendor/events/update/{id}")
+    @Multipart
+    suspend fun eventsUpdate(@Path("id")id:String, @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>, @Part banner:MultipartBody.Part,):Response<success_model>
+
+    @POST("api/vendor/events/destroy/{id}")
+    @FormUrlEncoded
+    suspend fun events_destroy(@Path("id")id:String,@Field("token")token:String):Response<success_model>
 
 }

@@ -1,16 +1,14 @@
 package com.bumperpick.bumperpickvendor.Screens.Subscription
 
-
-
-import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -20,39 +18,71 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXX
+import com.bumperpick.bumperpickvendor.API.FinalModel.Feature
 import com.bumperpick.bumperpickvendor.API.FinalModel.FeatureValue
-import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.Repository.BillingCycle
 import com.bumperpick.bumperpickvendor.Screens.Component.getMetalBrush
-
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey
-import com.bumperpick.bumperpickvendor.ui.theme.satoshi
-import com.bumperpick.bumperpickvendor.ui.theme.satoshi_bold
-import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
-import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
 import org.koin.androidx.compose.koinViewModel
-// UI Models for better
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+// Data Models
+data class SubscriptionPlan(
+    val features: List<Feature>,
+    val id: Int,
+    val name: String,
+    val price: String,
+    val time_period: String
+) {
+    val priceAsInt: Int
+        get() = price.toIntOrNull() ?: 0
+
+    val billingCycle: BillingCycle
+        get() = when (time_period.lowercase()) {
+            "monthly", "1 month" -> BillingCycle.MONTHLY
+            "quarterly", "3 months" -> BillingCycle.QUARTERLY
+            "annually", "1 year" -> BillingCycle.ANNUALLY
+            else -> BillingCycle.MONTHLY
+        }
+}
+
+enum class SubscriptionType(val displayName: String) {
+    GOLD("Gold"),
+    PLATINUM("Platinum"),
+    SILVER("Silver")
+}
+
+data class SubscriptionPlansResponse(
+    val Gold: List<SubscriptionPlan>,
+    val Platinum: List<SubscriptionPlan>,
+    val Silver: List<SubscriptionPlan>
+) {
+    fun getAllPlans(): List<Pair<SubscriptionType, List<SubscriptionPlan>>> {
+        return listOf(
+            SubscriptionType.GOLD to Gold,
+            SubscriptionType.PLATINUM to Platinum,
+            SubscriptionType.SILVER to Silver
+        ).filter { it.second.isNotEmpty() }
+    }
+}
+
 data class FeatureUI(
     val id: Int,
     val name: String,
@@ -61,27 +91,32 @@ data class FeatureUI(
     val featureValue: String = ""
 )
 
+@Preview
+@Composable
+private fun  previewSub(){
+    SubscriptionPage(onBackClick = {})
+}
+// Main Composable
 @Composable
 fun SubscriptionPage(
     viewModel: SubscriptionViewModel = koinViewModel(),
-    onClick: () -> Unit,
+    onBackClick: () -> Unit,
     gotoHome: () -> Unit = {}
 ) {
     val subscriptionState by viewModel.subscriptionState.collectAsState()
     val buySubscriptionState by viewModel.buySubscriptionState.collectAsState()
-    val selectedBillingCycle by viewModel.selectedBillingCycle.collectAsState()
     val selectedSubsId by viewModel.selectedSubsId.collectAsState()
-    val context= LocalContext.current
-    // Handle buy subscription result
+    val context = LocalContext.current
+
     LaunchedEffect(buySubscriptionState) {
         when (buySubscriptionState) {
             is SubscriptionViewModel.UiState.Success -> {
                 gotoHome()
-                Toast.makeText(context,"Subscription purchased",Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Subscription purchased successfully", Toast.LENGTH_SHORT).show()
                 viewModel.clearBuySubscriptionState()
             }
             is SubscriptionViewModel.UiState.Error -> {
-                kotlinx.coroutines.delay(3000)
+                Toast.makeText(context, (buySubscriptionState as SubscriptionViewModel.UiState.Error).message, Toast.LENGTH_SHORT).show()
                 viewModel.clearBuySubscriptionState()
             }
             else -> { /* No action needed */ }
@@ -96,54 +131,50 @@ fun SubscriptionPage(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Simple Header matching the image
-            SimpleHeader(onBackClick = onClick)
-
-            // Content based on state
-            when (subscriptionState) {
-                is SubscriptionViewModel.UiState.Loading -> {
-                    LoadingContent()
-                }
-                is SubscriptionViewModel.UiState.Error -> {
+            SimpleHeader(onBackClick = onBackClick)
+            when(subscriptionState){
+                is SubscriptionViewModel.UiState.Error ->{
                     ErrorContent(
                         message = (subscriptionState as SubscriptionViewModel.UiState.Error).message,
                         onRetry = { viewModel.fetchSubscription() }
                     )
                 }
-                is SubscriptionViewModel.UiState.Success -> {
-                    val data = (subscriptionState as SubscriptionViewModel.UiState.Success<subscription_model>).data
-                    val plans = data.data
+                SubscriptionViewModel.UiState.Idle -> TODO()
+                SubscriptionViewModel.UiState.Loading -> {
+                    LoadingContent()
+                }
+                is SubscriptionViewModel.UiState.Success<*> -> {
+                    val data = (subscriptionState as SubscriptionViewModel.UiState.Success<newsubscriptionModel>).data
+                    val planGroups = data.data.getAllPlans()
 
-                    if (plans.isNotEmpty()) {
-                        SimpleSubscriptionContent(
+                    if (planGroups.isNotEmpty()) {
+                        SubscriptionContent(
                             modifier = Modifier.weight(1f),
-                            plans = plans,
-                            selectedBillingCycle = selectedBillingCycle,
+                            planGroups = planGroups,
                             selectedSubsId = selectedSubsId,
-                            onBillingCycleChanged = viewModel::updateBillingCycle,
-                            onPlanSelected = { planId ->
-                                viewModel.updateBillingCycle(selectedBillingCycle, planId)
+                            onSubscriptionSelected = { subsId ->
+                                viewModel.updateSelectedSubscription(subsId)
                             },
                             onContinueClick = { viewModel.buySubscription() },
-                            calculatePrice = viewModel::calculatePrice,
                             getCycleDuration = viewModel::getCycleDuration,
                             isLoading = buySubscriptionState is SubscriptionViewModel.UiState.Loading
                         )
                     } else {
-                        EmptyPlansContent()
+                        ErrorContent(
+                            message = "No subscription plans available",
+                            onRetry = { viewModel.fetchSubscription() }
+                        )
                     }
                 }
             }
+
         }
 
-        // Error message overlay
-        buySubscriptionState?.let { state ->
-            if (state is SubscriptionViewModel.UiState.Error) {
-                ErrorSnackbar(
-                    message = state.message,
-                    onDismiss = { viewModel.clearBuySubscriptionState() }
-                )
-            }
+        if (buySubscriptionState is SubscriptionViewModel.UiState.Error) {
+            ErrorSnackbar(
+                message = (buySubscriptionState as SubscriptionViewModel.UiState.Error).message,
+                onDismiss = { viewModel.clearBuySubscriptionState() }
+            )
         }
     }
 }
@@ -153,9 +184,9 @@ private fun SimpleHeader(onBackClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
+
             .background(Color.White)
-            .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 24.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -227,45 +258,26 @@ private fun ErrorContent(
 }
 
 @Composable
-private fun EmptyPlansContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "No subscription plans available",
-            fontSize = 16.sp,
-            color = Color(0xFF666666)
-        )
-    }
-}
-
-@SuppressLint("UnrememberedMutableState")
-@Composable
-private fun SimpleSubscriptionContent(
+private fun SubscriptionContent(
     modifier: Modifier,
-    plans: List<DataXXXX>,
-    selectedBillingCycle: BillingCycle,
+    planGroups: List<Pair<SubscriptionType, List<SubscriptionPlan>>>,
     selectedSubsId: String,
-    onBillingCycleChanged: (BillingCycle, String) -> Unit,
-    onPlanSelected: (String) -> Unit,
+    onSubscriptionSelected: (String) -> Unit,
     onContinueClick: () -> Unit,
-    calculatePrice: (Int, BillingCycle) -> Int,
     getCycleDuration: (BillingCycle) -> String,
     isLoading: Boolean
 ) {
-    val pagerState = rememberPagerState(pageCount = { plans.size })
-    val currentPlan by derivedStateOf { plans.getOrNull(pagerState.currentPage) }
+    val pagerState = rememberPagerState(pageCount = { planGroups.size })
+    var selectedPlan by remember { mutableStateOf<SubscriptionPlan?>(null) }
 
-    // Auto-select current plan
-    LaunchedEffect(pagerState.currentPage) {
-        currentPlan?.let { plan ->
-            onPlanSelected(plan.id.toString())
+    LaunchedEffect(pagerState.currentPage, selectedSubsId) {
+        val currentPlanGroup = planGroups.getOrNull(pagerState.currentPage)
+        currentPlanGroup?.let { (_, plans) ->
+            selectedPlan = plans.find { it.id.toString() == selectedSubsId } ?: plans.firstOrNull()
         }
     }
 
     Column(modifier = modifier) {
-        // Plan Cards
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -276,20 +288,16 @@ private fun SimpleSubscriptionContent(
                 modifier = Modifier.fillMaxWidth(),
                 pageSpacing = 16.dp
             ) { page ->
-                SimpleSubscriptionCard(
-                    plan = plans[page],
-                    selectedBillingCycle = selectedBillingCycle,
-                    isSelected = selectedSubsId == plans[page].id.toString(),
-                    onCardClick = { onPlanSelected(plans[page].id.toString()) },
-                    onBillingCycleChanged = { cycle ->
-                        onBillingCycleChanged(cycle, plans[page].id.toString())
-                    },
-                    calculatePrice = calculatePrice
+                val (subscriptionType, plans) = planGroups[page]
+                SubscriptionCard(
+                    subscriptionType = subscriptionType,
+                    plans = plans,
+                    selectedSubsId = selectedSubsId,
+                    onSubscriptionSelected = onSubscriptionSelected
                 )
             }
         }
 
-        // Page indicators
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -297,185 +305,212 @@ private fun SimpleSubscriptionContent(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            repeat(plans.size) { index ->
+            repeat(planGroups.size) { index ->
                 Box(
                     modifier = Modifier
-                        .size(
-                            if (index == pagerState.currentPage)  18.dp else 12.dp)
+                        .size(if (index == pagerState.currentPage) 18.dp else 12.dp)
                         .background(
                             if (index == pagerState.currentPage) Color(0xFFD32F2F) else Color(0xFFCCCCCC),
                             CircleShape
                         )
                 )
-                if (index < plans.size - 1) {
+                if (index < planGroups.size - 1) {
                     Spacer(modifier = Modifier.width(8.dp))
                 }
             }
         }
 
-        // Bottom Continue Button
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RectangleShape,
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+        BottomActionBar(
+            selectedPlan = selectedPlan,
+            selectedSubsId = selectedSubsId,
+            onContinueClick = onContinueClick,
+            getCycleDuration = getCycleDuration,
+            isLoading = isLoading
+        )
+    }
+}
+
+@Composable
+private fun BottomActionBar(
+    selectedPlan: SubscriptionPlan?,
+    selectedSubsId: String,
+    onContinueClick: () -> Unit,
+    getCycleDuration: (BillingCycle) -> String,
+    isLoading: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RectangleShape,
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(
+            modifier = Modifier.padding(9.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                currentPlan?.let { plan ->
-                    val price = plan.price.toDouble().toInt()
-                    val calculatedPrice = calculatePrice(price, selectedBillingCycle)
+            selectedPlan?.let { plan ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Column(modifier = Modifier.padding(start = 16.dp)) {
+                        Text(
+                            text = "₹ ${plan.price}",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = getCycleDuration(plan.billingCycle),
+                            fontSize = 12.sp,
+                            color = Color(0xFF666666)
+                        )
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Bottom
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = onContinueClick,
+                        modifier = Modifier
+                            .width(150.dp)
+                            .height(48.dp),
+                        enabled = !isLoading && selectedSubsId.isNotEmpty(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = BtnColor,
+                            disabledContainerColor = Color(0xFFCCCCCC)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Column(modifier=Modifier.padding(start = 16.dp)) {
-                            Text(
-                                text = "₹ $calculatedPrice",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
                             )
+                        } else {
                             Text(
-                                text = getCycleDuration(selectedBillingCycle),
-                                fontSize = 12.sp,
-                                color = Color(0xFF666666)
+                                text = "Continue",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
                             )
-                        }
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        Button(
-                            onClick = onContinueClick,
-                            modifier = Modifier
-                                .width(150.dp)
-                                .height(48.dp),
-                            enabled = !isLoading && selectedSubsId.isNotEmpty(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = BtnColor,
-                                disabledContainerColor = Color(0xFFCCCCCC)
-                            ),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            if (isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Text(
-                                    text = "Continue",
-                                    color = Color.White,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
                         }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
+                Spacer(modifier = Modifier.height(12.dp))
+            } ?: run {
+                Text(
+                    text = "Please select a plan",
+                    fontSize = 16.sp,
+                    color = Color(0xFF666666),
+                    modifier = Modifier.padding(16.dp)
+                )
             }
         }
     }
 }
 
-
 @Composable
-fun SimpleSubscriptionCard(
-    plan: DataXXXX,
-    selectedBillingCycle: BillingCycle,
-    isSelected: Boolean,
-    onCardClick: () -> Unit,
-    onBillingCycleChanged: (BillingCycle) -> Unit,
-    calculatePrice: (Int, BillingCycle) -> Int
+fun SubscriptionCard(
+    subscriptionType: SubscriptionType,
+    plans: List<SubscriptionPlan>,
+    selectedSubsId: String,
+    onSubscriptionSelected: (String) -> Unit
 ) {
+    val selectedPlan = plans.find { it.id.toString() == selectedSubsId } ?: plans.firstOrNull()
+    val isSelected = selectedSubsId == selectedPlan?.id?.toString()
+
     Card(
         modifier = Modifier
             .fillMaxSize()
-            .clickable { onCardClick() },
+            .clickable { selectedPlan?.let { onSubscriptionSelected(it.id.toString()) } },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isSelected) 8.dp else 2.dp
+        ),
+        border = if (isSelected) BorderStroke(2.dp, Color(0xFFD32F2F)) else null
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .background(
-                  brush = getMetalBrush(plan.name)
+                    brush = getMetalBrush(subscriptionType.displayName)
                 )
-                .clip(shape =RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                .clip(shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
         ) {
-            // Gold Plan Header
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${plan.name} plan",
+                    text = "${subscriptionType.displayName} Plan",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-            Card(
 
-                modifier = Modifier.fillMaxSize().weight(1f),
+            Card(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
             ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(18.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(18.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Features",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Divider(modifier = Modifier.height(1.dp), color = Color.Gray)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    selectedPlan?.features?.forEach { feature ->
+                        val featureUI = FeatureUI(
+                            id = feature.id,
+                            name = feature.name,
+                            isIncluded = feature.value,
+                            type = feature.type
+                        )
+                        FeatureItem(feature = featureUI)
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Divider(modifier = Modifier.height(1.dp), color = Color.Gray)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Select Duration",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Black,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
 
                     ) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Features list",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-
-
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Divider(modifier = Modifier.height(1.dp), color = Color.Gray)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        plan.features.forEach { feature ->
-                            val featureUI = FeatureUI(
-                                id = feature.id,
-                                name = feature.name,
-                                isIncluded = feature.value,
-                                type = feature.type
+                        for(plan in plans){
+                            PlanPeriodItem(
+                                plan = plan,
+                                isSelected = selectedSubsId == plan.id.toString(),
+                                onClick = { onSubscriptionSelected(plan.id.toString()) }
                             )
-                            SimpleFeatureItem(feature = featureUI)
-                            Spacer(modifier = Modifier.height(12.dp))
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Divider(modifier = Modifier.height(1.dp), color = Color.Gray)
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Billing Cycle Selection - Horizontal Layout
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            BillingCycle.values().forEach { cycle ->
-                                SimpleRadioButton(
-                                    cycle = cycle,
-                                    isSelected = selectedBillingCycle == cycle,
-                                    onClick = { onBillingCycleChanged(cycle) }
-                                )
-                            }
-                        }
                     }
+
                 }
             }
         }
@@ -483,7 +518,39 @@ fun SimpleSubscriptionCard(
 }
 
 @Composable
-fun SimpleFeatureItem(feature: FeatureUI) {
+fun PlanPeriodItem(
+    plan: SubscriptionPlan,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = Color(0xFFD32F2F),
+                unselectedColor = Color(0xFFCCCCCC)
+            )
+        )
+
+        Spacer(modifier = Modifier.width(2.dp))
+
+        Text(
+            text = plan.time_period,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+
+        )
+    }
+}
+
+@Composable
+fun FeatureItem(feature: FeatureUI) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -501,10 +568,7 @@ fun SimpleFeatureItem(feature: FeatureUI) {
                     Box(
                         modifier = Modifier
                             .size(20.dp)
-                            .background(
-                                Color(0xFF4CAF50),
-                                CircleShape
-                            ),
+                            .background(Color(0xFF4CAF50), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -518,10 +582,7 @@ fun SimpleFeatureItem(feature: FeatureUI) {
                     Box(
                         modifier = Modifier
                             .size(20.dp)
-                            .background(
-                                Color(0xFFD32F2F),
-                                CircleShape
-                            ),
+                            .background(Color(0xFFD32F2F), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -542,38 +603,6 @@ fun SimpleFeatureItem(feature: FeatureUI) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun SimpleRadioButton(
-    cycle: BillingCycle,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { onClick() }
-    ) {
-        RadioButton(
-            selected = isSelected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Color(0xFFD32F2F),
-                unselectedColor = Color(0xFF666666)
-            )
-        )
-        Text(
-            text = when (cycle) {
-                BillingCycle.MONTHLY -> "3 Months"
-                BillingCycle.QUARTERLY -> "6 Months"
-                BillingCycle.ANNUALLY -> "1 Year"
-                else -> cycle.displayName
-            },
-            fontSize = 16.sp,
-            color = Color.Black,
-            modifier = Modifier.padding(start = 2.dp)
-        )
     }
 }
 
@@ -618,5 +647,35 @@ private fun ErrorSnackbar(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun getMetalBrush(planName: String): Brush {
+    return when (planName.lowercase()) {
+        "gold" -> Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFFFFD700),
+                Color(0xFFFFA500)
+            )
+        )
+        "platinum" -> Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFFE5E4E2),
+                Color(0xFFC0C0C0)
+            )
+        )
+        "silver" -> Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFFC0C0C0),
+                Color(0xFF808080)
+            )
+        )
+        else -> Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFFF5F5F5),
+                Color(0xFFE0E0E0)
+            )
+        )
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataX
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.Subcategory
 import com.bumperpick.bumperpickvendor.API.FinalModel.error_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpickvendor.API.Model.success_model
@@ -54,6 +55,7 @@ class OfferRepositoryImpl(
             map["terms"] = offerModel.termsAndCondition.toString().toRequestBody("text/plain".toMediaType())
             map["start_date"] = offerModel.offerStartDate.toString().toRequestBody("text/plain".toMediaType())
             map["end_date"] = offerModel.offerEndDate.toString().toRequestBody("text/plain".toMediaType())
+            map["sub_category_id"] = offerModel.subcat_id.toString().toRequestBody("text/plain".toMediaType())
             map["token"] = token.toString().toRequestBody("text/plain".toMediaType())
 
             val banner = uriToFile(context, offerModel.BannerImage!!)?.toMultipartPart(partName = "brand_logo")
@@ -91,7 +93,7 @@ class OfferRepositoryImpl(
         }
     }
 
-    private fun uriToFile(context: Context, uri: Uri): File {
+     fun uriToFile(context: Context, uri: Uri): File {
         val inputStream = context.contentResolver.openInputStream(uri)
         val tempFile = File.createTempFile("upload_", ".png", context.cacheDir)
         if (inputStream != null) {
@@ -253,7 +255,7 @@ class OfferRepositoryImpl(
                         offerTemplate="offerTemplate",
                         imageAppearance="imageAppearance",
                         heading=heading,
-                        discount=discount,
+                        discount=discount?:"",
                         brandName=brandName,
                         title=title,
                         description=description,
@@ -353,5 +355,15 @@ class OfferRepositoryImpl(
         } catch (e: Exception) {
             Result.Error("Failed to redeem offer: ${e.message}")
         }
+    }
+
+    override suspend fun getSubcategory(): Result<List<Subcategory>> {
+        val data=dataStoreManager.get_Vendor_Details()!!.category.subcategory
+        if(data.isEmpty())
+            return Result.Error("No SubCategory Found")
+        else{
+            return Result.Success(data)
+        }
+
     }
 }

@@ -5,5 +5,8 @@ data class SubscriptionX(
     val id: Int,
     val name: String?,
     val price: String?,
-    val time_period: String?
+    val time_period: String?,
+    val end_date:String?,
+    val start_date:String?,
+
 )

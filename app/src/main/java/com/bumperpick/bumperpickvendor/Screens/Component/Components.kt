@@ -112,6 +112,8 @@ import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.geometry.Rect
@@ -125,6 +127,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.bumperpick.bumperpickvendor.API.FinalModel.Media
+import com.bumperpick.bumperpickvendor.API.FinalModel.Subcategory
 import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailViewmodel
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi
 import org.koin.androidx.compose.koinViewModel
@@ -164,32 +167,75 @@ fun PrimaryButton(
  * Secondary action button with consistent styling
  */
 @Composable
+fun SignOutDialog(
+
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Sign Out",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Text(
+                text = "Are you sure you want to sign out?",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm()
+                    onDismiss()
+                }
+            ) {
+                Text(
+                    text = "Sign Out",
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+
+}
+
+@Composable
 fun SecondaryButton(
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    btnColor:Color= BtnColor.copy(alpha = 0.1f), textColor:Color= BtnColor,
+    modifier: Modifier=Modifier, horizontal_padding:Dp=16.dp,
+
     enabled: Boolean = true
 ) {
-    OutlinedButton(
-        onClick = onClick,
+    OutlinedButton (
+        onClick = { onClick() },
+        enabled=enabled,
         modifier = modifier
-            .fillMaxWidth()
-            .height(50.dp),
-        enabled = enabled,
-        border = BorderStroke(0.dp, Color.Transparent),
 
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = BtnColor,
-            containerColor = BtnColor.copy(alpha = 0.1f),
+            .fillMaxWidth()
+            .height(75.dp)
+            .padding( bottom = 20.dp, start =  horizontal_padding, end = 8.dp),
+
+        border = BorderStroke(0.dp, color = Color.Transparent),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = btnColor,
         ),
         shape = RoundedCornerShape(16.dp)
-    ) {
-        Text(
-            text = text,
-            fontSize = 16.sp,
-            fontFamily = satoshi_medium
 
-        )
+    ) {
+        Text(text, color = textColor, fontFamily = satoshi_regular, fontWeight = FontWeight.Bold, fontSize = 18.sp)
     }
 }
 @Composable
@@ -231,6 +277,81 @@ fun TextFieldView(
 
         )
     )
+}
+@Composable
+fun SubcategoryDropdown(
+    subcategories: List<Subcategory>,
+    selectedSubcategoryId: Int? = null,
+    onSubcategorySelected: (Int) -> Unit,
+    placeholder: String = "Select Subcategory...",
+    textStyle: TextStyle = LocalTextStyle.current,
+    modifier: Modifier = Modifier,
+    containerColor: Color = Color.White,
+    isEnabled: Boolean = true
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    // Find selected subcategory name
+    val selectedSubcategoryName = subcategories.find { it.id == selectedSubcategoryId }?.name ?: ""
+
+    Box(modifier = modifier) {
+        OutlinedTextField(
+            value = selectedSubcategoryName,
+            onValueChange = { }, // No direct text input
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    style = textStyle.copy(color = Color.Gray)
+                )
+            },
+            enabled = isEnabled,
+            readOnly = true, // Make it read-only so users can only select from dropdown
+            textStyle = textStyle,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = isEnabled) { expanded = true },
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = containerColor,
+                disabledTextColor = Color.Black,
+                focusedContainerColor = containerColor,
+                disabledContainerColor = containerColor,
+                cursorColor = BtnColor,
+                focusedBorderColor = BtnColor,
+                unfocusedBorderColor = Color.Gray,
+            ),
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (expanded) "Collapse" else "Expand",
+                    tint = Color.Gray,
+                    modifier = Modifier.clickable(enabled = isEnabled) { expanded = !expanded }
+                )
+            }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            subcategories.forEach { subcategory ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = subcategory.name,
+                            style = textStyle
+                        )
+                    },
+                    onClick = {
+                        onSubcategorySelected(subcategory.id)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -480,6 +601,7 @@ fun LocationCard(
 data class NavigationItem(
     val label: String,
     val icon: ImageVector? = null,
+    val icon_draw:Int?=null,
     val painter: Painter? = null,
     val contentDescription: String,
 )
@@ -509,6 +631,9 @@ fun BottomNavigationBar(
                                 contentDescription = item.contentDescription,
                                 tint = if (selectedTab == index) Color(0xFF3B82F6) else Color.Gray
                             )
+                        }
+                        item.icon_draw?.let {
+                            Icon(painter = painterResource(it), contentDescription = item.contentDescription, tint = if (selectedTab == index) Color(0xFF3B82F6) else Color.Gray, modifier = Modifier.size(30.dp))
                         }
                         item.painter?.let {
                             Icon(
@@ -1209,7 +1334,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                         .background(Color.White)
                         .align(Alignment.BottomStart)
                 ) {
-                    Text(text = offerModel.offerTag, color = Color.Black, fontSize = 14.sp, modifier = Modifier.padding(vertical = 6.dp, horizontal = 12.dp))
+                    Text(text = offerModel.offerTag?:"", color = Color.Black, fontSize = 14.sp, modifier = Modifier.padding(vertical = 6.dp, horizontal = 12.dp))
 
                 }
 
@@ -1223,7 +1348,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                             .background(color = Color.Gray.copy(0.3f), shape = RoundedCornerShape(8.dp))
                             .border(0.5.dp,Color.White, shape = RoundedCornerShape(8.dp)),
                     ){
-                        Icon(Icons.Outlined.Delete, contentDescription = null,modifier = Modifier.align(Alignment.Center)    .clickable { showBottomSheet(EditDelete.DELETE(offerModel.offerId)) }.padding(4.dp).size(26.dp), tint = Color.White)
+                        Icon(Icons.Outlined.Delete, contentDescription = null,modifier = Modifier.align(Alignment.Center)    .clickable { showBottomSheet(EditDelete.DELETE(offerModel.offerId?:"")) }.padding(4.dp).size(26.dp), tint = Color.White)
                     }
                 }
                 else{
@@ -1236,7 +1361,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                             .background(color = Color.Gray.copy(0.3f), shape = RoundedCornerShape(8.dp))
                             .border(0.5.dp,Color.White, shape = RoundedCornerShape(8.dp)),
                     ){
-                        Icon(Icons.Outlined.MoreVert, contentDescription = null,modifier = Modifier.align(Alignment.Center).clickable { showBottomSheet(EditDelete.EDIT(offerModel.offerId)) } .padding(4.dp).size(26.dp), tint = Color.White)
+                        Icon(Icons.Outlined.MoreVert, contentDescription = null,modifier = Modifier.align(Alignment.Center).clickable { showBottomSheet(EditDelete.EDIT(offerModel.offerId?:"")) } .padding(4.dp).size(26.dp), tint = Color.White)
                     }
                 }
 
@@ -1247,7 +1372,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
             Column(modifier = Modifier.padding(12.dp)) {
                 Spacer(Modifier.height(5.dp))
                 Text(
-                    text = offerModel.offerTitle,
+                    text = offerModel.offerTitle?:"",
                     fontSize = 22.sp,
                     fontFamily = satoshi_regular,
                     fontWeight = FontWeight.SemiBold,
@@ -1255,7 +1380,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = offerModel.offerDescription,
+                    text = offerModel.offerDescription?:"",
                     fontSize = 14.sp,
                     fontFamily = satoshi_regular,
                 )
@@ -1301,7 +1426,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = offerModel.discount,
+                            text = offerModel.discount?:"",
                             fontSize = 15.sp,
                             fontFamily = satoshi_regular,
                             fontWeight = FontWeight.SemiBold
@@ -1314,7 +1439,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                         shape = RoundedCornerShape(16.dp),
                     ) {
                         Text(
-                            text = offerModel.active,
+                            text = offerModel.active?:"",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Black,
@@ -1589,6 +1714,175 @@ fun EditDeleteBottomSheet(
                 )
             },
             title = "Delete offer",
+
+            onClick = onDeleteClick,
+            titleColor = Color.Red
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+        ButtonView(text = "Cancel", onClick = onDismiss,)
+    }
+}
+@Composable
+fun Campaign_EditDeleteBottomSheet(
+    onEditClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
+    onDismiss: () -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Color.White,
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            )
+            .padding(bottom = 16.dp)
+    ) {
+        // Handle bar for visual feedback
+        Box(
+            modifier = Modifier
+                .width(40.dp)
+                .height(4.dp)
+                .background(
+                    Color.Gray.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(2.dp)
+                )
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Header
+        Text(
+            text = "Manage Campaign",
+            fontSize = 20.sp,
+            fontFamily = satoshi_medium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Edit option
+        BottomSheetItem(
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.pencil_svgrepo_com),
+                    contentDescription = "Edit",
+                    modifier = Modifier.size(24.dp),
+                    tint = BtnColor
+                )
+            },
+            title = "Edit Campaign Details",
+
+            onClick = onEditClick
+        )
+
+        // Divider
+        Divider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = Color.Gray.copy(alpha = 0.2f),
+            thickness = 0.5.dp
+        )
+
+        // Delete option
+        BottomSheetItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "Delete",
+                    modifier = Modifier.size(24.dp),
+                    tint = BtnColor
+                )
+            },
+            title = "Delete Campaign",
+
+            onClick = onDeleteClick,
+            titleColor = Color.Red
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+        ButtonView(text = "Cancel", onClick = onDismiss,)
+    }
+}
+
+@Composable
+fun Event_EditDeleteBottomSheet(
+    onEditClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
+    onDismiss: () -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Color.White,
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            )
+            .padding(bottom = 16.dp)
+    ) {
+        // Handle bar for visual feedback
+        Box(
+            modifier = Modifier
+                .width(40.dp)
+                .height(4.dp)
+                .background(
+                    Color.Gray.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(2.dp)
+                )
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Header
+        Text(
+            text = "Manage Event",
+            fontSize = 20.sp,
+            fontFamily = satoshi_medium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Edit option
+        BottomSheetItem(
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.pencil_svgrepo_com),
+                    contentDescription = "Edit",
+                    modifier = Modifier.size(24.dp),
+                    tint = BtnColor
+                )
+            },
+            title = "Edit Event Details",
+
+            onClick = onEditClick
+        )
+
+        // Divider
+        Divider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = Color.Gray.copy(alpha = 0.2f),
+            thickness = 0.5.dp
+        )
+
+        // Delete option
+        BottomSheetItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "Delete",
+                    modifier = Modifier.size(24.dp),
+                    tint = BtnColor
+                )
+            },
+            title = "Delete Event",
 
             onClick = onDeleteClick,
             titleColor = Color.Red

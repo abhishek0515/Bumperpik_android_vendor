@@ -32,9 +32,9 @@ data class Vendor_Details(
     val GstNumber:String="",
     val GstPicUrl: File?=null,
     val userImage:File?=null,
-    val openingTime:String="",
-    val closingTime:String="",
-    val url_profile_image:String=""
+    val openingTime:String?="",
+    val closingTime:String?="",
+    val url_profile_image:String?=""
 
 )
 sealed class GoogleSignInState {
@@ -54,7 +54,6 @@ enum class BillingCycle(val displayName: String) {
 }
 enum class MarketingOption(val title: String) {
     OFFERS("Offers"),
-    CUSTOMER_ENGAGEMENT("Customer engagement"),
     CONTEST_FOR_CUSTOMERS("Contest for customers"),
     SCRATCH_AND_WIN("Scratch & win"),
     LUCKY_DRAW("Lucky draw"),
@@ -101,6 +100,7 @@ data class OfferModel(
     val discount:TextType=TextType(text = ""),
     val brandName:TextType?=null,
     val logo:Uri?=null,
+    val subcat_id:Int?=null,
     val offerStartDate:String?=null,
     val offerEndDate:String?=null,
     val medialList:ArrayList<Uri> = ArrayList(),
@@ -114,19 +114,19 @@ enum class OfferValidation{
     Valid,Expired
 }
 data class HomeOffer(
-    val offerId:String="",
+    val offerId:String?="",
     val Type:MarketingOption?=null,
     val offerValid:OfferValidation?=null,
     val Media_list:List<String> = emptyList(),
-    val discount:String="",
-    val startDate:String="",
+    val discount:String?="",
+    val startDate:String?="",
     val media:List<Media> =ArrayList(),
-    val approval:String="",
-    val endDate:String="",
-    val active:String="",
-    val offerTitle:String="",
+    val approval:String?="",
+    val endDate:String?="",
+    val active:String?="",
+    val offerTitle:String?="",
     val brand_logo_url:String?="",
-    val offerTag:String="",
-    val offerDescription:String="",
-    val termsAndCondition:String="",
+    val offerTag:String?="",
+    val offerDescription:String?="",
+    val termsAndCondition:String?="",
 )

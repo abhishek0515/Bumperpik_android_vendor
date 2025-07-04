@@ -8,9 +8,11 @@ data class DataXXXXXX(
     val establishment_name: String,
     val gst_number: String?,
     val id: Int,
+    val start_time:String?,
+    val close_time:String?,
     val image_url: String,
     val name: String,
     val outlet_address: String,
     val phone_number: String,
-    val subscription: SubscriptionX
+    val subscription: DataXXXX
 )

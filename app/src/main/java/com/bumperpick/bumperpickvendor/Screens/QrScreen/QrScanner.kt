@@ -368,7 +368,9 @@ fun BrandCard(offer: Offer) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        ImageSliderItem(imageUrl = offer.brand_logo_url)
+        if(offer.brand_logo_url!=null) {
+            ImageSliderItem(imageUrl = offer.brand_logo_url)
+        }
     }
 }
 

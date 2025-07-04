@@ -93,6 +93,7 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
     val vendorDetailViewmodel= koinViewModel<VendorDetailViewmodel>()
     val savedetail=vendorDetailViewmodel.savedVendorDetail.collectAsState()
     val delete by viewmodel.delete.collectAsState()
+    val offer by viewmodel.listOfOffers.collectAsState()
     LaunchedEffect(Unit) {
         vendorDetailViewmodel.getSavedVendorDetail()
     }
@@ -104,7 +105,7 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
     var showDeleteBottomSheet by remember { mutableStateOf(false) }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val context= LocalContext.current
-    val offer by viewmodel.listOfOffers.collectAsState()
+
     LaunchedEffect(selectedId) {  println("selectedId $selectedId") }
     LaunchedEffect(delete) {
         if(delete.isNotEmpty()){
@@ -113,11 +114,11 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
         }
     }
    if(showDeleteDialog){
-       DeleteExpiredOfferDialog(true, onDismiss = {showDeleteDialog=false}) {
+       DeleteExpiredOfferDialog(true, onDismiss = {showDeleteDialog=false}, onConfirmDelete = {
            showDeleteDialog=false
            viewmodel.deleteOffer(selectedId,"Delete Expired Offer")
            Toast.makeText(context,"Offer Deleted",Toast.LENGTH_SHORT).show()
-       }
+       })
    }
 
     // Compute list directly based on offer and selectedTabIndex
@@ -266,7 +267,7 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
                 HomeOfferView(it, showBottomSheet = {
                     when(it){
                         is EditDelete.DELETE ->{
-                showDeleteDialog=true
+                           showDeleteDialog=true
                             selectedId=it.offerId
                         }
                         is EditDelete.EDIT -> {
@@ -288,21 +289,23 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
 fun DeleteExpiredOfferDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
-    onConfirmDelete: () -> Unit
+    onConfirmDelete: () -> Unit,
+    name:String="Offer"
 ) {
     if (showDialog) {
         AlertDialog(
+            containerColor = Color.White,
             onDismissRequest = onDismiss,
             title = {
                 Text(
-                    text = "Delete Expired Offer?",
+                    text = "Delete  $name?",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
             },
             text = {
                 Text(
-                    text = "Are you sure you want to delete this expired offer? This action cannot be undone.",
+                    text = "Are you sure you want to delete this $name? This action cannot be undone.",
                     fontSize = 16.sp
                 )
             },

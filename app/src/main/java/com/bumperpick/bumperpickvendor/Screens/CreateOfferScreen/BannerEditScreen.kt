@@ -76,11 +76,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.bumperpick.bumperpickvendor.API.FinalModel.Subcategory
 import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Repository.OfferTemplateType
 import com.bumperpick.bumperpickvendor.Repository.TextType
 import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.SimpleImagePicker
+import com.bumperpick.bumperpickvendor.Screens.Component.SubcategoryDropdown
 import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey
@@ -96,11 +98,15 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
     val user_choosed_banner by viewmodel.user_choosed_banner.collectAsState()
     val choosed_Template by viewmodel.choosed_Template.collectAsState()
     val offerDetails by viewmodel.offerDetails.collectAsState()
+    val subcategories by viewmodel.subCatList.collectAsState()
     var showStartCalendar by remember { mutableStateOf(false) }
     var  showEndCalendar by remember { mutableStateOf(false) }
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    LaunchedEffect(Unit) {
+        viewmodel.getSubCategory()
+    }
     BackHandler {
         navController.navigate(CreateOfferScreenViews.SelectBanner.route){
             popUpTo(CreateOfferScreenViews.SelectBanner.route){
@@ -183,10 +189,28 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
                             .fillMaxWidth(),
                         singleLine = true,
                     )
+                    Text(
+                        text = "Offer Sub-Category",
+                        fontSize = 14.sp,
+                        fontFamily = satoshi_regular,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+
+                        )
+                    Spacer(Modifier.height(4.dp))
+                    SubcategoryDropdown(
+                        subcategories =subcategories ,
+                        selectedSubcategoryId = offerDetails.subcat_id,
+                        onSubcategorySelected = {
+                            viewmodel.updateSubCat(it)
+                        }
+
+                        )
+
 
                     Spacer(Modifier.height(10.dp))
                 } else {
-                    choosed_Template?.let { EditTemplate(viewmodel, it) }
+                    choosed_Template?.let { EditTemplate(viewmodel, it,subcategories) }
                 }
 
 
@@ -265,7 +289,7 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
 }
 
 @Composable
-fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplateType) {
+fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplateType,subcategories:List<Subcategory>) {
     val templateData by viewmodel.templateData.collectAsState()
     val offerDetails by viewmodel.offerDetails.collectAsState()
     var brandnameenabled by remember {  mutableStateOf(false)}
@@ -370,6 +394,24 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
                 .fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "Offer Sub-Category",
+            fontSize = 14.sp,
+            fontFamily = satoshi_regular,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+
+            )
+        Spacer(Modifier.height(4.dp))
+        SubcategoryDropdown(
+            subcategories = subcategories,
+            selectedSubcategoryId = offerDetails.subcat_id,
+            onSubcategorySelected = {
+                viewmodel.updateSubCat(it)
+            }
+
         )
 
         Spacer(modifier = Modifier.height(12.dp))

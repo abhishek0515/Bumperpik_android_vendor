@@ -187,7 +187,7 @@ fun VendorDetailPage(isMobile:Boolean,mobile:String,viewModel: VendorDetailViewm
                     )
                 }
                 composable(VendorDetailScreen.SubscriptionScreen.route){
-                    SubscriptionPage(gotoHome = gotoHome, onClick = {navController.popBackStack()})
+                    SubscriptionPage(gotoHome = gotoHome, onBackClick = {navController.popBackStack()})
                 }
             }
         }

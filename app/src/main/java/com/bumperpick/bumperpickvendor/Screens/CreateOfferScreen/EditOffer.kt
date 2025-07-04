@@ -160,7 +160,7 @@ fun ProductDetailsSection(
             offerEndDate = offerDetail.endDate,
             onStartClick = { showStartCalendar = true },
             onEndClick = {
-                if (offerDetail.startDate.isEmpty()) {
+                if (offerDetail.startDate!!.isEmpty()) {
                     viewmodel.showError("Please choose start date first")
                 } else {
                     showEndCalendar = true

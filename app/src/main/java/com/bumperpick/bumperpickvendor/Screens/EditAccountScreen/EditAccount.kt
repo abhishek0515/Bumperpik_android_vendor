@@ -1,6 +1,8 @@
 package com.bumperpick.bumperpickvendor.Screens.EditAccountScreen
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -76,11 +78,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-@Preview
-@Composable
-fun EditAccontPreview(){
-    EditAccount(onBackClick = {})
-}
 fun getFileFromUri(context: Context, uri: android.net.Uri): File? {
     val inputStream = context.contentResolver.openInputStream(uri) ?: return null
     val file = File(context.cacheDir, "picked_image_${System.currentTimeMillis()}.jpg")
@@ -414,15 +411,19 @@ fun EditAccount(
                 ) {
                     viewModel.saveProfile(
                         onSuccess = { updatedVendorDetails ->
-                            // Handle success - you might want to show a toast or navigate back
-                            Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                            onBackClick()
+                            Handler(Looper.getMainLooper()).post {
+                                Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                                onBackClick()
+                            }
                         },
                         onError = { errorMessage ->
-                            // Handle error - show toast or snackbar
-                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            Handler(Looper.getMainLooper()).post {
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     )
+
+
                 }
             }
         }
@@ -482,7 +483,7 @@ fun TimePickerDialog(
                     calendar.set(Calendar.HOUR_OF_DAY, hour)
                     calendar.set(Calendar.MINUTE, minute)
 
-                    val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                    val timeFormat = SimpleDateFormat("hh:mm a", Locale.US)
                     val formattedTime = timeFormat.format(calendar.time)
                     onTimeSelected(formattedTime)
                 }
