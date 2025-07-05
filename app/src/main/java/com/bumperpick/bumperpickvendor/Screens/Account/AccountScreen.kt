@@ -357,7 +357,7 @@ fun AccountScreen(onClick:(AccountClick)->Unit,viewmodel: AccountViewmodel= koin
                 Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "Contests", color = Color.Black, fontSize = 16.sp,)
+                    Text(text = "Ads and Banner", color = Color.Black, fontSize = 16.sp,)
                 }
 
                 Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)

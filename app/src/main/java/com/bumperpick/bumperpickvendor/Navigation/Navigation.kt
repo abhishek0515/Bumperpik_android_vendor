@@ -177,6 +177,8 @@ fun AppNavigation() {
                                 navController.navigate(Screen.AddEvent.route)
 
                             }
+
+                            MarketingOption.ADS -> {}
                         }
                        
 
@@ -224,6 +226,8 @@ fun AppNavigation() {
 
 
                                   }
+
+                                  MarketingOption.ADS -> {}
                               }
                           }
                       }
