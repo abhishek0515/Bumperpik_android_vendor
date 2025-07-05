@@ -1,5 +1,6 @@
 package com.bumperpick.bumperpickvendor.Navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -20,6 +21,11 @@ import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailPage
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import com.bumperpick.bumperpickvendor.Screens.Account.AccountClick
+import com.bumperpick.bumperpickvendor.Screens.Ads.AdsScreen
+import com.bumperpick.bumperpickvendor.Screens.Ads.AdsSubscriptionScreen
+import com.bumperpick.bumperpickvendor.Screens.Ads.CreateAd
+import com.bumperpick.bumperpickvendor.Screens.Ads.CreateAdScreenViews
+import com.bumperpick.bumperpickvendor.Screens.Ads.adsEditScreen
 import com.bumperpick.bumperpickvendor.Screens.Campaigns.CreateCampaign
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOffer
 import com.bumperpick.bumperpickvendor.Screens.EditAccountScreen.EditAccount
@@ -178,7 +184,6 @@ fun AppNavigation() {
 
                             }
 
-                            MarketingOption.ADS -> {}
                         }
                        
 
@@ -227,8 +232,18 @@ fun AppNavigation() {
 
                                   }
 
-                                  MarketingOption.ADS -> {}
                               }
+                          }
+
+                          is AccountClick.AdsClick -> {
+                              val gotosub=accountclick.gotosub
+                              if (gotosub){
+                                  navController.navigate(Screen.AdsSubscription.route)
+                              }
+                              else{
+                                  navController.navigate(Screen.AdsScreen.route)
+                              }
+
                           }
                       }
                   }
@@ -333,6 +348,44 @@ fun AppNavigation() {
             EditEventScreen2(eventId=eventId, onBackClick = {navController.popBackStack()})
         }
 
+        composable(Screen.AdsEdit.route,
+            arguments = listOf(navArgument(Screen.eventId, builder = {type=NavType.StringType}))
+        ){navBackStackEntry ->
+            val adId=navBackStackEntry.arguments?.getString(Screen.eventId)
+            adsEditScreen(
+                onBack = {navController.popBackStack()},
+                adsId = adId?:"",
+            )
+
+        }
+
+        composable(Screen.Add_AD.route){
+            CreateAd(onBack = {navController.popBackStack()})
+        }
+        composable(Screen.AdsScreen.route){
+            AdsScreen(onBackClick = {navController.popBackStack()},
+                EditAd = {
+                    Log.d("EDITAD",it)
+                    navController.navigate(Screen.AdsEdit.withAdId(it))},
+                Add_Ad = {
+                    navController.navigate(Screen.Add_AD.route)
+                })
+        }
+        composable(Screen.AdsSubscription.route) {
+            AdsSubscriptionScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                gotoAds = {
+                    navController.navigate(Screen.AdsScreen.route) {
+                        // Pop the current AdsSubscription screen from the stack
+                        popUpTo(Screen.AdsSubscription.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
 
 
 

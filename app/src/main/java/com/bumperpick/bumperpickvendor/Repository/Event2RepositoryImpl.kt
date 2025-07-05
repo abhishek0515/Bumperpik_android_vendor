@@ -17,6 +17,7 @@ import com.bumperpick.bumperpickvendor.Screens.Event2.CreateEventModel
 
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
@@ -116,7 +117,9 @@ class EventRepository2Impl(val dataStoreManager: DataStoreManager,val apiService
         val map = mutableMapOf<String, RequestBody>()
         val token=dataStoreManager.getToken()!!.token
         val vendorid=dataStoreManager.get_Vendor_Details()!!.vendor_id
-        val banner = uriToFile(context, eventModel.bannerImage!!)?.toMultipartPart(partName = "banner_image")
+        val banner = eventModel.bannerImage?.let {
+            uriToFile(context, it).toMultipartPart(partName = "banner_image")
+        }
         map["title"] =  eventModel.title.toString().toRequestBody("text/plain".toMediaType())
         map["description"] = eventModel.description.toString().toRequestBody("text/plain".toMediaType())
         map["address"] = eventModel.address.toString().toRequestBody("text/plain".toMediaType())
@@ -126,7 +129,13 @@ class EventRepository2Impl(val dataStoreManager: DataStoreManager,val apiService
         map["facebook_link"]=eventModel.facebookLiveLink.toString().toRequestBody("text/plain".toMediaType())
         map["youtube_link"]=eventModel.youtubeLiveLink.toString().toRequestBody("text/plain".toMediaType())
         map["vendor_id"]=vendorid.toString().toRequestBody("text/plain".toMediaType())
-        val event= safeApiCall(api = {apiService.eventsUpdate(eventModel.id,map,banner!!)},
+        val event= safeApiCall(api = {
+            if (banner != null) {
+                apiService.eventsUpdate(eventModel.id,map,banner)
+            }
+            else apiService.eventsUpdateWithoutBanner(eventModel.id,map)
+
+        },
             errorBodyParser = {
                 try {
 

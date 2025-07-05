@@ -5,6 +5,8 @@ import DataStoreManager
 import com.bumperpick.bumperpickvendor.API.FinalModel.Feature
 import com.bumperpick.bumperpickvendor.API.FinalModel.FeatureDeserializer
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
+import com.bumperpick.bumperpickvendor.Repository.AdsRepository
+import com.bumperpick.bumperpickvendor.Repository.AdsRepositoryImpl
 import com.bumperpick.bumperpickvendor.Repository.AuthRepository
 import com.bumperpick.bumperpickvendor.Repository.AuthRepositoryImpl
 import com.bumperpick.bumperpickvendor.Repository.Event2Repository
@@ -18,6 +20,7 @@ import com.bumperpick.bumperpickvendor.Repository.VendorRepositoryImpl
 import com.bumperpick.bumperpickvendor.Repository.offerRepository
 
 import com.bumperpick.bumperpickvendor.Screens.Account.AccountViewmodel
+import com.bumperpick.bumperpickvendor.Screens.Ads.AdsViewModel
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CreateOfferViewmodel
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOfferViewmodel
 import com.bumperpick.bumperpickvendor.Screens.EditAccountScreen.EditAccountViewModel
@@ -83,6 +86,7 @@ val appModule = module {
     single <offerRepository>{ OfferRepositoryImpl(get(),get(),get()) }
     single <EventRepository>{EventRepositoryImpl(get(),get(),get())}
     single <Event2Repository>{ EventRepository2Impl(get(),get(),get()) }
+    single <AdsRepository>{ AdsRepositoryImpl(get(),get()) }
     // ViewModel
     viewModel { SplashViewmodel(get()) }
     viewModel { LoginViewmodel(get(),get()) }
@@ -98,6 +102,8 @@ val appModule = module {
     viewModel { EditAccountViewModel(get()) }
     viewModel { EventsViewmodel(get()) }
     viewModel { Events2Viewmodel(get())}
+    viewModel { AdsViewModel(get()) }
+
 
 
 

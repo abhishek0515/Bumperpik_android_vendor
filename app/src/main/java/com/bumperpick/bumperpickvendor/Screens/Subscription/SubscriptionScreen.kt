@@ -139,11 +139,11 @@ fun SubscriptionPage(
                         onRetry = { viewModel.fetchSubscription() }
                     )
                 }
-                SubscriptionViewModel.UiState.Idle -> TODO()
+                SubscriptionViewModel.UiState.Idle -> {}
                 SubscriptionViewModel.UiState.Loading -> {
                     LoadingContent()
                 }
-                is SubscriptionViewModel.UiState.Success<*> -> {
+                is SubscriptionViewModel.UiState.Success -> {
                     val data = (subscriptionState as SubscriptionViewModel.UiState.Success<newsubscriptionModel>).data
                     val planGroups = data.data.getAllPlans()
 
@@ -180,7 +180,7 @@ fun SubscriptionPage(
 }
 
 @Composable
-private fun SimpleHeader(onBackClick: () -> Unit) {
+ fun SimpleHeader(onBackClick: () -> Unit,text:String="Choose subscription") {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,7 +199,7 @@ private fun SimpleHeader(onBackClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
-            text = "Choose subscription",
+            text = text,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
@@ -208,7 +208,7 @@ private fun SimpleHeader(onBackClick: () -> Unit) {
 }
 
 @Composable
-private fun LoadingContent() {
+fun LoadingContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -220,7 +220,7 @@ private fun LoadingContent() {
 }
 
 @Composable
-private fun ErrorContent(
+ fun ErrorContent(
     message: String,
     onRetry: () -> Unit
 ) {

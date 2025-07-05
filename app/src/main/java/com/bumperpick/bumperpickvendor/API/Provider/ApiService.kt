@@ -1,5 +1,6 @@
 package com.bumperpick.bumperpickvendor.API.Provider
 
+import com.bumperpick.bumperpickvendor.API.FinalModel.AdsDetailModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.EventModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.EventRegisterModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.HomeOfferModel
@@ -8,11 +9,14 @@ import com.bumperpick.bumperpickvendor.API.FinalModel.NewEventmodel
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.VendorLoginModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.ads_package_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.subs_ads_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.update_profile_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.vendorAdsModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.vendor_details_model
 import com.bumperpick.bumperpickvendor.API.Model.Category_Model
 import com.bumperpick.bumperpickvendor.API.Model.success_model
@@ -142,10 +146,21 @@ interface ApiService {
     @FormUrlEncoded
     suspend fun campaigns_destroy(@Path("id")id:String,@Field("token")token:String):Response<success_model>
 
-    @POST("api/vendor/campaigns/update/{id}")
     @Multipart
-    suspend fun campaignUpdate(@Path("id")id:String, @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>, @Part banner:MultipartBody.Part,):Response<success_model>
+    @POST("api/vendor/campaigns/update/{id}")
+    suspend fun campaignUpdate(
+        @Path("id") id: String,
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part banner: MultipartBody.Part
+    ): Response<success_model>
 
+    // Optional one without banner:
+    @Multipart
+    @POST("api/vendor/campaigns/update/{id}")
+    suspend fun campaignUpdateWithoutBanner(
+        @Path("id") id: String,
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>
+    ): Response<success_model>
 
 
     @GET("api/vendor/events")
@@ -168,8 +183,47 @@ interface ApiService {
     @Multipart
     suspend fun eventsUpdate(@Path("id")id:String, @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>, @Part banner:MultipartBody.Part,):Response<success_model>
 
+    @POST("api/vendor/events/update/{id}")
+    @Multipart
+    suspend fun eventsUpdateWithoutBanner(@Path("id")id:String, @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>):Response<success_model>
+
     @POST("api/vendor/events/destroy/{id}")
     @FormUrlEncoded
     suspend fun events_destroy(@Path("id")id:String,@Field("token")token:String):Response<success_model>
+
+
+    @GET("api/ads-packages")
+    suspend fun adsPackages():Response<ads_package_model>
+
+
+    @FormUrlEncoded
+    @POST("api/vendor/subscribe-ads-subscription")
+    suspend fun subscribePackage(@Field("token")token: String,
+                                 @Field("ads_subscription_id")ads_subscription_id:String,
+                                 @Field("payment_transaction_id")payment_transaction_id:String):Response<subs_ads_model>
+
+
+    @Multipart
+    @POST("api/vendor/vendor-ads/store")
+    suspend fun createads(   @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
+                             @Part banner:MultipartBody.Part,):Response<success_model>
+
+    @GET("api/vendor/vendor-ads")
+    suspend fun vendor_ads(@Query("token")token: String):Response<vendorAdsModel>
+
+    @GET("api/vendor/vendor-ads/show/{id}")
+    suspend fun vendor_ads_dfetail(@Path("id")id: String,@Query("token")token: String,):Response<AdsDetailModel>
+
+    @Multipart
+    @POST("api/vendor/vendor-ads/update/{id}")
+    suspend fun vendors_ads_update(@Path("id")id:String,@Query("token")token: String,
+                                   @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
+                                   @Part banner:MultipartBody.Part):Response<success_model>
+
+    @GET("api/vendor/vendor-ads/destroy/{id}")
+    suspend fun ads_dewstroy(@Path("id")id:String,@Query("token")token: String,):Response<success_model>
+
+
+
 
 }

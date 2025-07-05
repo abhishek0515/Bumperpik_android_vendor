@@ -81,6 +81,7 @@ import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Repository.OfferValidation
 import com.bumperpick.bumperpickvendor.Screens.Component.EditDelete
 import com.bumperpick.bumperpickvendor.Screens.Component.Event_EditDeleteBottomSheet
+import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
 import com.bumperpick.bumperpickvendor.Screens.OfferPage.DeleteExpiredOfferDialog
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
@@ -125,7 +126,7 @@ fun EventScreen2(
         DeleteExpiredOfferDialog(true, onDismiss = {showDeleteDialog=false}, onConfirmDelete ={
             showDeleteDialog=false
             viewmodel.deleteOffer(selectedId,"Delete Expired Event")
-            Toast.makeText(context,"Event2 Deleted", Toast.LENGTH_SHORT).show()
+
         }, name = "Event" )
     }
 
@@ -573,7 +574,7 @@ private fun EventDetails(
         // Event Info
         InfoRow(
             icon = painterResource(R.drawable.calendar_alt),
-            text = "Start Date: $startDate",
+            text = "Start Date: ${formatDate(startDate)}",
             isExpired = isExpired
         )
 

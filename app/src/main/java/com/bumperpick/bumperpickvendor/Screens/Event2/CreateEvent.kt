@@ -253,38 +253,38 @@ fun Event2PreviewScreen(
 
             item {
                 LabelledSection(label = "Title") {
-                    Text(Event2Details.title ?: "", fontSize = 8.sp, fontFamily = satoshi_medium)
+                    Text(Event2Details.title ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
                 LabelledSection(label = "Start Date") {
-                    Text(Event2Details.startDate ?: "", fontSize = 8.sp, fontFamily = satoshi_medium)
+                    Text(Event2Details.startDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
                 LabelledSection(label = "Start Time") {
-                    Text(Event2Details.startTime ?: "", fontSize = 8.sp, fontFamily = satoshi_medium)
+                    Text(Event2Details.startTime ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
                 LabelledSection(label = "Facebook live") {
-                    Text(Event2Details.facebookLiveLink?: "", fontSize = 8.sp, fontFamily = satoshi_medium)
+                    Text(Event2Details.facebookLiveLink?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
                 LabelledSection(label = "Youtube live") {
-                    Text(Event2Details.youtubeLiveLink ?: "", fontSize = 8.sp, fontFamily = satoshi_medium)
+                    Text(Event2Details.youtubeLiveLink ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
                 LabelledSection(label = "Event Address") {
-                    Text(Event2Details.address ?: "", fontSize = 8.sp, fontFamily = satoshi_medium)
+                    Text(Event2Details.address ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
 
             item {
                 LabelledSection(label = "Event Description") {
-                    Text(Event2Details.description ?: "", fontSize = 8.sp, fontFamily = satoshi_medium)
+                    Text(Event2Details.description ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
 

@@ -46,12 +46,16 @@ fun prepareImageParts(images: List<File>): List<MultipartBody.Part> {
         MultipartBody.Part.createFormData("media[]", file.name, requestFile)
     }
 }
-fun File.toMultipartPart(
-    partName: String = "file",
-    contentType: String = "application/x-www-form-urlencoded"
-): MultipartBody.Part {
-    val requestBody = this.asRequestBody(contentType.toMediaTypeOrNull())
-    return MultipartBody.Part.createFormData(partName, this.name, requestBody)
+fun File.toMultipartPart(partName: String): MultipartBody.Part {
+    val mediaType = when (extension.lowercase()) {
+        "jpg", "jpeg" -> "image/jpeg"
+        "png" -> "image/png"
+        "pdf" -> "application/pdf"
+        else -> "application/octet-stream"
+    }.toMediaTypeOrNull()
+
+    val requestFile = this.asRequestBody(mediaType)
+    return MultipartBody.Part.createFormData(partName, name, requestFile)
 }
 
 fun String.toPlainTextRequestBody(): RequestBody =

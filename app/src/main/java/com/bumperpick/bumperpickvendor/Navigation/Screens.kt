@@ -56,11 +56,22 @@ sealed class Screen(val route: String) {
 
     object AddEvent:Screen("addEvent")
     object Event:Screen("event")
+    object AdsSubscription:Screen("AdsSubs")
+    object AdsScreen:Screen("AdsScreen")
+    object Add_AD:Screen("addAD")
+    object AdsEdit:Screen("AdsEditScreen/{$eventId}"){
+        fun withAdId(adId:String):String{
+            return "AdsEditScreen/$adId"
+        }
+    }
+
     object EventEdit:Screen("eventDetail/{$eventId}"){
         fun withEventId(eventId:String):String{
             return "eventDetail/$eventId"
         }
     }
+
+
 
 }
 

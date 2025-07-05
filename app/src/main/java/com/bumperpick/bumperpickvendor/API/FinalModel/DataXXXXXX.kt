@@ -1,5 +1,7 @@
 package com.bumperpick.bumperpickvendor.API.FinalModel
 
+import com.google.gson.annotations.SerializedName
+
 data class DataXXXXXX(
     val brand_name: String,
     val category: String,
@@ -14,5 +16,8 @@ data class DataXXXXXX(
     val name: String,
     val outlet_address: String,
     val phone_number: String,
-    val subscription: DataXXXX
+    @SerializedName("subscription")
+    val subscription: DataXXXX?=null,
+    @SerializedName("adsSubscription")
+    val adsSubscription:AdsSubscription?=null
 )

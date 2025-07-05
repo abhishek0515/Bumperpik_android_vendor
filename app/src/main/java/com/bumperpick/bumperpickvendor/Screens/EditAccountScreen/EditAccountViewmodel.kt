@@ -52,8 +52,8 @@ class EditAccountViewModel(val vendorRepository: VendorRepository): ViewModel() 
                         Outlet_Address = vd.outlet_address,
                         GstNumber = vd.gst_number?:"",
                         GstPicUrl = null,
-                        openingTime = "",
-                        closingTime = "",
+                        openingTime = vd.start_time,
+                        closingTime = vd.close_time,
                         url_profile_image = vd.image_url
                     )
                     initializeWithVendorDetails(vendorDetails)

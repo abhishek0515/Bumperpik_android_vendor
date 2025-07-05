@@ -1,6 +1,9 @@
-package com.bumperpick.bumperpickvendor.Screens.Campaigns
+package com.bumperpick.bumperpickvendor.Screens.Ads
+
+import androidx.compose.runtime.Composable
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -29,7 +31,6 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,8 +40,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -48,16 +49,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.bumperpick.bumperpickvendor.Screens.Component.ButtonView
-import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.SecondaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.SimpleImagePicker
-import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CalendarBottomSheet
-import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CreateOfferScreenViews
-import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditableTextTypeView
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.ImageCardFromUri
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.OfferDateSelector
-import com.bumperpick.bumperpickvendor.Screens.Events.EventsViewmodel
+import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
@@ -66,40 +63,48 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
-
-sealed class CreateCampaignScreenViews(val route:String){
-    object CreateCampaign:CreateCampaignScreenViews("create_Campaign")
-    object CampaignPreview:CreateCampaignScreenViews("Campaign_preview")
+sealed class CreateAdScreenViews(val route: String) {
+    object CreateAd : CreateAdScreenViews("create_ad")
+    object AdPreview : CreateAdScreenViews("ad_preview")
 }
+
 @Composable
-fun CreateCampaign(
-    onBack:()->Unit,
-    viewmodel: EventsViewmodel= koinViewModel()
-){
-
-    val navController= rememberNavController()
-    val error by viewmodel.error.collectAsState()
+fun CreateAd(
+    onBack: () -> Unit,
+    viewmodel: AdsViewModel = koinViewModel()
+) {
+    val navController = rememberNavController()
+    val createAdsUiState by viewmodel.createAdsUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    BackHandler { onBack() }
-    LaunchedEffect(error) {
-        if (error.isNotEmpty()) {
-            val result = snackbarHostState.showSnackbar(
-                message = error,
-                actionLabel = "OK",
-                withDismissAction = true
-            )
-            when (result) {
-                SnackbarResult.ActionPerformed -> {
-                    viewmodel.clearError()
-                }
-                SnackbarResult.Dismissed -> {
-                    viewmodel.clearError()
 
+    BackHandler { onBack() }
+
+    // Handle error states
+    LaunchedEffect(createAdsUiState) {
+        when (createAdsUiState) {
+            is UiState.Error -> {
+                val result = snackbarHostState.showSnackbar(
+                    message = (createAdsUiState as UiState.Error).message,
+                    actionLabel = "OK",
+                    withDismissAction = true
+                )
+                when (result) {
+                    SnackbarResult.ActionPerformed -> {
+                        // Handle action if needed
+                    }
+                    SnackbarResult.Dismissed -> {
+                        // Handle dismissal if needed
+                    }
                 }
             }
+            is UiState.Success -> {
+                // Ad created successfully, navigate back
+                onBack()
+            }
+            else -> {}
         }
     }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = grey,
@@ -122,61 +127,58 @@ fun CreateCampaign(
                     ) {
                         Text(text = data.visuals.message)
                     }
-                })
+                }
+            )
         },
-    )
-     {
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues = it)){
-            NavHost (navController=navController,
-                startDestination = CreateCampaignScreenViews.CreateCampaign.route,
-                modifier = Modifier.fillMaxSize()){
-
-                composable(CreateCampaignScreenViews.CreateCampaign.route){
-                    CreateCampaignScreen(navController,viewmodel)
+    ) {
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues = it)) {
+            NavHost(
+                navController = navController,
+                startDestination = CreateAdScreenViews.CreateAd.route,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                composable(CreateAdScreenViews.CreateAd.route) {
+                    CreateAdScreen(navController, viewmodel)
                 }
-                composable(CreateCampaignScreenViews.CampaignPreview.route){
-                    CampaignPreviewScreen(navController, viewmodel = viewmodel, onCampaignDone = onBack)
+                composable(CreateAdScreenViews.AdPreview.route) {
+                    AdPreviewScreen(navController, viewmodel = viewmodel, onAdDone = onBack)
                 }
-
             }
         }
-     }
-
-
-
-
-
-
+    }
 }
 
 @Composable
-fun CampaignPreviewScreen(
+fun AdPreviewScreen(
     navController: NavController,
-    onCampaignDone: () -> Unit,
-    viewmodel: EventsViewmodel
+    onAdDone: () -> Unit,
+    viewmodel: AdsViewModel
 ) {
-    val CampaignDetails by viewmodel.eventDetails.collectAsState()
-    val loading by viewmodel.loading.collectAsState()
-    val CampaignAdded by viewmodel.eventAdded.collectAsState()
+    val createAdsUiState by viewmodel.createAdsUiState.collectAsState()
+    val isLoading = createAdsUiState is UiState.Loading
+    val bannerUri = viewmodel.getCurrentBannerUri()
+    val startDate = viewmodel.getCurrentStartDate()
+    val context= LocalContext.current
+    val endDate = viewmodel.getCurrentEndDate()
 
     BackHandler {
-        navController.navigate(CreateCampaignScreenViews.CreateCampaign.route) {
-            popUpTo(CreateCampaignScreenViews.CampaignPreview.route) {
+        navController.navigate(CreateAdScreenViews.CreateAd.route) {
+            popUpTo(CreateAdScreenViews.AdPreview.route) {
                 inclusive = true
             }
         }
     }
 
-    LaunchedEffect(CampaignAdded) {
-        if (CampaignAdded) {
-            onCampaignDone()
+    LaunchedEffect(createAdsUiState) {
+        if (createAdsUiState is UiState.Success) {
+            onAdDone()
         }
     }
 
     Scaffold(
         containerColor = grey,
         bottomBar = {
-            Surface( color = Color.White) {
+            Surface(color = Color.White) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -186,13 +188,13 @@ fun CampaignPreviewScreen(
                     SecondaryButton(
                         text = "Edit details",
                         onClick = {
-                            navController.navigate(CreateCampaignScreenViews.CreateCampaign.route) {
-                                popUpTo(CreateCampaignScreenViews.CreateCampaign.route) { inclusive = true }
+                            navController.navigate(CreateAdScreenViews.CreateAd.route) {
+                                popUpTo(CreateAdScreenViews.CreateAd.route) { inclusive = true }
                             }
                         },
                         modifier = Modifier.width(170.dp)
                     )
-                    if (loading) {
+                    if (isLoading) {
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -203,10 +205,16 @@ fun CampaignPreviewScreen(
                         }
                     } else {
                         ButtonView(
-                            text = "Publish",
+                            text = "Create Ad",
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            viewmodel.addEvent()
+                            // Create the ad using the viewmodel
+                            // You'll need to implement the actual ad creation logic here
+                            // This is a placeholder for the actual implementation
+                            if (bannerUri != null) {
+                                // Prepare data and call createAds
+                                viewmodel.createAd(context = context)
+                            }
                         }
                     }
                 }
@@ -224,7 +232,7 @@ fun CampaignPreviewScreen(
         ) {
             item {
                 Text(
-                    text = "Campaign Preview",
+                    text = "Ad Preview",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = satoshi_medium
@@ -232,41 +240,40 @@ fun CampaignPreviewScreen(
             }
 
             item {
-                LabelledSection(label = "Banner") {
-                    ImageCardFromUri(
-                        imageUri = CampaignDetails.bannerImage.toString(),
-                        modifier = Modifier.fillMaxWidth()
+                LabelledSection(label = "Ad Banner") {
+                    if (bannerUri != null) {
+                        ImageCardFromUri(
+                            imageUri = bannerUri.toString(),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Text(
+                            text = "No banner selected",
+                            fontSize = 16.sp,
+                            fontFamily = satoshi_medium,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            }
+
+            item {
+                LabelledSection(label = "Ad Start Date") {
+                    Text(
+                        text = startDate.ifEmpty { "Not selected" },
+                        fontSize = 16.sp,
+                        fontFamily = satoshi_medium
                     )
                 }
             }
 
             item {
-                LabelledSection(label = "Campaign Title") {
-                    Text(CampaignDetails.title ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
-                }
-            }
-
-            item {
-                LabelledSection(label = "Campaign Description") {
-                    Text(CampaignDetails.description ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
-                }
-            }
-
-            item {
-                LabelledSection(label = "Campaign Address") {
-                    Text(CampaignDetails.address ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
-                }
-            }
-
-            item {
-                LabelledSection(label = "Campaign Start Date") {
-                    Text(CampaignDetails.startDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
-                }
-            }
-
-            item {
-                LabelledSection(label = "Campaign End Date") {
-                    Text(CampaignDetails.endDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
+                LabelledSection(label = "Ad End Date") {
+                    Text(
+                        text = endDate.ifEmpty { "Not selected" },
+                        fontSize = 16.sp,
+                        fontFamily = satoshi_medium
+                    )
                 }
             }
         }
@@ -288,15 +295,18 @@ fun LabelledSection(label: String, content: @Composable () -> Unit) {
     }
 }
 
-
 @Composable
-fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmodel) {
-    val CampaignDetails by viewmodel.eventDetails.collectAsState()
+fun CreateAdScreen(navController: NavController, viewmodel: AdsViewModel) {
     var showStartCalendar by remember { mutableStateOf(false) }
     var showEndCalendar by remember { mutableStateOf(false) }
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    val context= LocalContext.current
+    val bannerUri = viewmodel.getCurrentBannerUri()
+    val startDateString = viewmodel.getCurrentStartDate()
+    val endDateString = viewmodel.getCurrentEndDate()
+
     Column(
         modifier = Modifier
             .background(grey)
@@ -309,7 +319,10 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                 .background(grey, RoundedCornerShape(8.dp))
         ) {
             Column(
-                modifier = Modifier.background(Color.White).fillMaxWidth().padding(top = 20.dp)
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth()
+                    .padding(top = 20.dp)
             ) {
                 Spacer(Modifier.height(5.dp))
                 Text(
@@ -321,7 +334,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                     modifier = Modifier.padding(16.dp)
                 )
                 Text(
-                    text = "Let's get started with Campaign",
+                    text = "Let's create your Ad",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = satoshi_medium,
@@ -329,109 +342,49 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                 )
                 Spacer(Modifier.height(20.dp))
             }
+
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                 SimpleImagePicker(
-                    text = "Upload Banner Image",
-                    ImageUri = CampaignDetails.bannerImage,
-                    modifier = Modifier.padding(horizontal = 0.dp)
-                        .align(Alignment.CenterHorizontally).fillMaxWidth(),
+                    text = "Upload Ad Banner",
+                    ImageUri = bannerUri,
+                    modifier = Modifier
+                        .padding(horizontal = 0.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(),
                     onImageSelected = {
                         if (it != null) {
                             viewmodel.updateBannerImage(it)
                         }
                     }
                 )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Campaign Title",
-                    fontSize = 14.sp,
-                    fontFamily = satoshi_regular,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(vertical = 6.dp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                TextFieldView(
-                    placeholder = "Enter Campaign Title",
-                    value = CampaignDetails.title,
-                    onValueChange = {
-                        viewmodel.updateTitle(it)
-                    })
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Campaign Description",
-                    fontSize = 14.sp,
-                    fontFamily = satoshi_regular,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(vertical = 6.dp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                TextFieldView(
-                    placeholder = "Enter Campaign Description",
-                    value = CampaignDetails.description,
-                    onValueChange = {
-                        viewmodel.updateDescription(it)
-                    })
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Campaign address",
-                    fontSize = 14.sp,
-                    fontFamily = satoshi_regular,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(vertical = 6.dp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                TextFieldView(
-                    placeholder = "Enter Campaign Address",
-                    value = CampaignDetails.address,
-                    onValueChange = {
-                        viewmodel.updateAddress(it)
-                    })
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Maximum number of participants",
-                    fontSize = 14.sp,
-                    fontFamily = satoshi_regular,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(vertical = 6.dp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                TextFieldView(
-                    placeholder = "Enter Number of Participants",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    value = CampaignDetails.numberOfParticipant,
-                    onValueChange = {
-                        viewmodel.updateNumberOfParticipant(it)
-                    })
-                Spacer(modifier = Modifier.height(6.dp))
+
+                Spacer(modifier = Modifier.height(20.dp))
 
                 OfferDateSelector(
-                    offerStartDate = CampaignDetails.startDate,
-                    offerEndDate = CampaignDetails.endDate,
+                    offerStartDate = startDateString,
+                    offerEndDate = endDateString,
                     onStartClick = { showStartCalendar = true },
                     onEndClick = {
-                        if (CampaignDetails.startDate.isEmpty()) {
-                            viewmodel.showError("Please choose start date first")
+                        if (startDateString.isEmpty()) {
+                            Toast.makeText(context,"Choose start date first",Toast.LENGTH_SHORT).show()
                         } else {
                             showEndCalendar = true
                         }
                     }
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+
                 ButtonView(text = "Next") {
-                    if (!viewmodel.validateEventDetails()) {
-                        return@ButtonView
+                    if (!viewmodel.validateAdDetails(false)) {
+                      Toast.makeText(context,"Please fill all fields",Toast.LENGTH_SHORT).show()
                     }
-                    navController.navigate(CreateCampaignScreenViews.CampaignPreview.route) {
-                        popUpTo(CreateCampaignScreenViews.CreateCampaign.route) {
+                    else{
+                    navController.navigate(CreateAdScreenViews.AdPreview.route) {
+                        popUpTo(CreateAdScreenViews.CreateAd.route) {
                         }
                     }
-
-
+                        }
                 }
             }
         }
@@ -442,7 +395,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
             onDateSelected = { startDate = it },
             onDismiss = { showStartCalendar = false },
             startDate = LocalDate.now(),
-            text = "Campaign Start Date",
+            text = "Ad Start Date",
             onConfirm = {
                 if (it != null) {
                     viewmodel.updateStartDate(it.format(formatter))
@@ -458,7 +411,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
             startDate = startDate ?: LocalDate.now(),
             onDateSelected = { endDate = it },
             onDismiss = { showEndCalendar = false },
-            text = "Campaign End Date",
+            text = "Ad End Date",
             onConfirm = {
                 if (it != null) {
                     viewmodel.updateEndDate(it.format(formatter))
@@ -467,6 +420,5 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                 showEndCalendar = false
             }
         )
-
     }
 }

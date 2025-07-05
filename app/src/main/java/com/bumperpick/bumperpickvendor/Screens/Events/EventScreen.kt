@@ -79,6 +79,7 @@ import com.bumperpick.bumperpickvendor.Repository.OfferValidation
 import com.bumperpick.bumperpickvendor.Screens.Component.Campaign_EditDeleteBottomSheet
 import com.bumperpick.bumperpickvendor.Screens.Component.EditDelete
 import com.bumperpick.bumperpickvendor.Screens.Component.Event_EditDeleteBottomSheet
+import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
 import com.bumperpick.bumperpickvendor.Screens.Event2.Events2Viewmodel
 import com.bumperpick.bumperpickvendor.Screens.OfferPage.DeleteExpiredOfferDialog
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
@@ -124,7 +125,7 @@ fun EventScreen(
         DeleteExpiredOfferDialog(true, onDismiss = {showDeleteDialog=false}, onConfirmDelete ={
             showDeleteDialog=false
             viewmodel.deleteOffer(selectedId,"Delete Expired Event")
-            Toast.makeText(context,"Campaign Deleted", Toast.LENGTH_SHORT).show()
+
         }, name = "Event" )
     }
 
@@ -465,7 +466,7 @@ fun EventCard(events: DataXXXXXXXX, onClick: (DataXXXXXXXX) -> Unit,  showBottom
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "${events.number_of_participant} PARTICIPANTS",
+                        text = "MAX ${events.number_of_participant} PARTICIPANTS",
                         color = Color.White,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
@@ -539,7 +540,7 @@ fun EventCard(events: DataXXXXXXXX, onClick: (DataXXXXXXXX) -> Unit,  showBottom
 
                 InfoRow(
                     icon = painterResource(R.drawable.loading),
-                    text = "Deadline: ${events.end_date}"
+                    text = "Deadline: ${formatDate(events.end_date)}"
                 )
 
                 InfoRow(
@@ -588,7 +589,7 @@ fun EventCard(events: DataXXXXXXXX, onClick: (DataXXXXXXXX) -> Unit,  showBottom
 }
 
 @Composable
-private fun InfoRow(
+ fun InfoRow(
     icon: Any,
     text: String,
     vectorIcon: Boolean = false,

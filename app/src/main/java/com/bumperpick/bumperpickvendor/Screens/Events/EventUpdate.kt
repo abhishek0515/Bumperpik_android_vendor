@@ -295,7 +295,7 @@ fun EditEventScreen(
                             btnColor = Color.Gray,
                             textColor = Color.White
                         ) {
-                            // navController.popBackStack()
+                            onBackClick()
                         }
 
                         ButtonView(

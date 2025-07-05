@@ -64,6 +64,7 @@ import com.bumperpick.bumperpickvendor.Repository.HomeOffer
 
 import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
+import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 
 import com.bumperpick.bumperpickvendor.ui.theme.grey
@@ -156,8 +157,8 @@ fun ProductDetailsSection(
 
         Spacer(modifier = Modifier.height(16.dp))
         OfferDateSelector(
-            offerStartDate = offerDetail.startDate,
-            offerEndDate = offerDetail.endDate,
+            offerStartDate = formatDate( offerDetail.startDate!!),
+            offerEndDate = formatDate( offerDetail.endDate!!),
             onStartClick = { showStartCalendar = true },
             onEndClick = {
                 if (offerDetail.startDate!!.isEmpty()) {

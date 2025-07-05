@@ -86,13 +86,15 @@ sealed class AccountClick(){
     data object My_subs:AccountClick()
     data object Subscription:AccountClick()
     data class EngagementClick(val marketingOption: MarketingOption):AccountClick()
+    data class AdsClick(val gotosub:Boolean):AccountClick()
 
 }
 @Composable
-fun AccountScreen(onClick:(AccountClick)->Unit,viewmodel: AccountViewmodel= koinViewModel()){
+fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koinViewModel()){
         val context= LocalContext.current
     var show_renewbtn by remember { mutableStateOf(false) }
     val uiState=viewmodel.uiState.collectAsState().value
+    var is_user_ads_subscribed by remember { mutableStateOf(false) }
     var show_signoutDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         viewmodel.fetchProfile()
@@ -150,6 +152,8 @@ fun AccountScreen(onClick:(AccountClick)->Unit,viewmodel: AccountViewmodel= koin
                 }
                 is AccountUi_state.GetProfile ->{
                     val data=uiState.vendorDetail
+                    Log.d("adsSubscription",data.data.adsSubscription!!.created_at.toString().equals("null").toString())
+                    is_user_ads_subscribed=!data.data.adsSubscription!!.created_at.toString().equals("null")
                     Log.d("DATA",data.toString())
                     Card(
                         modifier = Modifier.padding(16.dp).height(100.dp),
@@ -186,10 +190,12 @@ fun AccountScreen(onClick:(AccountClick)->Unit,viewmodel: AccountViewmodel= koin
                     Spacer(modifier = Modifier.height(0.dp))
                     val subscriberdata=data.data.subscription
 
-                    SubscriptionCard(
-                        subs_data=subscriberdata,
-                        is_subs_10 = {show_renewbtn=it}
-                    )
+                    if (subscriberdata != null) {
+                        SubscriptionCard(
+                            subs_data=subscriberdata,
+                            is_subs_10 = {show_renewbtn=it}
+                        )
+                    }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(text = "View Membership", color = BtnColor, fontSize = 14.sp, fontFamily = satoshi_medium,
                         modifier = Modifier.align(Alignment.End).padding(vertical = 2.dp, horizontal = 16.dp)
@@ -332,6 +338,20 @@ fun AccountScreen(onClick:(AccountClick)->Unit,viewmodel: AccountViewmodel= koin
                 Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
 
             }
+            Spacer(modifier = Modifier.height(12.dp))
+      Box (modifier = Modifier.fillMaxWidth().clickable {
+                onClick(AccountClick.EngagementClick(MarketingOption.CONTEST_FOR_CUSTOMERS))
+            }.background(Color.White), )
+            {
+                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                    Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = "Contest for Customer", color = Color.Black, fontSize = 16.sp,)
+                }
+
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
             Box (modifier = Modifier.fillMaxWidth().clickable {
@@ -351,7 +371,7 @@ fun AccountScreen(onClick:(AccountClick)->Unit,viewmodel: AccountViewmodel= koin
             Spacer(modifier = Modifier.height(12.dp))
 
             Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.EngagementClick(MarketingOption.CONTEST_FOR_CUSTOMERS))
+                onClick(AccountClick.AdsClick(!is_user_ads_subscribed))
             }.background(Color.White), )
             {
                 Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){

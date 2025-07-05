@@ -58,7 +58,6 @@ enum class MarketingOption(val title: String) {
     SCRATCH_AND_WIN("Scratch & win"),
     LUCKY_DRAW("Lucky draw"),
     CAMPAIGNS("Campaigns"),
-    ADS("ADS"),
     EVENTS("Events");
 
     companion object {

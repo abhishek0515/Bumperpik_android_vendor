@@ -119,10 +119,7 @@ class EventsViewmodel(val eventRepository: EventRepository) : ViewModel() {
     }
 
     fun validateEventDetails():Boolean {
-        if (_eventDetails.value.bannerImage == null) {
-            showError("Please select banner")
-            return false
-        } else if (_eventDetails.value.title.isEmpty()) {
+    if (_eventDetails.value.title.isEmpty()) {
             showError("Please enter title")
             return false
         } else if (_eventDetails.value.description.isEmpty()) {

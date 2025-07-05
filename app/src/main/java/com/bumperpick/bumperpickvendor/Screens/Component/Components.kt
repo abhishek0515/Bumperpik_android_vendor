@@ -132,6 +132,8 @@ import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailView
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 /**
@@ -1389,7 +1391,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                    Icon(painter = painterResource(R.drawable.clock), contentDescription = "clock",Modifier.size(20.dp))
                    Spacer(modifier = Modifier.width(6.dp))
                    Text(
-                       text = "Offer Validation:${offerModel.startDate} - ${offerModel.endDate}",
+                       text = "Offer Validation: ${ formatDate(offerModel.startDate!!)} - ${formatDate(offerModel.endDate!!)}",
                        fontSize = 15.sp,
                        fontFamily = satoshi_regular,
                    )
@@ -1894,7 +1896,7 @@ fun Event_EditDeleteBottomSheet(
 }
 
 @Composable
-private fun BottomSheetItem(
+fun BottomSheetItem(
     icon: @Composable () -> Unit,
     title: String,
     subtitle: String? = null,
@@ -2196,8 +2198,19 @@ fun getSilverBrush(): Brush = Brush.horizontalGradient(
 fun getPlatinumBrush(): Brush = Brush.horizontalGradient(
     colors = listOf(
         Color(0xFF8C92AC),
-        Color(0xFFE5E4E2),
+        Color(0xFFA3EBFA),
         Color(0xFF71797E),
-        Color(0xFFBCC6CC)
+        Color(0xFFDEEDFF)
     )
 )
+
+fun formatDate(inputDate: String): String {
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+        val date = inputFormat.parse(inputDate)
+        outputFormat.format(date!!)
+    } catch (e: Exception) {
+        "Invalid date"
+    }
+}

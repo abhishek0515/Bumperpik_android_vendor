@@ -12,5 +12,6 @@ data class Data(
     val outlet_address: String,
     val phone_number: String,
     val subscription: SubscriptionXXX,
+    val adsSubscription:AdsSubscription,
     val vendor_id: Int
 )
