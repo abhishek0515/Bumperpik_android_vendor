@@ -256,7 +256,7 @@ class VendorDetailViewmodel(val vendorRepository: VendorRepository) : ViewModel(
             val result = vendorRepository.SavedDetail(details = _vendorDetails.value,number.replace(" ",""))
             when (result) {
                 is Result.Success -> {
-                    _success.value = result.data
+                    _success.value = "done"
                     _vendorDetails.update { it.copy(Vendor_Id = result.data) }
                 }
 

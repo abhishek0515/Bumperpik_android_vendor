@@ -98,7 +98,7 @@ fun VendorDetailPage(isMobile:Boolean,mobile:String,viewModel: VendorDetailViewm
     }
 
     LaunchedEffect(success) {
-        if (success!=null) {
+        if (success=="done") {
             Log.d("ID",success.toString())
             navController.navigate(VendorDetailScreen.SubscriptionScreen.route)
 
@@ -631,7 +631,7 @@ fun AdditionalDetailsScreen(
                 )
                 Spacer(Modifier.height(20.dp))
                 Text(
-                    text = "Gst Number (Optional)",
+                    text = "Gst Number",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = satoshi_regular
@@ -730,7 +730,7 @@ fun GSTCertificateUploadSection(
         modifier = modifier
     ) {
         Text(
-            text = "Upload GST Certificate (Optional)",
+            text = "Upload GST Certificate",
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             color = Color.Black

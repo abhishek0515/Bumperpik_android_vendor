@@ -78,6 +78,7 @@ class VendorRepositoryImpl(
             val newDetails = details.copy(
                 Vendor_Id = (1..1000).random().toString(),
                 Vendor_Mobile = number
+
             )
             Log.d("DETAILS", newDetails.toString())
 
@@ -113,12 +114,13 @@ class VendorRepositoryImpl(
                 is ApiResult.Success -> {
                     dataStoreManager.save_Vendor_Details(submitDetail.data.data)
                     dataStoreManager.saveToken(submitDetail.data.meta)
+                    Log.d("success","sccc")
                     Result.Success(submitDetail.data.data.vendor_id.toString())
                 }
                 is ApiResult.Error -> Result.Error(submitDetail.error.message)
             }
         } catch (e: Exception) {
-            Result.Error("Failed to save vendor details: ${e.message}")
+            Result.Error("Failed to save vendor details: ${e}")
         }
     }
 
