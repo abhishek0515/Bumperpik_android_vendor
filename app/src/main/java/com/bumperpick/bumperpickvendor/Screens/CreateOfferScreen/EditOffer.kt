@@ -35,6 +35,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -110,7 +111,7 @@ fun ProductDetailsSection(
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
-            modifier = Modifier.padding(horizontal = 16.dp)
+
         )
         Spacer(Modifier.height(4.dp))
         TextFieldView(
@@ -127,7 +128,7 @@ fun ProductDetailsSection(
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
-            modifier = Modifier.padding(horizontal = 16.dp)
+
         )
         // Product Description
         TextFieldView(
@@ -145,7 +146,7 @@ fun ProductDetailsSection(
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
-            modifier = Modifier.padding(horizontal = 16.dp)
+
         )
         // Terms and Conditions
         TextFieldView(
@@ -157,8 +158,8 @@ fun ProductDetailsSection(
 
         Spacer(modifier = Modifier.height(16.dp))
         OfferDateSelector(
-            offerStartDate = formatDate( offerDetail.startDate!!),
-            offerEndDate = formatDate( offerDetail.endDate!!),
+            offerStartDate =(offerDetail.startDate!!),
+            offerEndDate = (offerDetail.endDate!!),
             onStartClick = { showStartCalendar = true },
             onEndClick = {
                 if (offerDetail.startDate!!.isEmpty()) {
@@ -214,7 +215,7 @@ fun EditOffer(
     val uiState by viewmodel.uiState.collectAsState()
     val newLocalMediaList by viewmodel.newLocalMediaList.collectAsState()
     val deletedUrlMediaList by viewmodel.deletedUrlMediaList.collectAsState()
-    val context= LocalContext.current
+    val context = LocalContext.current
     var showMediaTypeDialog by remember { mutableStateOf(false) }
 
     // Media picker launchers
@@ -222,10 +223,9 @@ fun EditOffer(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris ->
         if (uris.isNotEmpty()) {
-            uris.forEach{
+            uris.forEach {
                 viewmodel.addNewLocalMedia(it)
             }
-
         }
     }
 
@@ -245,7 +245,7 @@ fun EditOffer(
     // Handle success callback
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
-            onOfferDone()
+
             viewmodel.clearSuccess()
         }
     }
@@ -306,36 +306,28 @@ fun EditOffer(
                     .padding(16.dp)
             ) {
                 // Banner Image
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                ) {
+
                     println("offer image :- ${offerDetail.brand_logo_url}")
                     AsyncImage(
                         model = offerDetail.brand_logo_url,
                         contentDescription = "Banner Image",
                         modifier = Modifier
-                            .fillMaxSize()
+                           // .fillMaxSize()
                             .clip(RoundedCornerShape(16.dp)),
-                        contentScale = ContentScale.Fit
+                        contentScale = ContentScale.Crop
                     )
-                }
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-
-
                 val context = LocalContext.current
                 val combinedMediaList = getCombinedMediaList(
-                   urlMediaList = offerDetail.media,
+                    urlMediaList = offerDetail.media,
                     localMediaList = newLocalMediaList,
                     deletedUrlList = deletedUrlMediaList
                 )
 
-                Log.d("CombinedMediaList",combinedMediaList.toString())
+                Log.d("CombinedMediaList", combinedMediaList.toString())
 
                 // Media Row with Add Button
                 LazyRow(
@@ -356,7 +348,7 @@ fun EditOffer(
                         val mediaItem = combinedMediaList[index]
                         println("mediaItem $mediaItem")
                         val isVideo = if (mediaItem.isUrl) {
-                            isVideoUrl(mediaItem.url!!.url)
+                            mediaItem.url?.let { isVideoUrl(it.url) } ?: false
                         } else {
                             isVideoFile(context, mediaItem.uri!!)
                         }
@@ -369,8 +361,10 @@ fun EditOffer(
                             },
                             onDelete = {
                                 if (mediaItem.isUrl) {
-                                    // Add to deleted URLs list
-                                    viewmodel.addToDeletedUrlMedia(mediaItem.url!!.url)
+                                    // Add the URL to deleted URLs list (not the ID)
+                                    mediaItem.url?.let { media ->
+                                        viewmodel.addToDeletedUrlMedia(media.id.toString())
+                                    }
                                 } else {
                                     // Remove from local media list
                                     viewmodel.removeNewLocalMedia(mediaItem.uri!!)
@@ -378,8 +372,6 @@ fun EditOffer(
                             }
                         )
                     }
-
-
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -420,7 +412,8 @@ fun EditOffer(
                             deletedUrlMedia = deletedUrlMediaList,
                             newLocalMedia = newLocalMediaList,
                             onSuccess = {
-                                Toast.makeText(context,"Offer Updated",Toast.LENGTH_SHORT).show()
+                                onOfferDone()
+                                Toast.makeText(context, "Offer Updated", Toast.LENGTH_SHORT).show()
                             }
                         )
                     },
@@ -450,14 +443,14 @@ fun EditOffer(
 }
 
 @Composable
-fun  EditMediaTypeSelectionDialog(
+fun EditMediaTypeSelectionDialog(
     onImageSelected: () -> Unit,
     onVideoSelected: () -> Unit,
     onDismiss: () -> Unit,
     currentImageCount: Int,
     currentVideoCount: Int,
-    maxImageCount:Int=10,
-    maxVideoCount:Int=10
+    maxImageCount: Int = 10,
+    maxVideoCount: Int = 10
 ) {
     AlertDialog(
         modifier = Modifier.background(Color.Transparent),
@@ -489,7 +482,9 @@ fun  EditMediaTypeSelectionDialog(
                     enabled = currentImageCount < 10,
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (currentImageCount < maxImageCount) Color.White else BtnColor.copy(alpha = 0.3f)
+                        containerColor = if (currentImageCount < maxImageCount) Color.White else BtnColor.copy(
+                            alpha = 0.3f
+                        )
                     )
                 ) {
                     Row(
@@ -533,7 +528,9 @@ fun  EditMediaTypeSelectionDialog(
                     modifier = Modifier.fillMaxWidth(),
                     border = BorderStroke(1.dp, BtnColor),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (currentVideoCount < maxVideoCount) Color.White else BtnColor.copy(alpha = 0.3f)
+                        containerColor = if (currentVideoCount < maxVideoCount) Color.White else BtnColor.copy(
+                            alpha = 0.3f
+                        )
                     )
                 ) {
                     Row(
@@ -545,7 +542,7 @@ fun  EditMediaTypeSelectionDialog(
                         Icon(
                             painter = painterResource(R.drawable.ic_video),
                             contentDescription = "Videos",
-                            tint = if (currentVideoCount < maxVideoCount)BtnColor else Color.Gray,
+                            tint = if (currentVideoCount < maxVideoCount) BtnColor else Color.Gray,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(16.dp))
@@ -573,13 +570,15 @@ fun  EditMediaTypeSelectionDialog(
         }
     )
 }
+
 // Data class to represent media items
 data class MediaItem(
     val isUrl: Boolean,
     val url: Media? = null,
     val uri: Uri? = null
 )
-// Combines URL media and local media (excluding deleted ones)
+
+// Fixed: Combines URL media and local media (excluding deleted ones)
 fun getCombinedMediaList(
     urlMediaList: List<Media>,
     localMediaList: List<Uri>,
@@ -588,6 +587,7 @@ fun getCombinedMediaList(
     val combinedList = mutableListOf<MediaItem>()
 
     // Add URL media items, skipping those marked for deletion
+    // Fixed: Check against the URL, not the ID
     urlMediaList.forEach { media ->
         if (!deletedUrlList.contains(media.id.toString())) {
             combinedList.add(MediaItem(isUrl = true, url = media))
@@ -602,13 +602,11 @@ fun getCombinedMediaList(
     return combinedList
 }
 
-
 // Helper function to check if URL is video
 fun isVideoUrl(url: String): Boolean {
     val videoExtensions = listOf(".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm", ".mkv")
     return videoExtensions.any { url.lowercase().contains(it) }
 }
-
 
 @Composable
 fun EnhancedMediaPreviewItem(

@@ -69,8 +69,10 @@ fun EditEventScreen2(
     val eventDetails by viewmodel.eventDetails.collectAsState()
     val isLoading by viewmodel.loading.collectAsState()
     var showStartCalendar by remember { mutableStateOf(false) }
+    var showEndCalendar by remember { mutableStateOf(false) }
     var showStartTime by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var selectedEndDate by remember { mutableStateOf<LocalDate?>(null) }
 
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
     val error by viewmodel.error.collectAsState()
@@ -103,6 +105,15 @@ fun EditEventScreen2(
         if (eventDetails.startDate.isNotEmpty()) {
             try {
                 selectedDate = LocalDate.parse(eventDetails.startDate, formatter)
+            } catch (e: Exception) {
+                Log.e("EditEventScreen", "Date parsing error: ${e.message}")
+            }
+        }
+    }
+    LaunchedEffect(eventDetails.endDate) {
+        if (eventDetails.endDate.isNotEmpty()) {
+            try {
+                selectedEndDate = LocalDate.parse(eventDetails.endDate, formatter)
             } catch (e: Exception) {
                 Log.e("EditEventScreen", "Date parsing error: ${e.message}")
             }
@@ -149,6 +160,7 @@ fun EditEventScreen2(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .weight(1f)
+
                     .background(grey, RoundedCornerShape(8.dp))
             ) {
                 // Header section
@@ -161,7 +173,10 @@ fun EditEventScreen2(
                     eventId = eventId,
                     onStartDateClick = { showStartCalendar = true },
                     onStartTimeClick = { showStartTime = true },
-                    onBackClick = onBackClick
+                    onBackClick = onBackClick,
+                    onEndTimeClick = {
+                        showEndCalendar=true}
+
                 )
             }
 
@@ -171,7 +186,7 @@ fun EditEventScreen2(
                 selectedDate = selectedDate,
                 onDateSelected = { selectedDate = it },
                 onDismiss = { showStartCalendar = false },
-                startDate = LocalDate.now(),
+                startDate = selectedDate?: LocalDate.now(),
                 text = "Event Start Date",
                 onConfirm = { date ->
                     date?.let {
@@ -179,6 +194,22 @@ fun EditEventScreen2(
                         selectedDate = it
                     }
                     showStartCalendar = false
+                }
+            )
+            CalendarBottomSheet(
+                isVisible = showEndCalendar,
+                selectedDate=selectedEndDate,
+                onDateSelected = {selectedEndDate=it},
+                onDismiss = {showEndCalendar=false},
+                startDate =selectedDate ?: LocalDate.now(),
+                text = "Event End Date",
+                onConfirm = {
+                    date->
+                    date?.let {
+                        viewmodel.updateEndDate(it.format(formatter))
+                        selectedEndDate = it
+                    }
+                    showEndCalendar = false
                 }
             )
 
@@ -243,14 +274,15 @@ private fun EditFormContent(
     eventId: String,
     onStartDateClick: () -> Unit,
     onStartTimeClick: () -> Unit,
+    onEndTimeClick:()->Unit,
     onBackClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp)
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)
     ) {
         // Editable image picker
         EditableImagePicker(
-            text = "Update Banner Image",
+            text = "Update banner image",
             imageUri = eventDetails.bannerImage,
             imageUrl = eventDetails.bannerImageUrl,
             modifier = Modifier
@@ -265,8 +297,8 @@ private fun EditFormContent(
 
         // Title field
         EditFormField(
-            label = "Title",
-            placeholder = "Enter Event Title",
+            label = "Event title",
+            placeholder = "Enter event title",
             value = eventDetails.title,
             onValueChange = { viewmodel.updateTitle(it) }
         )
@@ -277,30 +309,41 @@ private fun EditFormContent(
         StartDateTimeSelector(
             offerStartDate = eventDetails.startDate,
             offerStartTime = eventDetails.startTime,
+            offerEndTime = eventDetails.endDate,
             onStartDateClick = onStartDateClick,
-            onStartTimeClick = onStartTimeClick
+            onStartTimeClick = onStartTimeClick,
+            onEndTimeClick = onEndTimeClick
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Facebook live field
         EditFormField(
-            label = "Facebook Live",
-            placeholder = "Enter Facebook live link",
+            label = "Facebook live",
+            placeholder = "Enter facebook live link",
             value = eventDetails.facebookLiveLink,
             onValueChange = { viewmodel.updatefacebookLiveLink(it) }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-
         // YouTube live field
         EditFormField(
-            label = "YouTube Live",
-            placeholder = "Enter YouTube live link",
+            label = "Instagram live",
+            placeholder = "Enter instagram live link",
+            value = eventDetails.instagramLiveLink, // Fixed: was using facebookLiveLink
+            onValueChange = { viewmodel.updateInstagramLink(it) }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        // YouTube live field
+        EditFormField(
+            label = "Youtube live",
+            placeholder = "Enter youtube live Id",
             value = eventDetails.youtubeLiveLink, // Fixed: was using facebookLiveLink
             onValueChange = { viewmodel.updateYoutubeLiveLink(it) }
         )
         Spacer(modifier = Modifier.height(4.dp))
+
+
         // YouTube hint with highlighted video ID
         Text(
             text = buildAnnotatedString {
@@ -337,8 +380,8 @@ private fun EditFormContent(
 
         // Address field
         EditFormField(
-            label = "Event Address",
-            placeholder = "Enter Event Address",
+            label = "Event address",
+            placeholder = "Enter event address",
             value = eventDetails.address,
             onValueChange = { viewmodel.updateAddress(it) }
         )
@@ -347,8 +390,8 @@ private fun EditFormContent(
 
         // Description field
         EditFormField(
-            label = "Event Description",
-            placeholder = "Enter Event Description",
+            label = "Event description",
+            placeholder = "Enter event description",
             value = eventDetails.description,
             onValueChange = { viewmodel.updateDescription(it) },
             maxLines = 4

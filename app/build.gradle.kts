@@ -59,11 +59,12 @@ dependencies {
     implementation ("androidx.camera:camera-core:1.3.0")
     implementation ("com.google.mlkit:barcode-scanning:17.2.0")
     implementation ("com.google.accompanist:accompanist-permissions:0.28.0")
-
+    implementation("com.razorpay:checkout:1.6.33")
     implementation ("androidx.credentials:credentials:1.2.2")
     implementation ("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation( "com.google.android.libraries.identity.googleid:googleid:1.1.0")
     implementation ("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0") // or latest
 
     // Credential Manager dependencies
     implementation("androidx.credentials:credentials:1.3.0")

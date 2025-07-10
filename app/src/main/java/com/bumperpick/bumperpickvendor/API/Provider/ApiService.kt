@@ -29,6 +29,7 @@ import retrofit2.http.Field
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -52,6 +53,11 @@ interface ApiService {
         @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part gst_certificate: MultipartBody.Part
    ):Response<VendorLoginModel>
+   @Multipart
+   @POST("api/vendor/register")
+   suspend fun register_vendorWOimage(
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
+   ):Response<VendorLoginModel>
    @GET("api/categories")
    suspend fun getCategory():Response<Category_Model>
    @FormUrlEncoded
@@ -61,31 +67,24 @@ interface ApiService {
 
 
     // For updates with media (multipart)
-
+    @Multipart
     @POST("api/vendor/offers-update/{id}")
     suspend fun updateOfferWithMedia(
         @Path("id") id: String,
-        @Body requestBody: RequestBody
+        @Header("Authorization") token: String,
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part mediaFiles: List<MultipartBody.Part>
     ): Response<OfferUpdateModel>
     // For text-only updates (form-encoded)
-    @FormUrlEncoded
+    @Multipart
     @POST("api/vendor/offers-update/{id}")
     suspend fun updateOfferTextOnly(
-        @Path("id") id: String?,
-        @Field("vendor_id", encoded = false) vendorId: String,
-        @Field("offer_template", encoded = false) offerTemplate: String,
-        @Field("image_appearance", encoded = false) imageAppearance: String,
-        @Field("heading", encoded = false) heading: String,
-        @Field("discount", encoded = false) discount: String,
-        @Field("brand_name", encoded = false) brandName: String,
-        @Field("title", encoded = false) title: String,
-        @Field("description", encoded = false) description: String,
-        @Field("terms", encoded = false) terms: String,
-        @Field("start_date", encoded = false) startDate: String,
-        @Field("end_date", encoded = false) endDate: String,
-        @Field("token", encoded = false) token: String
-    ): Response< OfferUpdateModel>
-   @Multipart
+        @Path("id") id: String,
+        @Header("Authorization") token: String,
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>
+
+    ): Response<OfferUpdateModel>
+    @Multipart
    @POST("api/vendor/offers-store")
    suspend fun addOffers(
        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
@@ -112,6 +111,12 @@ interface ApiService {
     suspend fun UpdateProfile(
         @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
         @Part image:MultipartBody.Part,
+    ):Response<update_profile_model>
+    @Multipart
+    @POST("api/vendor/profile/update")
+    suspend fun UpdateProfileWOImage(
+        @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
+
     ):Response<update_profile_model>
 
 
@@ -150,6 +155,7 @@ interface ApiService {
     @POST("api/vendor/campaigns/update/{id}")
     suspend fun campaignUpdate(
         @Path("id") id: String,
+        @Header("Authorization") token: String,
         @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part banner: MultipartBody.Part
     ): Response<success_model>
@@ -159,6 +165,7 @@ interface ApiService {
     @POST("api/vendor/campaigns/update/{id}")
     suspend fun campaignUpdateWithoutBanner(
         @Path("id") id: String,
+        @Header("Authorization") token: String,
         @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>
     ): Response<success_model>
 
@@ -181,11 +188,14 @@ interface ApiService {
 
     @POST("api/vendor/events/update/{id}")
     @Multipart
-    suspend fun eventsUpdate(@Path("id")id:String, @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>, @Part banner:MultipartBody.Part,):Response<success_model>
+    suspend fun eventsUpdate(@Path("id")id:String,
+                             @Header("Authorization") token: String,
+                             @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
+                             @Part banner:MultipartBody.Part,):Response<success_model>
 
     @POST("api/vendor/events/update/{id}")
     @Multipart
-    suspend fun eventsUpdateWithoutBanner(@Path("id")id:String, @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>):Response<success_model>
+    suspend fun eventsUpdateWithoutBanner(@Path("id")id:String,   @Header("Authorization") token: String, @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>):Response<success_model>
 
     @POST("api/vendor/events/destroy/{id}")
     @FormUrlEncoded
@@ -216,7 +226,8 @@ interface ApiService {
 
     @Multipart
     @POST("api/vendor/vendor-ads/update/{id}")
-    suspend fun vendors_ads_update(@Path("id")id:String,@Query("token")token: String,
+    suspend fun vendors_ads_update(@Path("id")id:String,
+                                   @Header("Authorization") token: String,
                                    @PartMap data:Map<String,@JvmSuppressWildcards RequestBody>,
                                    @Part banner:MultipartBody.Part):Response<success_model>
 

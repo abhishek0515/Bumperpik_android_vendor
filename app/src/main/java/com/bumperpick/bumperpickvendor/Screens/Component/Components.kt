@@ -159,7 +159,7 @@ fun PrimaryButton(
     ) {
         Text(
             text = text,
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             fontFamily = satoshi_medium
         )
     }
@@ -217,7 +217,8 @@ fun SecondaryButton(
     text: String,
     onClick: () -> Unit,
     btnColor:Color= BtnColor.copy(alpha = 0.1f), textColor:Color= BtnColor,
-    modifier: Modifier=Modifier, horizontal_padding:Dp=16.dp,
+    modifier: Modifier=Modifier,
+    horizontal_padding:Dp=16.dp,
 
     enabled: Boolean = true
 ) {
@@ -227,8 +228,8 @@ fun SecondaryButton(
         modifier = modifier
 
             .fillMaxWidth()
-            .height(75.dp)
-            .padding( bottom = 20.dp, start =  horizontal_padding, end = 8.dp),
+            .height(50.dp)
+            .padding( bottom = 0.dp, start =  horizontal_padding),
 
         border = BorderStroke(0.dp, color = Color.Transparent),
         colors = ButtonDefaults.buttonColors(
@@ -1391,7 +1392,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                    Icon(painter = painterResource(R.drawable.clock), contentDescription = "clock",Modifier.size(20.dp))
                    Spacer(modifier = Modifier.width(6.dp))
                    Text(
-                       text = "Offer Validation: ${ formatDate(offerModel.startDate!!)} - ${formatDate(offerModel.endDate!!)}",
+                       text = "Offer valid from ${ formatDate(offerModel.startDate!!)} to ${formatDate(offerModel.endDate!!)}",
                        fontSize = 15.sp,
                        fontFamily = satoshi_regular,
                    )
@@ -1470,8 +1471,7 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
 fun AutoImageSlider(
     imageUrls: List<String>,
     modifier: Modifier = Modifier,
-    autoSlideInterval: Long = 5000L, // 5 seconds
-    slideAnimationDuration: Int = 800 // milliseconds
+    slideAnimationDuration: Int = 800 // Optional: Can remove if unused
 ) {
     if (imageUrls.isEmpty()) return
 
@@ -1480,30 +1480,18 @@ fun AutoImageSlider(
         pageCount = { imageUrls.size }
     )
 
-    // Auto-scroll effect
-    LaunchedEffect(pagerState) {
-        while (true) {
-            delay(autoSlideInterval)
-            val nextPage = (pagerState.currentPage + 1) % imageUrls.size
-            pagerState.animateScrollToPage(
-                page = nextPage,
-                animationSpec = tween(durationMillis = slideAnimationDuration)
-            )
-        }
-    }
-
     Box(
-        modifier = modifier.fillMaxWidth(),
-
+        modifier = modifier.fillMaxWidth()
     ) {
-        // Image Pager
+        // User-scrollable Image Pager
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
                 .height(200.dp),
-            pageSpacing = 8.dp
+            pageSpacing = 8.dp,
+            userScrollEnabled = true // ✅ Allow user scroll
         ) { page ->
             ImageSliderItem(
                 imageUrl = imageUrls[page],
@@ -1511,13 +1499,13 @@ fun AutoImageSlider(
             )
         }
 
-
-
-        // Red Dot Indicators
+        // Dot Indicators
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(8.dp)
         ) {
             repeat(imageUrls.size) { index ->
                 val isSelected = pagerState.currentPage == index
@@ -1533,6 +1521,7 @@ fun AutoImageSlider(
         }
     }
 }
+
 
 @Composable
  fun ImageSliderItem(

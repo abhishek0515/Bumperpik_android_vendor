@@ -1,7 +1,11 @@
 package com.bumperpick.bumperpickvendor.Screens.Subscription
 
+import android.app.Activity
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.bumperpick.bumperpickvendor.API.FinalModel.Feature
 import com.bumperpick.bumperpickvendor.API.FinalModel.FeatureValue
 import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
+import com.bumperpick.bumperpickvendor.Misc.RazorpayActivity
 import com.bumperpick.bumperpickvendor.Repository.BillingCycle
 import com.bumperpick.bumperpickvendor.Screens.Component.getMetalBrush
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
@@ -91,11 +96,7 @@ data class FeatureUI(
     val featureValue: String = ""
 )
 
-@Preview
-@Composable
-private fun  previewSub(){
-    SubscriptionPage(onBackClick = {})
-}
+
 // Main Composable
 @Composable
 fun SubscriptionPage(
@@ -103,11 +104,21 @@ fun SubscriptionPage(
     onBackClick: () -> Unit,
     gotoHome: () -> Unit = {}
 ) {
+
     val subscriptionState by viewModel.subscriptionState.collectAsState()
     val buySubscriptionState by viewModel.buySubscriptionState.collectAsState()
     val selectedSubsId by viewModel.selectedSubsId.collectAsState()
     val context = LocalContext.current
-
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val paymentId = result.data?.getStringExtra("payment_id")
+            viewModel.buySubscription(transactionId = paymentId.toString())
+       //     Toast.makeText(context, "Success: $paymentId", Toast.LENGTH_LONG).show()
+        } else {
+            val error = result.data?.getStringExtra("error") ?: "Cancelled"
+        //    Toast.makeText(context, "Failed: $error", Toast.LENGTH_LONG).show()
+        }
+    }
     LaunchedEffect(buySubscriptionState) {
         when (buySubscriptionState) {
             is SubscriptionViewModel.UiState.Success -> {
@@ -122,59 +133,73 @@ fun SubscriptionPage(
             else -> { /* No action needed */ }
         }
     }
+    Scaffold (){
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(grey)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .background(grey)
         ) {
-            SimpleHeader(onBackClick = onBackClick)
-            when(subscriptionState){
-                is SubscriptionViewModel.UiState.Error ->{
-                    ErrorContent(
-                        message = (subscriptionState as SubscriptionViewModel.UiState.Error).message,
-                        onRetry = { viewModel.fetchSubscription() }
-                    )
-                }
-                SubscriptionViewModel.UiState.Idle -> {}
-                SubscriptionViewModel.UiState.Loading -> {
-                    LoadingContent()
-                }
-                is SubscriptionViewModel.UiState.Success -> {
-                    val data = (subscriptionState as SubscriptionViewModel.UiState.Success<newsubscriptionModel>).data
-                    val planGroups = data.data.getAllPlans()
-
-                    if (planGroups.isNotEmpty()) {
-                        SubscriptionContent(
-                            modifier = Modifier.weight(1f),
-                            planGroups = planGroups,
-                            selectedSubsId = selectedSubsId,
-                            onSubscriptionSelected = { subsId ->
-                                viewModel.updateSelectedSubscription(subsId)
-                            },
-                            onContinueClick = { viewModel.buySubscription() },
-                            getCycleDuration = viewModel::getCycleDuration,
-                            isLoading = buySubscriptionState is SubscriptionViewModel.UiState.Loading
-                        )
-                    } else {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            )
+            {
+                SimpleHeader(onBackClick = onBackClick)
+                when (subscriptionState) {
+                    is SubscriptionViewModel.UiState.Error -> {
                         ErrorContent(
-                            message = "No subscription plans available",
+                            message = (subscriptionState as SubscriptionViewModel.UiState.Error).message,
                             onRetry = { viewModel.fetchSubscription() }
                         )
                     }
+
+                    SubscriptionViewModel.UiState.Idle -> {}
+                    SubscriptionViewModel.UiState.Loading -> {
+                        LoadingContent()
+                    }
+
+                    is SubscriptionViewModel.UiState.Success -> {
+                        val data =
+                            (subscriptionState as SubscriptionViewModel.UiState.Success<newsubscriptionModel>).data
+                        val planGroups = data.data.getAllPlans()
+
+                        if (planGroups.isNotEmpty()) {
+                            SubscriptionContent(
+                                modifier = Modifier.weight(1f),
+                                planGroups = planGroups,
+                                selectedSubsId = selectedSubsId,
+                                onSubscriptionSelected = { subsId ->
+                                    viewModel.updateSelectedSubscription(subsId)
+                                },
+                                onContinueClick = {
+
+                                    val intent = Intent(context, RazorpayActivity::class.java)
+                                    val price = (it ?: 0.0)
+                                    intent.putExtra("amount", price.toInt()) // ₹100
+                                    launcher.launch(intent)
+
+                                },
+                                getCycleDuration = viewModel::getCycleDuration,
+                                isLoading = buySubscriptionState is SubscriptionViewModel.UiState.Loading
+                            )
+                        } else {
+                            ErrorContent(
+                                message = "No subscription plans available",
+                                onRetry = { viewModel.fetchSubscription() }
+                            )
+                        }
+                    }
                 }
+
             }
 
-        }
-
-        if (buySubscriptionState is SubscriptionViewModel.UiState.Error) {
-            ErrorSnackbar(
-                message = (buySubscriptionState as SubscriptionViewModel.UiState.Error).message,
-                onDismiss = { viewModel.clearBuySubscriptionState() }
-            )
+            if (buySubscriptionState is SubscriptionViewModel.UiState.Error) {
+                ErrorSnackbar(
+                    message = (buySubscriptionState as SubscriptionViewModel.UiState.Error).message,
+                    onDismiss = { viewModel.clearBuySubscriptionState() }
+                )
+            }
         }
     }
 }
@@ -186,7 +211,7 @@ fun SubscriptionPage(
             .fillMaxWidth()
 
             .background(Color.White)
-            .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 24.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -263,7 +288,7 @@ private fun SubscriptionContent(
     planGroups: List<Pair<SubscriptionType, List<SubscriptionPlan>>>,
     selectedSubsId: String,
     onSubscriptionSelected: (String) -> Unit,
-    onContinueClick: () -> Unit,
+    onContinueClick: (price:Double?) -> Unit,
     getCycleDuration: (BillingCycle) -> String,
     isLoading: Boolean
 ) {
@@ -323,7 +348,7 @@ private fun SubscriptionContent(
         BottomActionBar(
             selectedPlan = selectedPlan,
             selectedSubsId = selectedSubsId,
-            onContinueClick = onContinueClick,
+            onContinueClick = { onContinueClick(selectedPlan!!.price.toDoubleOrNull()) },
             getCycleDuration = getCycleDuration,
             isLoading = isLoading
         )
@@ -541,7 +566,7 @@ fun PlanPeriodItem(
 
         Text(
             text = plan.time_period,
-            fontSize = 12.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             color = Color.Black,
 

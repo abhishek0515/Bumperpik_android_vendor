@@ -1,6 +1,7 @@
 package com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -45,6 +46,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -106,13 +108,15 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-    var quantity_enabled by remember { mutableStateOf(false) }
+    var quantity_enabled by remember { mutableStateOf(offerDetails.quantity.equals("until stock last")) }
+    Log.d("quantity_enabled",quantity_enabled.toString())
     LaunchedEffect(quantity_enabled) {
         if(quantity_enabled){
-            viewmodel.updateQuantity("UNTIL STOCK LAST")
+            viewmodel.updateQuantity("until stock last")
         }
-        else{
-            viewmodel.updateQuantity(null)
+        else {
+           // viewmodel.updateQuantity(null)
+
         }
     }
     LaunchedEffect(Unit) {
@@ -125,170 +129,182 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
             }
         }
     }
-    Column(
-        modifier = Modifier
-            .background(grey)
-            .fillMaxSize()
-    ) {
-        // First Column - Scrollable content (takes remaining space)
+
         Column(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .weight(1f)
-                .background(grey, RoundedCornerShape(8.dp))
-        ) {
+                .background(grey)
+                .fillMaxSize()
+        )
+        {
+            // First Column - Scrollable content (takes remaining space)
             Column(
-                modifier = Modifier.background(Color.White).fillMaxWidth().padding(top = 20.dp)
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .weight(1f)
+                    .background(grey, RoundedCornerShape(8.dp))
             ) {
-                Spacer(Modifier.height(5.dp))
-                Text(
-                    text = "Step 2 of 3",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = satoshi_regular,
-                    color = Color.Black,
-                    modifier = Modifier.padding(16.dp)
-                )
-                Text(
-                    text = "Let's get started with offer banner",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = satoshi_medium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                Spacer(Modifier.height(20.dp))
-            }
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                println("user_choosed_banner $user_choosed_banner")
-                if (user_choosed_banner == startingChoose.UserBanner) {
-                    ImageCardFromUri(
-                        imageUri = offerDetails.BannerImage.toString()
-                    )
-                    Spacer(Modifier.height(10.dp))
+                Column(
+                    modifier = Modifier.background(Color.White).fillMaxWidth().padding(top = 0.dp)
+                ) {
+                    Spacer(Modifier.height(5.dp))
                     Text(
-                        text = "Enter Discount",
-                        fontSize = 14.sp,
+                        text = "Step 2 of 3",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
                         fontFamily = satoshi_regular,
-                        fontWeight = FontWeight.Bold,
                         color = Color.Black,
-                        modifier = Modifier.padding(vertical = 6.dp)
+                        modifier = Modifier.padding(16.dp)
                     )
-                    EditableTextTypeView(textType = offerDetails.discount, onTextChange = {
-                        viewmodel.updateDissaount(it)
-                    })
-
-                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "Offer quantity",
-                        fontSize = 14.sp,
-                        fontFamily = satoshi_regular,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-
+                        text = "Let's get started with offer banner",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = satoshi_medium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    Spacer(Modifier.height(4.dp))
-                    TextFieldView(
-                        value = offerDetails.quantity ?: "",
-                        onValueChange = {
+                    Spacer(Modifier.height(20.dp))
+                }
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                    println("user_choosed_banner $user_choosed_banner")
+                    if (user_choosed_banner == startingChoose.UserBanner) {
+                        ImageCardFromUri(
+                            imageUri = offerDetails.BannerImage.toString()
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "Enter Discount",
+                            fontSize = 14.sp,
+                            fontFamily = satoshi_regular,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.padding(vertical = 6.dp)
+                        )
+                        EditableTextTypeView(textType = offerDetails.discount, onTextChange = {
+                            viewmodel.updateDissaount(it)
+                        })
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Box(modifier = Modifier.fillMaxWidth()){
+                        Text(
+                            text = "Offer quantity",
+                            fontSize = 14.sp,
+                            fontFamily = satoshi_regular,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.align(Alignment.CenterStart)
+
+                            )
+
+
+                            RadioButton(selected = !quantity_enabled, onClick = {quantity_enabled=!quantity_enabled},
+                                colors = RadioButtonDefaults.colors(selectedColor = BtnColor),
+                                modifier = Modifier.align(Alignment.CenterEnd))
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        TextFieldView(
+                            value = offerDetails.quantity ?: "",
+                            onValueChange = {
 
                                 viewmodel.updateQuantity(it)
 
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        placeholder = "Enter Offer Quantity",
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        singleLine = true,
-                        isEnabled = !quantity_enabled
-                    )
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            placeholder = "Enter Offer Quantity",
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            singleLine = true,
+                            isEnabled = !quantity_enabled
+                        )
 
-                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "Until stock last",
+                                fontSize = 16.sp,
+                                fontFamily = satoshi_regular,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.align(Alignment.CenterStart),
+                                color = Color.Gray,
+
+                                )
+
+                            Switch(
+                                modifier = Modifier.align(Alignment.CenterEnd),
+                                checked = quantity_enabled,
+                                onCheckedChange = { quantity_enabled = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = BtnColor,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Color.Gray
+                                )
+                            )
+                        }
+
+
+                        Spacer(Modifier.height(2.dp))
                         Text(
-                            text = "Until stock end",
-                            fontSize = 16.sp,
+                            text = "Offer sub category",
+                            fontSize = 14.sp,
                             fontFamily = satoshi_regular,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.align(Alignment.CenterStart),
-                            color = Color.Gray,
+                            color = Color.Black,
 
                             )
-
-                        Switch(modifier = Modifier.align(Alignment.CenterEnd),
-                            checked = quantity_enabled,
-                            onCheckedChange = { quantity_enabled = it },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = BtnColor,
-                                uncheckedThumbColor = Color.White,
-                                uncheckedTrackColor = Color.Gray
-                            )
-                        )
-                    }
-
-
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = "Offer Sub-Category",
-                        fontSize = 14.sp,
-                        fontFamily = satoshi_regular,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-
-                        )
-                    Spacer(Modifier.height(4.dp))
-                    SubcategoryDropdown(
-                        subcategories =subcategories ,
-                        selectedSubcategoryId = offerDetails.subcat_id,
-                        onSubcategorySelected = {
-                            viewmodel.updateSubCat(it)
-                        }
-
-                        )
-
-
-                    Spacer(Modifier.height(10.dp))
-                } else {
-                    choosed_Template?.let { EditTemplate(viewmodel, it,subcategories) }
-                }
-
-
-                OfferDateSelector(
-                    offerStartDate = offerDetails.offerStartDate,
-                    offerEndDate = offerDetails.offerEndDate,
-                    onStartClick = { showStartCalendar = true },
-                    onEndClick = {
-                        if (offerDetails.offerStartDate.isNullOrEmpty()) {
-                            viewmodel.showError("Please choose start date first")
-                        } else {
-                            showEndCalendar = true
-                        }
-                    }
-                )
-            }
-        }
-
-        // Second Column - Bottom button (fixed at bottom)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(16.dp)
-        ) {
-            PrimaryButton(
-                text = "Next",
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    if(viewmodel.validateBannerDetail()){
-                        navController.navigate(CreateOfferScreenViews.MoreofferDetails.route){
-                            popUpTo(CreateOfferScreenViews.MoreofferDetails.route){
-                                inclusive=true
+                        Spacer(Modifier.height(4.dp))
+                        SubcategoryDropdown(
+                            subcategories = subcategories,
+                            selectedSubcategoryId = offerDetails.subcat_id,
+                            onSubcategorySelected = {
+                                viewmodel.updateSubCat(it)
                             }
 
-                        }
+                        )
+
+
+                        Spacer(Modifier.height(10.dp))
+                    } else {
+                        choosed_Template?.let { EditTemplate(viewmodel, it, subcategories) }
                     }
 
+
+                    OfferDateSelector(
+                        offerStartDate = offerDetails.offerStartDate,
+                        offerEndDate = offerDetails.offerEndDate,
+                        onStartClick = { showStartCalendar = true },
+                        onEndClick = {
+                            if (offerDetails.offerStartDate.isNullOrEmpty()) {
+                                viewmodel.showError("Please choose start date first")
+                            } else {
+                                showEndCalendar = true
+                            }
+                        }
+                    )
                 }
-            )
+            }
+
+            // Second Column - Bottom button (fixed at bottom)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(16.dp)
+            ) {
+                PrimaryButton(
+                    text = "Next",
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        if (viewmodel.validateBannerDetail()) {
+                            navController.navigate(CreateOfferScreenViews.MoreofferDetails.route) {
+                                popUpTo(CreateOfferScreenViews.MoreofferDetails.route) {
+                                    inclusive = true
+                                }
+
+                            }
+                        }
+
+                    }
+                )
+
         }
     }
     CalendarBottomSheet(
@@ -297,7 +313,7 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
         onDateSelected = { startDate = it },
         onDismiss = { showStartCalendar = false },
         startDate = LocalDate.now(),
-        text ="Offer Start Date",
+        text ="Offer start date",
         onConfirm = {
             if (it != null) {
                 viewmodel.updateStartDate(it.format(formatter))
@@ -313,7 +329,7 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
         startDate = startDate ?: LocalDate.now(),
         onDateSelected = { endDate = it },
         onDismiss = { showEndCalendar = false },
-        text ="Offer End Date",
+        text ="Offer end date",
         onConfirm = {
             if (it != null) {
                 viewmodel.updateEndDate(it.format(formatter))
@@ -331,6 +347,15 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
     val templateData by viewmodel.templateData.collectAsState()
     val offerDetails by viewmodel.offerDetails.collectAsState()
     var brandnameenabled by remember {  mutableStateOf(false)}
+    var quantity_enabled by remember { mutableStateOf(offerDetails.quantity.equals("until stock last")) }
+    LaunchedEffect(quantity_enabled) {
+        if(quantity_enabled){
+            viewmodel.updateQuantity("Until stock last")
+        }
+        else{
+           // viewmodel.updateQuantity(null)
+        }
+    }
     LaunchedEffect(offerDetails) {
         if(offerDetails.BannerImage!=null){
             brandnameenabled=false
@@ -400,7 +425,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
         })
         Spacer(Modifier.height(10.dp))
         Text(
-            text = "Enter Discount",
+            text = "Enter discount",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -411,31 +436,67 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
             viewmodel.updateDissaount(it)
         })
         Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = "Offer quantity",
-            fontSize = 14.sp,
-            fontFamily = satoshi_regular,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
 
-        )
+
+        Box(modifier = Modifier.fillMaxWidth()){
+            Text(
+                text = "Offer quantity",
+                fontSize = 14.sp,
+                fontFamily = satoshi_regular,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.align(Alignment.CenterStart)
+
+            )
+
+
+            RadioButton(selected = !quantity_enabled, onClick = {quantity_enabled=!quantity_enabled},
+                colors = RadioButtonDefaults.colors(selectedColor = BtnColor),
+                modifier = Modifier.align(Alignment.CenterEnd))
+        }
         Spacer(Modifier.height(4.dp))
         TextFieldView(
             value = offerDetails.quantity ?: "",
             onValueChange = {
 
-                    viewmodel.updateQuantity(it)
+                viewmodel.updateQuantity(it)
 
             },
-            placeholder = "Enter Offer Quantity",
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            placeholder = "Enter offer quantity",
             modifier = Modifier
                 .fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
+            isEnabled = !quantity_enabled
         )
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Until stock last",
+                fontSize = 16.sp,
+                fontFamily = satoshi_regular,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterStart),
+                color = Color.Gray,
+
+                )
+
+            Switch(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                checked = quantity_enabled,
+                onCheckedChange = { quantity_enabled = it },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = BtnColor,
+                    uncheckedThumbColor = Color.White,
+                    uncheckedTrackColor = Color.Gray
+                )
+            )
+        }
         Spacer(Modifier.height(10.dp))
+
         Text(
-            text = "Offer Sub-Category",
+            text = "Offer sub category",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -454,7 +515,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
 
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Sub Heading",
+            text = "Sub heading",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -467,7 +528,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Brand Name",
+            text = "Brand name",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -750,6 +811,7 @@ Card( modifier = modifier
 fun OfferDateSelector(
     offerStartDate: String?,
     offerEndDate: String?,
+    text:String="Offer",
     onStartClick: () -> Unit,
     onEndClick: () -> Unit
 ) {
@@ -760,7 +822,7 @@ fun OfferDateSelector(
             .padding(vertical = 16.dp)
     ) {
         Text(
-            text = "Offer Start Date",
+            text = "$text start date",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -803,7 +865,7 @@ fun OfferDateSelector(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Offer End Date",
+            text = "$text end date",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,

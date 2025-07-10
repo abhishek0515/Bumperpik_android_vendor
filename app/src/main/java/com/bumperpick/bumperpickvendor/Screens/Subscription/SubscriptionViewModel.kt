@@ -91,7 +91,7 @@ class SubscriptionViewModel(private val vendorRepository: VendorRepository) : Vi
         }
     }
 
-    fun buySubscription() {
+    fun buySubscription(transactionId:String) {
         val currentSubsId = _selectedSubsId.value
         if (currentSubsId.isEmpty()) {
             _buySubscriptionState.value = UiState.Error("Please select a subscription")
@@ -101,7 +101,7 @@ class SubscriptionViewModel(private val vendorRepository: VendorRepository) : Vi
         viewModelScope.launch {
             _buySubscriptionState.value = UiState.Loading
             try {
-                val result = vendorRepository.selectSubsVendor(id = currentSubsId)
+                val result = vendorRepository.selectSubsVendor(id = currentSubsId, transactionId = transactionId)
                 _buySubscriptionState.value = when (result) {
                     is Result.Error -> UiState.Error(result.message)
                     Result.Loading -> UiState.Loading

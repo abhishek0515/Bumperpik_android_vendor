@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,69 +71,72 @@ fun SubscriptionXDetailPage(
     LaunchedEffect(Unit) {
         accountViewModel.fetchProfile()
     }
+    Scaffold() {
+        Column(
+            modifier = modifier
+                .padding(it)
+                .fillMaxSize()
+                .background(Color(0xFFF5F5F5))
+        )
+        {
+            // Top App Bar
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
-    ) {
-        // Top App Bar
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color.White,
-            shadowElevation = 4.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBackPressed) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.Black
-                    )
-                }
-                Text(
-                    text = "My Subscription",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(start = 12.dp)
-                )
-            }
-        }
-
-        when (uiState) {
-            is AccountUi_state.Loading -> {
-                Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            is AccountUi_state.Error -> {
-                Box(Modifier.fillMaxSize(), Alignment.Center) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
                     Text(
-                        text = (uiState as AccountUi_state.Error).message,
-                        color = Color.Red,
-                        fontSize = 16.sp
+                        text = "My Subscription",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(start = 12.dp)
                     )
                 }
             }
 
-            is AccountUi_state.GetProfile -> {
-                (uiState as AccountUi_state.GetProfile).vendorDetail.data.subscription?.let { subscription ->
-                    SubscriptionContent(subscription = subscription)
-                } ?: Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    Text("No subscription found", color = Color.Gray, fontSize = 16.sp)
+            when (uiState) {
+                is AccountUi_state.Loading -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
                 }
-            }
 
-            is AccountUi_state.Empty -> {
-                Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    Text("Loading...", color = Color.Gray, fontSize = 16.sp)
+                is AccountUi_state.Error -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Text(
+                            text = (uiState as AccountUi_state.Error).message,
+                            color = Color.Red,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+
+                is AccountUi_state.GetProfile -> {
+                    (uiState as AccountUi_state.GetProfile).vendorDetail.data.subscription?.let { subscription ->
+                        SubscriptionContent(subscription = subscription)
+                    } ?: Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Text("No subscription found", color = Color.Gray, fontSize = 16.sp)
+                    }
+                }
+
+                is AccountUi_state.Empty -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Text("Loading...", color = Color.Gray, fontSize = 16.sp)
+                    }
                 }
             }
         }

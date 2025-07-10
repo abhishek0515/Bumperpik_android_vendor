@@ -25,9 +25,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.razorpay.PaymentData
+import com.razorpay.PaymentResultWithDataListener
 import java.util.concurrent.Executors
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,6 +38,15 @@ class MainActivity : ComponentActivity() {
                 AppNavigation()
             }
         }
+    }
+    override fun onPaymentSuccess(paymentId: String?, data: PaymentData?) {
+        // Forward to the payment manager
+        RazorpayPaymentManager.onPaymentSuccess(paymentId, data)
+    }
+
+    override fun onPaymentError(code: Int, description: String?, data: PaymentData?) {
+        // Forward to the payment manager
+        RazorpayPaymentManager.onPaymentError(code, description, data)
     }
 
 }

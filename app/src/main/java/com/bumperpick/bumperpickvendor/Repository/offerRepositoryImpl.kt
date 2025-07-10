@@ -19,6 +19,7 @@ import com.bumperpick.bumperpickvendor.API.Provider.ApiService
 import com.bumperpick.bumperpickvendor.API.Provider.prepareImageParts
 import com.bumperpick.bumperpickvendor.API.Provider.safeApiCall
 import com.bumperpick.bumperpickvendor.API.Provider.toMultipartPart
+import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -54,7 +55,7 @@ class OfferRepositoryImpl(
             map["description"] = offerModel.productDiscription.toString().toRequestBody("text/plain".toMediaType())
             map["terms"] = offerModel.termsAndCondition.toString().toRequestBody("text/plain".toMediaType())
             map["start_date"] = offerModel.offerStartDate.toString().toRequestBody("text/plain".toMediaType())
-            map["end_date"] = offerModel.offerEndDate.toString().toRequestBody("text/plain".toMediaType())
+            if(!offerModel.offerEndDate.isNullOrEmpty()) map["end_date"] = offerModel.offerEndDate.toRequestBody("text/plain".toMediaType())
             map["sub_category_id"] = offerModel.subcat_id.toString().toRequestBody("text/plain".toMediaType())
             map["token"] = token.toString().toRequestBody("text/plain".toMediaType())
 
@@ -104,24 +105,7 @@ class OfferRepositoryImpl(
         return tempFile
     }
 
-    private fun getFileName(context: Context, uri: Uri): String? {
-        var result: String? = null
-        if (uri.scheme == "content") {
-            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
-                }
-            }
-        }
-        if (result == null) {
-            result = uri.path
-            val cut = result?.lastIndexOf('/')
-            if (cut != null && cut != -1) {
-                result = result?.substring(cut + 1)
-            }
-        }
-        return result
-    }
+
 
     override suspend fun GetOffers(): Result<List<HomeOffer>> {
         return try {
@@ -183,7 +167,8 @@ class OfferRepositoryImpl(
                 val homeOffer = results.data.find {
                     it.offerId.equals(id)
                 }
-                Result.Success(homeOffer)
+                val changedoffer=homeOffer?.copy(startDate = formatDate(homeOffer?.startDate!!), endDate = formatDate(homeOffer?.endDate!!))
+                Result.Success(changedoffer)
             }
         }
     }
@@ -208,6 +193,9 @@ class OfferRepositoryImpl(
             null
         }
     }
+
+    fun String.toRequestBody(): RequestBody =
+        this.toRequestBody("text/plain".toMediaTypeOrNull())
     override suspend fun updateOffer(
         offerModel: HomeOffer,
         deletedImage: List<String>,
@@ -215,7 +203,7 @@ class OfferRepositoryImpl(
     ): Result<OfferUpdateModel> {
         return try {
             val vendorDetails = dataStoreManager.get_Vendor_Details()
-            val token = dataStoreManager.getToken()?.token
+            val token="Bearer ${dataStoreManager.getToken()!!.token}"
             Log.d("token",token.toString())
 
             // Prepare media list only if not empty
@@ -234,39 +222,51 @@ class OfferRepositoryImpl(
             val imageAppearance = "green"
             val heading = offerModel.offerTitle.toString()
             val discount = offerModel.discount
-            val brandName = offerModel.brand_logo_url.toString()
+            val brandName = offerModel.offerTitle.toString()
             val title = offerModel.offerTitle.toString()
             val description = offerModel.offerDescription.toString()
             val terms = offerModel.termsAndCondition.toString()
             val startDate = offerModel.startDate.toString()
             val endDate = offerModel.endDate.toString()
+            val map = mutableMapOf<String, RequestBody>()
+            map["vendor_id"]=vendorId.toRequestBody()
+            map["offer_template"]=offerTemplate.toRequestBody()
+             map["title"]=title.toRequestBody()
+            map["description"]=description.toRequestBody()
+            map["terms"]=terms.toRequestBody()
+            Log.d("start_date",startDate)
+           map["start_date"]=startDate.toRequestBody()
+           map["end_date"]=endDate.toRequestBody()
+            deletedImage.forEachIndexed { index, id ->
+                map["delete_media_ids[$index]"] = RequestBody.create("text/plain".toMediaTypeOrNull(), id)
+            }
+
+            val mediaList = newLocalMedia.map { uri: Uri ->
+                uriToFile(context, uri)
+            }
+            val mediaListMulti = prepareImageParts(mediaList)
+
+
+//
+
 
 
 
             Log.d("UpdateOffer", "Media list size: ${medialist.size}")
-            Log.d("UpdateOffer", "Deleted images: ${deletedImage.size}")
+            Log.d("UpdateOffer", "Deleted images: ${deletedImage}")
+            Log.d("UpdateOffer", "brand name: ${brandName}")
 
             val editOffer = safeApiCall(
                 api = {
-
-                    apiService.updateOfferTextOnly(
-                        id = offerModel.offerId,
-                        vendorId=vendorId,
-                        offerTemplate="offerTemplate",
-                        imageAppearance="imageAppearance",
-                        heading=heading,
-                        discount=discount?:"",
-                        brandName=brandName,
-                        title=title,
-                        description=description,
-                        terms=terms,
-                        startDate=startDate,
-                        endDate=endDate,
-                        token=token?:""
-
-
-
-                    )
+if(mediaListMulti.isEmpty()) {
+    apiService.updateOfferTextOnly(
+        id = offerModel.offerId ?: "",
+        token = token,
+        map
+    )
+}else{
+    apiService.updateOfferWithMedia(id=offerModel.offerId?:"", token = token,data=map, mediaFiles = mediaListMulti)
+}
 
                 },
                 errorBodyParser = { json ->

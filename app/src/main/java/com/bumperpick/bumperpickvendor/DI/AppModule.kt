@@ -25,7 +25,7 @@ import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CreateOfferView
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOfferViewmodel
 import com.bumperpick.bumperpickvendor.Screens.EditAccountScreen.EditAccountViewModel
 import com.bumperpick.bumperpickvendor.Screens.Event2.Events2Viewmodel
-import com.bumperpick.bumperpickvendor.Screens.Events.EventsViewmodel
+import com.bumperpick.bumperpickvendor.Screens.Campaign.EventsViewmodel
 import com.bumperpick.bumperpickvendor.Screens.Login.GoogleSignInViewModel
 import com.bumperpick.bumperpickvendor.Screens.Login.LoginViewmodel
 import com.bumperpick.bumperpickvendor.Screens.OTP.OtpViewModel
@@ -36,13 +36,11 @@ import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionViewMode
 import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailViewmodel
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
-import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import org.koin.androidx.viewmodel.dsl.viewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import kotlin.math.sin
 
 val networkModule = module {
 

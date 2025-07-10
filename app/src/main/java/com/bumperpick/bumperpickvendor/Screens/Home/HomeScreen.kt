@@ -1,5 +1,6 @@
 package com.bumperpick.bumperpickvendor.Screens.Home
 
+import RazorpayPaymentButton
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -103,7 +104,7 @@ fun HomeScreen(onClick:(HomeScreenClicked) -> Unit) {
                 NavigationItem("Create offers", icon = Icons.Default.List, contentDescription = "Create offers"),
                 NavigationItem("More", icon_draw = R.drawable.more_vertical_square_svgrepo_com, contentDescription = "Account")
             )
-
+          //  RazorpayPaymentButton(amountInPaise = 1000, email = "anuj@gmail.com", contact = "1234567889")
             BottomNavigationBar(
                 items = navItems,
                 selectedTab = selectedTab,

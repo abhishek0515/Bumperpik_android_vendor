@@ -1,8 +1,6 @@
 package com.bumperpick.bumperpickvendor.Screens.Ads
 
-import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,15 +41,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.bumperpick.bumperpickvendor.API.FinalModel.AdsDetailModel
-import com.bumperpick.bumperpickvendor.API.FinalModel.vendorAdsModel
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 import com.bumperpick.bumperpickvendor.Screens.Component.ButtonView
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CalendarBottomSheet
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.OfferDateSelector
-import com.bumperpick.bumperpickvendor.Screens.Events.EditableImagePicker
-import com.bumperpick.bumperpickvendor.Screens.Events.EventsViewmodel
+import com.bumperpick.bumperpickvendor.Screens.Campaign.EditableImagePicker
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey

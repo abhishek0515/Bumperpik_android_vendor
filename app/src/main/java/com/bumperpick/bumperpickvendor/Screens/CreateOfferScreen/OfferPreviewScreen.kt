@@ -32,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
@@ -141,176 +142,193 @@ fun OfferPreviewScreen(navController: NavController, viewmodel: CreateOfferViewm
 
 
 
-    Column(
-        modifier = Modifier
-            .background(grey)
-            .fillMaxSize()
-    ) {
-        // First Column - Scrollable content (takes remaining space)
         Column(
             modifier = Modifier
 
-                .verticalScroll(rememberScrollState())
-                .weight(1f)
-                .background(grey, RoundedCornerShape(8.dp))
-        ) {
+                .background(grey)
+                .fillMaxSize()
+        )
+        {
+            // First Column - Scrollable content (takes remaining space)
             Column(
-                modifier = Modifier.background(Color.White).fillMaxWidth()
+                modifier = Modifier
+
+                    .verticalScroll(rememberScrollState())
+                    .weight(1f)
+                    .background(grey, RoundedCornerShape(8.dp))
             ) {
+                Column(
+                    modifier = Modifier.background(Color.White).fillMaxWidth()
+                ) {
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = "Offer Preview",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = satoshi_medium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)
+                    )
+                    Spacer(Modifier.height(20.dp))
+                }
+
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = "Offer Preview",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = satoshi_medium,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)
+                    text = "Banner",
+                    fontSize = 14.sp,
+                    fontFamily = satoshi_regular,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Spacer(Modifier.height(20.dp))
-            }
-
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = "Banner",
-                fontSize = 14.sp,
-                fontFamily = satoshi_regular,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            if (userChoosedBanner == startingChoose.UserBanner) {
-                ImageCardFromUri(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    imageUri = offerDetails.BannerImage.toString()
+                Spacer(modifier = Modifier.height(8.dp))
+                if (userChoosedBanner == startingChoose.UserBanner) {
+                    ImageCardFromUri(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        imageUri = offerDetails.BannerImage.toString()
+                    )
+                } else if (userChoosedBanner == startingChoose.Template) {
+                    renderTemplate(choosed_Template, templateData)
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider(
+                    modifier = Modifier.height(1.dp).padding(horizontal = 16.dp),
+                    color = Color.Gray.copy(0.2f)
                 )
-            }
-            else if(userChoosedBanner == startingChoose.Template){
-                renderTemplate(choosed_Template, templateData)
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider(modifier = Modifier.height(1.dp).padding(horizontal = 16.dp), color = Color.Gray.copy(0.2f))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Media (${offerDetails.medialList.size}",
-                fontSize = 14.sp,
-                fontFamily = satoshi_regular,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(vertical = 6.dp, horizontal = 16.dp)
-            )
-            val selectedMediaList=offerDetails.medialList
-            val context= LocalContext.current
-            if(offerDetails.medialList.isNotEmpty()){
-                LazyRow( horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 3.dp)) {
-                    items(offerDetails.medialList.size){index: Int ->
-                        val mediaUri = selectedMediaList[index]
-                        val isVideo = isVideoFile(context, mediaUri)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Media (${offerDetails.medialList.size}",
+                    fontSize = 14.sp,
+                    fontFamily = satoshi_regular,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(vertical = 6.dp, horizontal = 16.dp)
+                )
+                val selectedMediaList = offerDetails.medialList
+                val context = LocalContext.current
+                if (offerDetails.medialList.isNotEmpty()) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(horizontal = 4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 3.dp)
+                    ) {
+                        items(offerDetails.medialList.size) { index: Int ->
+                            val mediaUri = selectedMediaList[index]
+                            val isVideo = isVideoFile(context, mediaUri)
 
-                        MediaPreview(
-                            mediaUri=mediaUri,
-                            isVideo=isVideo,
-                            onPreview = {}
-                        )
+                            MediaPreview(
+                                mediaUri = mediaUri,
+                                isVideo = isVideo,
+                                onPreview = {}
+                            )
 
 
-
+                        }
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider(
+                    modifier = Modifier.height(1.dp).padding(horizontal = 16.dp),
+                    color = Color.Gray.copy(0.2f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Product Title",
+                    fontSize = 14.sp,
+                    fontFamily = satoshi_regular,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${offerDetails.productTittle}",
+                    fontSize = 16.sp,
+                    fontFamily = satoshi_medium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider(
+                    modifier = Modifier.height(1.dp).padding(horizontal = 16.dp),
+                    color = Color.Gray.copy(0.2f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Product Description",
+                    fontSize = 14.sp,
+                    fontFamily = satoshi_regular,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${offerDetails.productDiscription}",
+                    fontSize = 16.sp,
+                    fontFamily = satoshi_medium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider(
+                    modifier = Modifier.height(1.dp).padding(horizontal = 16.dp),
+                    color = Color.Gray.copy(0.2f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Terms and Conditions",
+                    fontSize = 14.sp,
+                    fontFamily = satoshi_regular,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${offerDetails.termsAndCondition}",
+                    fontSize = 16.sp,
+                    fontFamily = satoshi_medium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider(
+                    modifier = Modifier.height(1.dp).padding(horizontal = 16.dp),
+                    color = Color.Gray.copy(0.2f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Offer Quantity",
+                    fontSize = 14.sp,
+                    fontFamily = satoshi_regular,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${offerDetails.quantity}",
+                    fontSize = 16.sp,
+                    fontFamily = satoshi_medium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Divider(modifier = Modifier.height(1.dp).padding(horizontal = 16.dp), color = Color.Gray.copy(0.2f))           
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Product Title",
-                fontSize = 14.sp,
-                fontFamily = satoshi_regular,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "${offerDetails.productTittle}",
-                fontSize = 16.sp,
-                fontFamily = satoshi_medium,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-           Divider(modifier = Modifier.height(1.dp).padding(horizontal = 16.dp), color = Color.Gray.copy(0.2f))           
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Product Description",
-                fontSize = 14.sp,
-                fontFamily = satoshi_regular,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "${offerDetails.productDiscription}",
-                fontSize = 16.sp,
-                fontFamily = satoshi_medium,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-           Divider(modifier = Modifier.height(1.dp).padding(horizontal = 16.dp), color = Color.Gray.copy(0.2f))           
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Terms and Conditions",
-                fontSize = 14.sp,
-                fontFamily = satoshi_regular,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "${offerDetails.termsAndCondition}",
-                fontSize = 16.sp,
-                fontFamily = satoshi_medium,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-           Divider(modifier = Modifier.height(1.dp).padding(horizontal = 16.dp), color = Color.Gray.copy(0.2f))           
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Offer Quantity",
-                fontSize = 14.sp,
-                fontFamily = satoshi_regular,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "${offerDetails.quantity}",
-                fontSize = 16.sp,
-                fontFamily = satoshi_medium,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
 
-
-
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(16.dp)
-        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(horizontal = 8.dp, vertical = 16.dp)
+            ) {
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -329,32 +347,37 @@ fun OfferPreviewScreen(navController: NavController, viewmodel: CreateOfferViewm
                     )
 
                     if (loading) {
-                        Box(  modifier = Modifier.weight(1f).height(30.dp).fillMaxWidth().align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            color = BtnColor,
+                        Box(
+                            modifier = Modifier.weight(1f).height(30.dp).fillMaxWidth()
+                                .align(Alignment.CenterVertically),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = BtnColor,
 
-                        )
-                    }
+                                )
+                        }
                     } else {
-                    PrimaryButton(
-                        text = "Publish your Offer",
-                        onClick = {
-                            Log.d("userType", userChoosedBanner.toString())
-                            loading = true
+                        PrimaryButton(
+                            text = "Publish your Offer",
+                            onClick = {
+                                Log.d("userType", userChoosedBanner.toString())
+                                loading = true
 
-                            triggerCapture = true
+                                triggerCapture = true
 
-                            viewmodel.AddDatatoServer()
+                                viewmodel.AddDatatoServer()
 
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
 
+                    }
                 }
             }
+
         }
 
-    }
     if (showPreviewDialog && selectedPreviewMedia != null) {
         MediaPreviewDialog(
             mediaUri = selectedPreviewMedia!!,

@@ -6,13 +6,11 @@ import com.bumperpick.bumperpickvendor.API.FinalModel.Data
 import com.bumperpick.bumperpickvendor.API.FinalModel.error_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
-import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.update_profile_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.vendor_details_model
 import com.bumperpick.bumperpickvendor.API.Provider.ApiResult
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
 import com.bumperpick.bumperpickvendor.API.Provider.safeApiCall
-import com.bumperpick.bumperpickvendor.API.Provider.toMultipartPart
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -21,7 +19,6 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
-import kotlin.random.Random
 
 class VendorRepositoryImpl(
     private val dataStoreManager: DataStoreManager,
@@ -62,9 +59,13 @@ class VendorRepositoryImpl(
             Result.Error("Failed to fetch categories", e)
         }
     }
-    fun prepareImagePart(file: File,name:String): MultipartBody.Part {
-        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        return MultipartBody.Part.createFormData(name, file.name, requestFile)
+    fun prepareImagePart(file: File?, name: String): MultipartBody.Part? {
+
+        if (file != null) {
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            return MultipartBody.Part.createFormData(name, file.name, requestFile)
+        }
+        else return null
     }
     fun createPartFromString(value: String): RequestBody {
         return value.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -94,11 +95,16 @@ class VendorRepositoryImpl(
             map["gst_number"] = newDetails.GstNumber.toRequestBody("text/plain".toMediaType())
             map["vendor_id"] = vendorId.toRequestBody("text/plain".toMediaType())
 
-            val image = prepareImagePart(name="Gst_pic_url", file = details.GstPicUrl!!)
+            val image = prepareImagePart(name ="Gst_pic_url", file = details.GstPicUrl!!)
             Log.d("MAP", map.toString())
 
             val submitDetail = safeApiCall(
-                api = { apiService.register_vendor(map,image) },
+                api = {
+                    if(image!=null) {
+                        apiService.register_vendor(map, image)
+                    }
+                    apiService.register_vendorWOimage(map)
+                      },
                 errorBodyParser = { json ->
                     try {
                         Gson().fromJson(json, error_model::class.java)
@@ -172,12 +178,12 @@ class VendorRepositoryImpl(
         }
     }
 
-    override suspend fun selectSubsVendor( id:String): Result<select_subs_model> {
+    override suspend fun selectSubsVendor( id:String,transactionId:String): Result<select_subs_model> {
         return try {
             val token=dataStoreManager.getToken()!!.token
             val add_subs= safeApiCall(
                 api = {apiService.Vendor_subs_choose(subscription_id = id,token=token,
-                    transaction_id =generateCustomTransactionId(8),
+                    transaction_id =transactionId,
                     status = 1)},
                 errorBodyParser = {
                         json->
@@ -245,7 +251,9 @@ class VendorRepositoryImpl(
       return try {
           Log.d("update_profile",vendorDetails.toString())
           val token=dataStoreManager.getToken()!!.token
-          val image = prepareImagePart(name="image", file = vendorDetails.userImage!!)
+
+          val image = prepareImagePart(name = "image", file = vendorDetails.userImage)
+
           val map = mutableMapOf<String, RequestBody>()
           map["token"]=token.toPart()
           map["name"]=vendorDetails.Vendor_EstablishName.toPart()
@@ -253,7 +261,7 @@ class VendorRepositoryImpl(
           map["email"]=vendorDetails.Vendor_Email.toPart()
           map["establishment_name"]=vendorDetails.Vendor_EstablishName.toPart()
           map["brand_name"]=vendorDetails.Vendor_brand.toPart()
-          map["establishment_address"]=vendorDetails.Vendor_EstablishName.toPart()
+          map["establishment_address"]=vendorDetails.Establisment_Adress.toPart()
           map["outlet_address"]=vendorDetails.Outlet_Address.toPart()
           map["gst_number"]=vendorDetails.GstNumber.toPart()
           map["start_time"]=vendorDetails.openingTime!!.toPart()
@@ -261,7 +269,14 @@ class VendorRepositoryImpl(
 
 
           val update= safeApiCall(
-              api = {apiService.UpdateProfile(map,image)},
+              api = {
+                  if (image != null) {
+                      apiService.UpdateProfile(map,image)
+                  }
+                  else{
+                      apiService.UpdateProfileWOImage(map)
+                  }
+              },
               errorBodyParser = { json ->
                   try {
                       Gson().fromJson(json, error_model::class.java)

@@ -204,7 +204,7 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                             }
                         , textDecoration = TextDecoration.Underline)
 
-                    if(show_renewbtn) {
+                    if(true) {
 
                         Spacer(modifier = Modifier.height(12.dp))
                         ButtonView(text = "Renew now") {
@@ -324,49 +324,6 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
 
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.EngagementClick(MarketingOption.LUCKY_DRAW))
-            }.background(Color.White), )
-            {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
-                    Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "Lucky draw", color = Color.Black, fontSize = 16.sp,)
-                }
-
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
-
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-      Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.EngagementClick(MarketingOption.CONTEST_FOR_CUSTOMERS))
-            }.background(Color.White), )
-            {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
-                    Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "Contest for Customer", color = Color.Black, fontSize = 16.sp,)
-                }
-
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
-
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.EngagementClick(MarketingOption.SCRATCH_AND_WIN))
-            }.background(Color.White), )
-            {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
-                    Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "Scratch & win", color = Color.Black, fontSize = 16.sp,)
-                }
-
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
-
-            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -377,7 +334,7 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                 Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "Ads and Banner", color = Color.Black, fontSize = 16.sp,)
+                    Text(text = "Ads and banner", color = Color.Black, fontSize = 16.sp,)
                 }
 
                 Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)

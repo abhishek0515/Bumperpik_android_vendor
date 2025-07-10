@@ -439,7 +439,7 @@ fun OfferOtpScreen(
 
     when (val currentState = uiState) {
         is UiState.Error -> {
-            ErrorMessage(message = "Error in fetching offer details")
+            ErrorMessage(message = currentState.message)
         }
         UiState.Loading -> {
             Box(modifier = Modifier.fillMaxSize()) {

@@ -14,7 +14,7 @@ interface VendorRepository {
     suspend fun  SavedDetail(details:Vendor_Details,number:String):Result<String>
     suspend fun  getSavedVendorDetail():Result<Data>
     suspend fun  fetchSubscription():Result<newsubscriptionModel>
-    suspend fun selectSubsVendor(id:String):Result<select_subs_model>
+    suspend fun selectSubsVendor(id:String,transactionId:String):Result<select_subs_model>
     suspend fun getProfile():Result<vendor_details_model>
     suspend fun updateProfile(
         vendorDetails: Vendor_Details

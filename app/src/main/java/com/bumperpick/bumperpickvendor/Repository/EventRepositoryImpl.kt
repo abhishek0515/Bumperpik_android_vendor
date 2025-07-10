@@ -12,13 +12,10 @@ import com.bumperpick.bumperpickvendor.API.Provider.ApiResult
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
 import com.bumperpick.bumperpickvendor.API.Provider.safeApiCall
 import com.bumperpick.bumperpickvendor.API.Provider.toMultipartPart
-import com.bumperpick.bumperpickvendor.Screens.Event2.CreateEventModel
-import com.bumperpick.bumperpickvendor.Screens.Events.CreateCampaignModel
+import com.bumperpick.bumperpickvendor.Screens.Campaign.CreateCampaignModel
 
 import com.google.gson.Gson
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
@@ -141,7 +138,7 @@ class EventRepositoryImpl(val dataStoreManager: DataStoreManager,val apiService:
         this.toRequestBody("text/plain".toMediaTypeOrNull())
     override suspend fun updateEvent(eventModel: CreateCampaignModel): Result<success_model> {
         val map = mutableMapOf<String, RequestBody>()
-        val token=dataStoreManager.getToken()!!.token
+        val token="Bearer ${dataStoreManager.getToken()!!.token}"
         val banner = eventModel.bannerImage?.let {
             uriToFile(context, it).toMultipartPart(partName = "banner_image")
         }
@@ -152,13 +149,13 @@ class EventRepositoryImpl(val dataStoreManager: DataStoreManager,val apiService:
         map["address"] = eventModel.address.toString().toRequestBody()
         map["start_date"] = eventModel.startDate.toString().toRequestBody()
         map["end_date"] = eventModel.endDate.toString().toRequestBody()
-        map["token"] = token.toRequestBody()
         map["number_of_participant"]=eventModel.numberOfParticipant.toString().toRequestBody()
+
         val event= safeApiCall(api = {
             if (banner != null)
-                apiService.campaignUpdate(eventModel.id, map, banner)
+                apiService.campaignUpdate(eventModel.id, token=token,map, banner)
             else
-                apiService.campaignUpdateWithoutBanner(eventModel.id, map)},
+                apiService.campaignUpdateWithoutBanner(eventModel.id, token,map)},
             errorBodyParser = {
                 try {
 

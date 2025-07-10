@@ -1,7 +1,6 @@
 package com.bumperpick.bumperpickvendor.Screens.Ads
 
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -23,32 +22,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,25 +60,20 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXX
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXXXXXX
-import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXXXXXXXX
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Screens.Component.BottomSheetItem
 import com.bumperpick.bumperpickvendor.Screens.Component.ButtonView
-import com.bumperpick.bumperpickvendor.Screens.Component.Campaign_EditDeleteBottomSheet
-import com.bumperpick.bumperpickvendor.Screens.Component.EditDelete
 import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
-import com.bumperpick.bumperpickvendor.Screens.Events.InfoRow
-import com.bumperpick.bumperpickvendor.Screens.Home.HomeScreenClicked
+import com.bumperpick.bumperpickvendor.Screens.Campaign.InfoRow
 
 import com.bumperpick.bumperpickvendor.Screens.OfferPage.DeleteExpiredOfferDialog
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
-import com.bumperpick.bumperpickvendor.ui.theme.satoshi_bold
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -166,173 +151,185 @@ fun AdsScreen(
     val transparentBrush = Brush.horizontalGradient(
         colors = listOf(Color.Transparent, Color.Transparent)
     )
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFFAFAFA))
+    val systemUiController = rememberSystemUiController()
+    val statusBarColor = Color(0xFF5A0E26) // Your desired color
+
+    // Change status bar color
+    SideEffect {
+        systemUiController.setStatusBarColor(
+            color = statusBarColor,
+            darkIcons = false // true for dark icons on light background
         )
-        {
-            var size by remember { mutableStateOf(IntSize.Zero) }
-            val backgroundModifier = remember(size) {
-                if (size.width > 0 && size.height > 0) {
-                    val radius = maxOf(size.width, size.height) / 1.5f
-                    Modifier.background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(Color(0xFF8B1538), Color(0xFF5A0E26)),
-                            center = Offset(size.width / 2f, size.height / 2f),
-                            radius = radius
-                        )
-                    )
-                } else {
-                    Modifier.background(Color(0xFF8B1538))
-                }
-            }
-            // Header Card with improved padding and structure
-            Card(
+    }
+    Scaffold() {
+        Box(modifier = Modifier.fillMaxSize().padding(it)) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .onSizeChanged { size = it },
-                shape = RoundedCornerShape(
-                    topStart = 0.dp,
-                    topEnd = 0.dp,
-                    bottomStart = 24.dp,
-                    bottomEnd = 24.dp
-                ),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-            ) {
-                Column(
+                    .fillMaxSize()
+                    .background(Color(0xFFFAFAFA))
+            )
+            {
+                var size by remember { mutableStateOf(IntSize.Zero) }
+                val backgroundModifier = remember(size) {
+                    if (size.width > 0 && size.height > 0) {
+                        val radius = maxOf(size.width, size.height) / 1.5f
+                        Modifier.background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(Color(0xFF8B1538), Color(0xFF5A0E26)),
+                                center = Offset(size.width / 2f, size.height / 2f),
+                                radius = radius
+                            )
+                        )
+                    } else {
+                        Modifier.background(Color(0xFF8B1538))
+                    }
+                }
+                // Header Card with improved padding and structure
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .then(backgroundModifier)
-                        .padding(bottom = 0.dp)
-                )
-                {
-                    Spacer(modifier = Modifier.height(40.dp))
-
-                    // Top App Bar with improved spacing
-                    Box(
+                        .onSizeChanged { size = it },
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 0.dp,
+                        bottomStart = 24.dp,
+                        bottomEnd = 24.dp
+                    ),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.align(Alignment.CenterStart)
+                            .then(backgroundModifier)
+                            .padding(bottom = 0.dp)
+                    )
+                    {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Top App Bar with improved spacing
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
                         ) {
-                            IconButton(
-                                onClick = onBackClick,
-                                modifier = Modifier.size(44.dp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.align(Alignment.CenterStart)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Back",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
+                                IconButton(
+                                    onClick = onBackClick,
+                                    modifier = Modifier.size(44.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowBack,
+                                        contentDescription = "Back",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Ads And Banner",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 22.sp,
+                                    color = Color.White
                                 )
                             }
 
-                            Spacer(modifier = Modifier.width(8.dp))
+
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                when (adsState) {
+                    UiState.Empty -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
                             Text(
-                                text = "Ads And Banner",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 22.sp,
-                                color = Color.White
+                                text = "No Ads available",
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.align(Alignment.Center),
+                                color = BtnColor
                             )
                         }
-
-
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    is UiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = (adsState as UiState.Error).message,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.align(Alignment.Center),
+                                color = BtnColor
+                            )
+                        }
+                    }
 
+                    UiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            CircularProgressIndicator(
+                                color = BtnColor,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
 
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            when (adsState) {
-                UiState.Empty -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    is UiState.Success -> {
+                        val adsList = (adsState as UiState.Success).data.data
+
                         Text(
-                            text = "No Ads available",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.align(Alignment.Center),
-                            color = BtnColor
+                            text = "${adsList.size} ADS",
+                            fontSize = 16.sp,
+                            fontFamily = satoshi_regular,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Gray,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
                         )
-                    }
-                }
 
-                is UiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Text(
-                            text = (adsState as UiState.Error).message,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.align(Alignment.Center),
-                            color = BtnColor
-                        )
-                    }
-                }
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                UiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(
-                            color = BtnColor,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                }
+                        LazyColumn(
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
 
-                is UiState.Success -> {
-                    val adsList = (adsState as UiState.Success).data.data
+                            items(adsList) { ad ->
+                                AdCard(ad) {
 
-                    Text(
-                        text = "${adsList.size} ADS",
-                        fontSize = 16.sp,
-                        fontFamily = satoshi_regular,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.Gray,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
+                                    selectedId = it
+                                    showBottomSheet = true
+                                }
 
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-
-                        items(adsList) { ad ->
-                            AdCard(ad) {
-
-                            selectedId=it
-                                showBottomSheet=true
                             }
 
+
                         }
-
-
                     }
                 }
+
+
             }
-
-
+            FloatingActionButton(
+                containerColor = BtnColor,
+                onClick = { Add_Ad() },
+                content = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        tint = Color.White,
+                        contentDescription = "Scan QR",
+                    )
+                },
+                modifier = Modifier.align(Alignment.BottomEnd)
+                    .padding(bottom = 16.dp, end = 16.dp).size(60.dp),
+                shape = CircleShape,
+            )
         }
-        FloatingActionButton(
-            containerColor = BtnColor,
-            onClick = { Add_Ad() },
-            content = {
-                Icon(
-                  imageVector =   Icons.Default.Add,
-                    tint = Color.White,
-                    contentDescription = "Scan QR",
-                )
-            },
-            modifier = Modifier.align(Alignment.BottomEnd)
-                .padding(bottom = 16.dp, end = 16.dp).size(60.dp),
-            shape = CircleShape,
-        )
     }
 
    }
@@ -445,7 +442,7 @@ fun Ad_EditDeleteBottomSheet(
 
         // Header
         Text(
-            text = "Manage Campaign",
+            text = "Manage Ads",
             fontSize = 20.sp,
             fontFamily = satoshi_medium,
             fontWeight = FontWeight.SemiBold,
@@ -465,7 +462,7 @@ fun Ad_EditDeleteBottomSheet(
                     tint = BtnColor
                 )
             },
-            title = "Edit Campaign Details",
+            title = "Edit Ads Details",
 
             onClick = onEditClick
         )
@@ -487,7 +484,7 @@ fun Ad_EditDeleteBottomSheet(
                     tint = BtnColor
                 )
             },
-            title = "Delete Campaign",
+            title = "Delete Ads",
 
             onClick = onDeleteClick,
             titleColor = Color.Red

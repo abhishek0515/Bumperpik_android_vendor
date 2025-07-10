@@ -252,17 +252,22 @@ fun Event2PreviewScreen(
             }
 
             item {
-                LabelledSection(label = "Title") {
+                LabelledSection(label = "Event title") {
                     Text(Event2Details.title ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "Start Date") {
+                LabelledSection(label = "Start date") {
                     Text(Event2Details.startDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "Start Time") {
+                LabelledSection(label = "End date") {
+                    Text(Event2Details.endDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
+                }
+            }
+            item {
+                LabelledSection(label = "Start time") {
                     Text(Event2Details.startTime ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
@@ -277,13 +282,13 @@ fun Event2PreviewScreen(
                 }
             }
             item {
-                LabelledSection(label = "Event Address") {
+                LabelledSection(label = "Event address") {
                     Text(Event2Details.address ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
 
             item {
-                LabelledSection(label = "Event Description") {
+                LabelledSection(label = "Event description") {
                     Text(Event2Details.description ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
@@ -320,6 +325,8 @@ fun CreateEvent2Screen(
     var showStartCalendar by remember { mutableStateOf(false) }
     var showStartTime by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var showEndCalendar by remember { mutableStateOf(false) }
+    var selectedEndDate by remember { mutableStateOf<LocalDate?>(null) }
 
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
@@ -344,6 +351,7 @@ fun CreateEvent2Screen(
                 viewmodel = viewmodel,
                 onStartDateClick = { showStartCalendar = true },
                 onStartTimeClick = { showStartTime = true },
+                onEndTimeClick = {showEndCalendar=true},
                 navController = navController
             )
         }
@@ -362,6 +370,23 @@ fun CreateEvent2Screen(
                     selectedDate = it
                 }
                 showStartCalendar = false
+            }
+        )
+
+        CalendarBottomSheet(
+            isVisible = showEndCalendar,
+            selectedDate=selectedEndDate,
+            onDateSelected = {selectedEndDate=it},
+            onDismiss = {showEndCalendar=false},
+            startDate =selectedDate ?: LocalDate.now(),
+            text = "Event End Date",
+            onConfirm = {
+                    date->
+                date?.let {
+                    viewmodel.updateEndDate(it.format(formatter))
+                    selectedEndDate = it
+                }
+                showEndCalendar = false
             }
         )
 
@@ -414,7 +439,9 @@ private fun FormContent(
     viewmodel: Events2Viewmodel,
     onStartDateClick: () -> Unit,
     onStartTimeClick: () -> Unit,
-    navController: NavController
+    onEndTimeClick:()->Unit,
+    navController: NavController,
+
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
@@ -436,7 +463,7 @@ private fun FormContent(
 
         // Title field
         FormField(
-            label = "Title",
+            label = "Event title",
             placeholder = "Enter Event Title",
             value = eventDetails.title,
             onValueChange = { viewmodel.updateTitle(it) }
@@ -449,25 +476,34 @@ private fun FormContent(
             offerStartDate = eventDetails.startDate,
             offerStartTime = eventDetails.startTime,
             onStartDateClick = onStartDateClick,
-            onStartTimeClick = onStartTimeClick
+            onStartTimeClick = onStartTimeClick,
+            offerEndTime = eventDetails.endDate,
+            onEndTimeClick = onEndTimeClick
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Facebook live field
         FormField(
-            label = "Facebook Live",
+            label = "Facebook live",
             placeholder = "Enter Facebook live link",
             value = eventDetails.facebookLiveLink,
             onValueChange = { viewmodel.updatefacebookLiveLink(it) }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-
         // YouTube live field
         FormField(
-            label = "YouTube Live",
-            placeholder = "Enter YouTube live link",
+            label = "Instagram live",
+            placeholder = "Enter instagram live link",
+            value = eventDetails.instagramLiveLink, // Fixed: was using facebookLiveLink
+            onValueChange = { viewmodel.updateInstagramLink(it) }
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        // YouTube live field
+        FormField(
+            label = "Youtube live",
+            placeholder = "Enter Youtube live link",
             value = eventDetails.youtubeLiveLink,
             onValueChange = { viewmodel.updateYoutubeLiveLink(it) }
         )
@@ -507,7 +543,7 @@ private fun FormContent(
 
         // Address field
         FormField(
-            label = "Event Address",
+            label = "Event address",
             placeholder = "Enter Event Address",
             value = eventDetails.address,
             onValueChange = { viewmodel.updateAddress(it) }
@@ -517,7 +553,7 @@ private fun FormContent(
 
         // Description field
         FormField(
-            label = "Event Description",
+            label = "Event description",
             placeholder = "Enter Event Description",
             value = eventDetails.description,
             onValueChange = { viewmodel.updateDescription(it) },
@@ -568,8 +604,10 @@ private fun FormField(
 fun StartDateTimeSelector(
     offerStartDate: String?,
     offerStartTime: String?,
+    offerEndTime:String?,
     onStartDateClick: () -> Unit,
-    onStartTimeClick: () -> Unit
+    onStartTimeClick: () -> Unit,
+    onEndTimeClick:() -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -578,7 +616,7 @@ fun StartDateTimeSelector(
     ) {
         // Start Date Section
         Text(
-            text = "Event Start Date",
+            text = "Event start date",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -596,10 +634,29 @@ fun StartDateTimeSelector(
         )
 
         Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Event end date",
+            fontSize = 14.sp,
+            fontFamily = satoshi_regular,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        DateTimeCard(
+            text = offerEndTime ?: "Select end date",
+            isSelected = offerEndTime != null,
+            iconRes = R.drawable.calendar_alt,
+            contentDescription = "Calendar Icon",
+            onClick = onEndTimeClick
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Start Time Section
         Text(
-            text = "Event Start Time",
+            text = "Event time",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,

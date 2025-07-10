@@ -1,11 +1,9 @@
-package com.bumperpick.bumperpickvendor.Screens.Events
+package com.bumperpick.bumperpickvendor.Screens.Campaign
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +25,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,6 +37,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -48,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +54,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -68,24 +66,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXX
-import com.bumperpick.bumperpickvendor.API.FinalModel.EventModel
 import com.bumperpick.bumperpickvendor.R
-import com.bumperpick.bumperpickvendor.Repository.OfferValidation
 import com.bumperpick.bumperpickvendor.Screens.Component.Campaign_EditDeleteBottomSheet
 import com.bumperpick.bumperpickvendor.Screens.Component.EditDelete
-import com.bumperpick.bumperpickvendor.Screens.Component.Event_EditDeleteBottomSheet
 import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
-import com.bumperpick.bumperpickvendor.Screens.Event2.Events2Viewmodel
 import com.bumperpick.bumperpickvendor.Screens.OfferPage.DeleteExpiredOfferDialog
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_bold
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 import org.koin.androidx.compose.koinViewModel
 
@@ -124,9 +120,10 @@ fun EventScreen(
     if(showDeleteDialog){
         DeleteExpiredOfferDialog(true, onDismiss = {showDeleteDialog=false}, onConfirmDelete ={
             showDeleteDialog=false
+            showBottomSheet=false
             viewmodel.deleteOffer(selectedId,"Delete Expired Event")
 
-        }, name = "Event" )
+        }, name = "Campaign" )
     }
 
     if(showBottomSheet) {
@@ -151,7 +148,16 @@ fun EventScreen(
             )
         }
     }
+    val systemUiController = rememberSystemUiController()
+    val statusBarColor = Color(0xFF5A0E26) // Your desired color
 
+    // Change status bar color
+    SideEffect {
+        systemUiController.setStatusBarColor(
+            color = statusBarColor,
+            darkIcons = false // true for dark icons on light background
+        )
+    }
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color.Transparent,
@@ -164,11 +170,14 @@ fun EventScreen(
     val transparentBrush = Brush.horizontalGradient(
         colors = listOf(Color.Transparent, Color.Transparent)
     )
+    Scaffold {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(it)
             .background(Color(0xFFFAFAFA))
-    ) {
+    )
+    {
         var size by remember { mutableStateOf(IntSize.Zero) }
         val backgroundModifier = remember(size) {
             if (size.width > 0 && size.height > 0) {
@@ -205,7 +214,7 @@ fun EventScreen(
                     .then(backgroundModifier)
                     .padding(bottom = 0.dp)
             ) {
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Top App Bar with improved spacing
                 Box(
@@ -278,6 +287,7 @@ fun EventScreen(
                         .padding(horizontal = 20.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = BtnColor,
                         unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
                         focusedBorderColor = Color.White,
                         unfocusedContainerColor = Color.White,
@@ -429,6 +439,7 @@ fun EventScreen(
 
 
     }
+    }
 }
 
 @Composable
@@ -562,7 +573,7 @@ fun EventCard(events: DataXXXXXXXX, onClick: (DataXXXXXXXX) -> Unit,  showBottom
                 if (events.expire) {
                     InfoRow(
                         icon = painterResource(R.drawable.check),
-                        text = "Event is expired.",
+                        text = "Campaign is expired.",
                         iconTint = Color(0xFF50C878),
                         textColor = Color(0xFF50C878)
                     )
@@ -619,6 +630,8 @@ fun EventCard(events: DataXXXXXXXX, onClick: (DataXXXXXXXX) -> Unit,  showBottom
         Text(
             text = text,
             fontSize = 16.sp,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Medium,
             color = textColor.copy(alpha = 0.8f)

@@ -1,18 +1,16 @@
-package com.bumperpick.bumperpickvendor.Screens.Events
+package com.bumperpick.bumperpickvendor.Screens.Campaign
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXX
 import com.bumperpick.bumperpickvendor.Repository.EventRepository
-import com.bumperpick.bumperpickvendor.Repository.OfferModel
 import com.bumperpick.bumperpickvendor.Repository.Result
+import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.RequestBody
-import java.io.File
 
 data class CreateCampaignModel(
     val id: String="",
@@ -59,7 +57,7 @@ class EventsViewmodel(val eventRepository: EventRepository) : ViewModel() {
                     description = currentDetails.description,
                     address = currentDetails.address,
                     numberOfParticipant = currentDetails.numberOfParticipant,
-                    startDate = currentDetails.startDate,
+                    startDate =  currentDetails.startDate,
                     endDate = currentDetails.endDate,
                     bannerImage = currentDetails.bannerImage // This will be uploaded if not null
                 )
@@ -120,13 +118,13 @@ class EventsViewmodel(val eventRepository: EventRepository) : ViewModel() {
 
     fun validateEventDetails():Boolean {
     if (_eventDetails.value.title.isEmpty()) {
-            showError("Please enter title")
+            showError("Please enter campaign title")
             return false
         } else if (_eventDetails.value.description.isEmpty()) {
-            showError("Please enter description")
+            showError("Please enter campaign description")
             return false
         } else if (_eventDetails.value.address.isEmpty()) {
-            showError("Please enter address")
+            showError("Please enter campaignr address")
             return false
         }
         else if(_eventDetails.value.numberOfParticipant.isEmpty()){
@@ -134,12 +132,18 @@ class EventsViewmodel(val eventRepository: EventRepository) : ViewModel() {
             return false
         }
         else if (_eventDetails.value.startDate.isEmpty()) {
-            showError("Please select start date")
+            showError("Please select campaign start date")
             return false
         } else if (_eventDetails.value.endDate.isEmpty()) {
-            showError("Please select end date")
+            showError("Please select campaign end date")
             return false
-        } else
+        }
+    else if(_eventDetails.value.bannerImage==null){
+        showError("Please select banner image")
+        return false
+    }
+
+    else
             return true
     }
 
@@ -222,9 +226,9 @@ class EventsViewmodel(val eventRepository: EventRepository) : ViewModel() {
                             title=data.title,
                             description=data.description,
                             address=data.address,
-                            startDate=data.start_date,
+                            startDate=formatDate(data.start_date),
 
-                            endDate=data.end_date,
+                            endDate=formatDate(data.end_date),
                             numberOfParticipant = data.number_of_participant
                       )
                         _uiEvent_Detail.value = UiState.Success(result.data.data)

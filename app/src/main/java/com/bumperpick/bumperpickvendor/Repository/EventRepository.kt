@@ -3,8 +3,7 @@ package com.bumperpick.bumperpickvendor.Repository
 import com.bumperpick.bumperpickvendor.API.FinalModel.EventModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.EventRegisterModel
 import com.bumperpick.bumperpickvendor.API.Model.success_model
-import com.bumperpick.bumperpickvendor.Screens.Event2.CreateEventModel
-import com.bumperpick.bumperpickvendor.Screens.Events.CreateCampaignModel
+import com.bumperpick.bumperpickvendor.Screens.Campaign.CreateCampaignModel
 
 interface EventRepository {
 

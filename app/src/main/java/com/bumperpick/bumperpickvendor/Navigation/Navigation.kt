@@ -24,7 +24,6 @@ import com.bumperpick.bumperpickvendor.Screens.Account.AccountClick
 import com.bumperpick.bumperpickvendor.Screens.Ads.AdsScreen
 import com.bumperpick.bumperpickvendor.Screens.Ads.AdsSubscriptionScreen
 import com.bumperpick.bumperpickvendor.Screens.Ads.CreateAd
-import com.bumperpick.bumperpickvendor.Screens.Ads.CreateAdScreenViews
 import com.bumperpick.bumperpickvendor.Screens.Ads.adsEditScreen
 import com.bumperpick.bumperpickvendor.Screens.Campaigns.CreateCampaign
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOffer
@@ -32,10 +31,10 @@ import com.bumperpick.bumperpickvendor.Screens.EditAccountScreen.EditAccount
 import com.bumperpick.bumperpickvendor.Screens.Event2.CreateEvent2
 import com.bumperpick.bumperpickvendor.Screens.Event2.EditEventScreen2
 import com.bumperpick.bumperpickvendor.Screens.Event2.EventScreen2
-import com.bumperpick.bumperpickvendor.Screens.Events.EditEventScreen
+import com.bumperpick.bumperpickvendor.Screens.Campaign.EditEventScreen
 
-import com.bumperpick.bumperpickvendor.Screens.Events.EventDetailPage
-import com.bumperpick.bumperpickvendor.Screens.Events.EventScreen
+import com.bumperpick.bumperpickvendor.Screens.Campaign.EventDetailPage
+import com.bumperpick.bumperpickvendor.Screens.Campaign.EventScreen
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.QRScannerScreen
 import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionXDetailPage
 
@@ -173,9 +172,6 @@ fun AppNavigation() {
                                 navController.navigate(Screen.CreateOfferScreen.route)
                             }
 
-                            MarketingOption.CONTEST_FOR_CUSTOMERS -> {}
-                            MarketingOption.SCRATCH_AND_WIN -> {}
-                            MarketingOption.LUCKY_DRAW -> {}
                             MarketingOption.CAMPAIGNS -> {
                                 navController.navigate(Screen.AddCampaign.route)
                             }
@@ -219,9 +215,7 @@ fun AppNavigation() {
                               val marketingOption=accountclick.marketingOption
                               when(marketingOption){
                                   MarketingOption.OFFERS -> {}
-                                  MarketingOption.CONTEST_FOR_CUSTOMERS -> {}
-                                  MarketingOption.SCRATCH_AND_WIN -> {}
-                                  MarketingOption.LUCKY_DRAW -> {}
+
                                   MarketingOption.CAMPAIGNS -> {
                                       navController.navigate(Screen.Campaign.route)
                                   }

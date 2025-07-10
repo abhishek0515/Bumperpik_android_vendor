@@ -115,7 +115,7 @@ class EventRepository2Impl(val dataStoreManager: DataStoreManager,val apiService
 
     override suspend fun updateEvent(eventModel: CreateEventModel): Result<success_model> {
         val map = mutableMapOf<String, RequestBody>()
-        val token=dataStoreManager.getToken()!!.token
+        val token="Bearer ${dataStoreManager.getToken()!!.token}"
         val vendorid=dataStoreManager.get_Vendor_Details()!!.vendor_id
         val banner = eventModel.bannerImage?.let {
             uriToFile(context, it).toMultipartPart(partName = "banner_image")
@@ -123,6 +123,7 @@ class EventRepository2Impl(val dataStoreManager: DataStoreManager,val apiService
         map["title"] =  eventModel.title.toString().toRequestBody("text/plain".toMediaType())
         map["description"] = eventModel.description.toString().toRequestBody("text/plain".toMediaType())
         map["address"] = eventModel.address.toString().toRequestBody("text/plain".toMediaType())
+        map["end_date"] =eventModel.endDate.toString().toRequestBody("text/plain".toMediaType())
         map["start_date"] = eventModel.startDate.toString().toRequestBody("text/plain".toMediaType())
         map["start_time"] = eventModel.startTime.toString().toRequestBody("text/plain".toMediaType())
         map["token"] = token.toRequestBody("text/plain".toMediaType())
@@ -131,9 +132,9 @@ class EventRepository2Impl(val dataStoreManager: DataStoreManager,val apiService
         map["vendor_id"]=vendorid.toString().toRequestBody("text/plain".toMediaType())
         val event= safeApiCall(api = {
             if (banner != null) {
-                apiService.eventsUpdate(eventModel.id,map,banner)
+                apiService.eventsUpdate(eventModel.id,token,map,banner)
             }
-            else apiService.eventsUpdateWithoutBanner(eventModel.id,map)
+            else apiService.eventsUpdateWithoutBanner(eventModel.id,token,map)
 
         },
             errorBodyParser = {

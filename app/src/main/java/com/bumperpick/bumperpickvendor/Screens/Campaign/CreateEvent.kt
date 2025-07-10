@@ -1,6 +1,5 @@
 package com.bumperpick.bumperpickvendor.Screens.Campaigns
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -48,16 +47,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.bumperpick.bumperpickvendor.Screens.Component.ButtonView
-import com.bumperpick.bumperpickvendor.Screens.Component.PrimaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.SecondaryButton
 import com.bumperpick.bumperpickvendor.Screens.Component.SimpleImagePicker
 import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CalendarBottomSheet
-import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CreateOfferScreenViews
-import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditableTextTypeView
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.ImageCardFromUri
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.OfferDateSelector
-import com.bumperpick.bumperpickvendor.Screens.Events.EventsViewmodel
+import com.bumperpick.bumperpickvendor.Screens.Campaign.EventsViewmodel
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
@@ -224,7 +220,7 @@ fun CampaignPreviewScreen(
         ) {
             item {
                 Text(
-                    text = "Campaign Preview",
+                    text = "Campaign preview",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = satoshi_medium
@@ -241,31 +237,31 @@ fun CampaignPreviewScreen(
             }
 
             item {
-                LabelledSection(label = "Campaign Title") {
+                LabelledSection(label = "Campaign title") {
                     Text(CampaignDetails.title ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
 
             item {
-                LabelledSection(label = "Campaign Description") {
+                LabelledSection(label = "Campaign description") {
                     Text(CampaignDetails.description ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
 
             item {
-                LabelledSection(label = "Campaign Address") {
+                LabelledSection(label = "Campaign address") {
                     Text(CampaignDetails.address ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
 
             item {
-                LabelledSection(label = "Campaign Start Date") {
+                LabelledSection(label = "Campaign start date") {
                     Text(CampaignDetails.startDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
 
             item {
-                LabelledSection(label = "Campaign End Date") {
+                LabelledSection(label = "Campaign end date") {
                     Text(CampaignDetails.endDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
@@ -343,7 +339,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Campaign Title",
+                    text = "Campaign title",
                     fontSize = 14.sp,
                     fontFamily = satoshi_regular,
                     fontWeight = FontWeight.Bold,
@@ -359,7 +355,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                     })
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Campaign Description",
+                    text = "Campaign description",
                     fontSize = 14.sp,
                     fontFamily = satoshi_regular,
                     fontWeight = FontWeight.Bold,
@@ -409,6 +405,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                 Spacer(modifier = Modifier.height(6.dp))
 
                 OfferDateSelector(
+                    text = "Campaign",
                     offerStartDate = CampaignDetails.startDate,
                     offerEndDate = CampaignDetails.endDate,
                     onStartClick = { showStartCalendar = true },
@@ -422,7 +419,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
-                ButtonView(text = "Next") {
+                ButtonView(text = "Next", horizontal_padding = 0.dp) {
                     if (!viewmodel.validateEventDetails()) {
                         return@ButtonView
                     }

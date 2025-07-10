@@ -66,11 +66,14 @@ fun MoreOfferDetailsScreen(navController: NavController,viewmodel: CreateOfferVi
             popUpTo(CreateOfferScreenViews.EditBanner.route)
         }
     }
+
     Column(
         modifier = Modifier
+
             .background(grey)
             .fillMaxSize()
-    ) {
+    )
+    {
         // First Column - Scrollable content (takes remaining space)
         Column(
             modifier = Modifier
@@ -196,6 +199,7 @@ fun MoreOfferDetailsScreen(navController: NavController,viewmodel: CreateOfferVi
 
         }
     }
+
 }
 
 @Composable

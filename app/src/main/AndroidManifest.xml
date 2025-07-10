@@ -28,6 +28,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <activity
+            android:name=".Misc.RazorpayActivity"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+
+
 
         <activity
             android:name=".MainActivity"

@@ -10,6 +10,7 @@ import com.bumperpick.bumperpickvendor.Repository.Event2Repository
 import com.bumperpick.bumperpickvendor.Repository.EventRepository
 import com.bumperpick.bumperpickvendor.Repository.OfferModel
 import com.bumperpick.bumperpickvendor.Repository.Result
+import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
 
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,8 +26,10 @@ data class CreateEventModel(
     val title:String="",
     val startDate:String="",
     val startTime:String="",
+    val endDate: String="",
     val facebookLiveLink:String="",
     val youtubeLiveLink:String="",
+    val instagramLiveLink:String="",
     val address: String="",
     val description: String="",
 
@@ -100,6 +103,12 @@ class Events2Viewmodel(val eventRepository: Event2Repository) : ViewModel() {
    fun updateStartDate(date:String){
        _eventDetails.value=eventDetails.value.copy(startDate = date)
    }
+    fun updateEndDate(date:String){
+       _eventDetails.value=eventDetails.value.copy(endDate = date)
+   }
+    fun updateInstagramLink(link:String){
+        _eventDetails.value=eventDetails.value.copy(instagramLiveLink = link)
+    }
    fun updateStartTime(time:String){
        _eventDetails.value=eventDetails.value.copy(startTime = time)
    }
@@ -112,31 +121,33 @@ class Events2Viewmodel(val eventRepository: Event2Repository) : ViewModel() {
 
     fun validateEventDetails():Boolean {
      if (_eventDetails.value.title.isEmpty()) {
-            showError("Please enter title")
+            showError("Please enter event title")
             return false
         } else if (_eventDetails.value.description.isEmpty()) {
-            showError("Please enter description")
+            showError("Please enter event description")
             return false
         } else if (_eventDetails.value.address.isEmpty()) {
-            showError("Please enter address")
-            return false
-        }
-        else if(_eventDetails.value.youtubeLiveLink.isEmpty()){
-            showError("Please enter youtube link")
-            return false
-        }
-        else if(_eventDetails.value.facebookLiveLink.isEmpty()){
-            showError("Please enter facebook link")
+            showError("Please enter event address")
             return false
         }
 
+
         else if (_eventDetails.value.startDate.isEmpty()) {
-            showError("Please select start date")
+            showError("Please select event start date")
+            return false
+        }
+        else if (_eventDetails.value.endDate.isEmpty()) {
+            showError("Please select event end date")
             return false
         } else if (_eventDetails.value.startTime.isEmpty()) {
-            showError("Please select start time")
+            showError("Please select event time")
             return false
-        } else
+        }
+     else if(_eventDetails.value.bannerImage==null){
+         showError("Please select banner image")
+         return false
+     }
+     else
             return true
     }
 
@@ -216,13 +227,14 @@ class Events2Viewmodel(val eventRepository: Event2Repository) : ViewModel() {
                         _eventDetails.value=_eventDetails.value.copy(
                             id=data.id.toString(),
                             bannerImageUrl=data.banner_image_url,
-                            title=data.title,
-                            description=data.description,
-                            address=data.address,
-                            startDate=data.start_date,
-                            startTime = data.start_time,
-                            facebookLiveLink = data.facebook_link,
-                            youtubeLiveLink = data.youtube_link
+                            title=data.title?:"",
+                            description=data.description?:"",
+                            address=data.address?:"",
+                            startDate=if(data.start_date.isNullOrEmpty())"" else   formatDate( data.start_date),
+                            startTime = data.start_time?:"",
+                            endDate  =if(data.end_date.isNullOrEmpty())"" else   formatDate( data.end_date),
+                            facebookLiveLink = data.facebook_link?:"",
+                            youtubeLiveLink = data.youtube_link?:""
 
                       )
                         _uiEvent_Detail.value = UiState.Success(result.data.data)

@@ -1,4 +1,4 @@
-package com.bumperpick.bumperpickvendor.Screens.Events
+package com.bumperpick.bumperpickvendor.Screens.Campaign
 
 import android.net.Uri
 import android.util.Log
@@ -47,7 +47,6 @@ import com.bumperpick.bumperpickvendor.Screens.Component.ButtonView
 import com.bumperpick.bumperpickvendor.Screens.Component.TextFieldView
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.CalendarBottomSheet
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.OfferDateSelector
-import com.bumperpick.bumperpickvendor.Screens.Event2.Events2Viewmodel
 import com.bumperpick.bumperpickvendor.ui.theme.grey
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
@@ -271,8 +270,9 @@ fun EditEventScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     OfferDateSelector(
+                        text="Campaign",
                         offerStartDate = eventDetails.startDate,
-                        offerEndDate = eventDetails.endDate,
+                        offerEndDate =  eventDetails.endDate,
                         onStartClick = { showStartCalendar = true },
                         onEndClick = {
                             if (eventDetails.startDate.isEmpty()) {

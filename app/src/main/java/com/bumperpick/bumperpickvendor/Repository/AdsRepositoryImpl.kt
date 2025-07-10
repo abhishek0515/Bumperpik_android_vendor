@@ -103,7 +103,7 @@ class AdsRepositoryImpl(private val dataStoreManager: DataStoreManager,
         banner: MultipartBody.Part
     ): Result<success_model> {
         return try {
-            val token=dataStoreManager.getToken()!!.token
+            val token="Bearer ${dataStoreManager.getToken()!!.token}"
 
             val response = api.vendors_ads_update(id, token, data, banner)
             if (response.isSuccessful && response.body() != null) {

@@ -41,6 +41,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -49,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,6 +89,7 @@ import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_bold
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_regular
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 import org.koin.androidx.compose.koinViewModel
 
@@ -125,6 +128,7 @@ fun EventScreen2(
     if(showDeleteDialog){
         DeleteExpiredOfferDialog(true, onDismiss = {showDeleteDialog=false}, onConfirmDelete ={
             showDeleteDialog=false
+            showBottomSheet=false
             viewmodel.deleteOffer(selectedId,"Delete Expired Event")
 
         }, name = "Event" )
@@ -165,270 +169,291 @@ fun EventScreen2(
     val transparentBrush = Brush.horizontalGradient(
         colors = listOf(Color.Transparent, Color.Transparent)
     )
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFAFAFA))
-    ) {
-        var size by remember { mutableStateOf(IntSize.Zero) }
-        val backgroundModifier = remember(size) {
-            if (size.width > 0 && size.height > 0) {
-                val radius = maxOf(size.width, size.height) / 1.5f
-                Modifier.background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFF8B1538), Color(0xFF5A0E26)),
-                        center = Offset(size.width / 2f, size.height / 2f),
-                        radius = radius
-                    )
-                )
-            } else {
-                Modifier.background(Color(0xFF8B1538))
-            }
-        }
+    val systemUiController = rememberSystemUiController()
+    val statusBarColor = Color(0xFF5A0E26) // Your desired color
 
-        // Header Card with improved padding and structure
-        Card(
+    // Change status bar color
+    SideEffect {
+        systemUiController.setStatusBarColor(
+            color = statusBarColor,
+            darkIcons = false // true for dark icons on light background
+        )
+    }
+
+    Scaffold {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .onSizeChanged { size = it },
-            shape = RoundedCornerShape(
-                topStart = 0.dp,
-                topEnd = 0.dp,
-                bottomStart = 24.dp,
-                bottomEnd = 24.dp
-            ),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-        ) {
-            Column(
+                .fillMaxSize()
+                .padding(it)
+                .background(Color(0xFFFAFAFA))
+        )
+        {
+            var size by remember { mutableStateOf(IntSize.Zero) }
+            val backgroundModifier = remember(size) {
+                if (size.width > 0 && size.height > 0) {
+                    val radius = maxOf(size.width, size.height) / 1.5f
+                    Modifier.background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(Color(0xFF8B1538), Color(0xFF5A0E26)),
+                            center = Offset(size.width / 2f, size.height / 2f),
+                            radius = radius
+                        )
+                    )
+                } else {
+                    Modifier.background(Color(0xFF8B1538))
+                }
+            }
+
+            // Header Card with improved padding and structure
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .then(backgroundModifier)
-                    .padding(bottom = 0.dp)
+                    .onSizeChanged { size = it },
+                shape = RoundedCornerShape(
+                    topStart = 0.dp,
+                    topEnd = 0.dp,
+                    bottomStart = 24.dp,
+                    bottomEnd = 24.dp
+                ),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // Top App Bar with improved spacing
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .then(backgroundModifier)
+                        .padding(bottom = 0.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.align(Alignment.CenterStart)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Top App Bar with improved spacing
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
                     ) {
-                        IconButton(
-                            onClick = onBackClick,
-                            modifier = Modifier.size(44.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.align(Alignment.CenterStart)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back",
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Events",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                            color = Color.White
-                        )
-                    }
-
-
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Search Field with improved styling
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Search,
-                            contentDescription = "Search",
-                            tint = Color.Gray.copy(alpha = 0.7f)
-                        )
-                    },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
                             IconButton(
-                                onClick = { searchQuery = "" }
+                                onClick = onBackClick,
+                                modifier = Modifier.size(44.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear",
-                                    tint = Color.Gray.copy(alpha = 0.7f)
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "Back",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Events",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp,
+                                color = Color.White
+                            )
                         }
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Search Events",
-                            color = Color.Gray.copy(alpha = 0.6f)
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        focusedBorderColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedContainerColor = Color.White
-                    )
-                )
 
-                Spacer(modifier = Modifier.height(20.dp))
 
-                // Tab Row with improved styling
-                TabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    containerColor = Color.Transparent,
-                    divider = {},
-                    indicator = { tabPositions ->
-                        TabRowDefaults.Indicator(
-                            modifier = Modifier
-                                .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                                .height(4.dp)
-                                .padding(horizontal = 0.dp),
-                            color = Color.White
-                        )
-                    },
-                    modifier = Modifier.padding(horizontal = 0.dp)
-                ) {
-                    Tab(
-                        selected = selectedTabIndex == 0,
-                        onClick = { selectedTabIndex = 0 },
-                        text = {
-                            Text(
-                                "Ongoing Event",
-                                fontSize = 16.sp,
-                                fontWeight = if (selectedTabIndex == 0) FontWeight.SemiBold else FontWeight.Normal
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Search Field with improved styling
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Search,
+                                contentDescription = "Search",
+                                tint = Color.Gray.copy(alpha = 0.7f)
                             )
                         },
-                        selectedContentColor = Color.White,
-                        unselectedContentColor = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier
-                            .background(if (selectedTabIndex == 0) gradientBrush else transparentBrush)
-                    )
-
-                    Tab(
-                        selected = selectedTabIndex == 1,
-                        onClick = { selectedTabIndex = 1 },
-                        text = {
-                            Text(
-                                "Expired Event",
-                                fontSize = 16.sp,
-                                fontWeight = if (selectedTabIndex == 1) FontWeight.SemiBold else FontWeight.Normal
-                            )
-                        },
-                        selectedContentColor = Color.White,
-                        unselectedContentColor = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier
-                            .background(if (selectedTabIndex == 1) gradientBrush else transparentBrush)
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        when (eventsState) {
-        UiState.Empty -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = "No Event available",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center),
-                    color = BtnColor
-                )
-            }
-        }
-        is UiState.Error -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = (eventsState as UiState.Error).message,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center),
-                    color = BtnColor
-                )
-            }
-        }
-        UiState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    color = BtnColor,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        }
-        is UiState.Success -> {
-            val eventList = (eventsState as UiState.Success).data
-
-// Filter based on selectedTabIndex
-            val filteredEventsByTab = if (selectedTabIndex == 0) {
-                eventList.filter { !it.expire }
-            } else {
-                eventList.filter { it.expire }
-            }
-
-// Further filter based on search query
-            val filteredList = filteredEventsByTab.filter {
-                it.title.contains(searchQuery, ignoreCase = true)
-            }
-
-
-
-            // Events count with improved styling
-                Text(
-                    text = if (selectedTabIndex == 0) "${filteredList.size} ONGOING EVENT" else "${filteredList.size} EXPIRED EVENT",
-                    fontSize = 16.sp,
-                    fontFamily = satoshi_regular,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Gray,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // Events List with improved padding
-                LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(filteredList) { event ->
-                        EventCard(event, onClick = {
-                            event_detail_click(it.id)
-                        },
-                            showBottomSheet = {
-                                when(it){
-                                    is EditDelete.DELETE -> {
-                                        showDeleteDialog=true
-                                        selectedId=it.offerId
-                                    }
-                                    is EditDelete.EDIT -> {
-                                        selectedId=it.offerId
-                                        showBottomSheet=true
-
-                                    }
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(
+                                    onClick = { searchQuery = "" }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Clear",
+                                        tint = Color.Gray.copy(alpha = 0.7f)
+                                    )
                                 }
                             }
+                        },
+                        placeholder = {
+                            Text(
+                                text = "Search Events",
+                                color = Color.Gray.copy(alpha = 0.6f)
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            cursorColor = BtnColor,
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                            focusedBorderColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedContainerColor = Color.White
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Tab Row with improved styling
+                    TabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        containerColor = Color.Transparent,
+                        divider = {},
+                        indicator = { tabPositions ->
+                            TabRowDefaults.Indicator(
+                                modifier = Modifier
+                                    .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                                    .height(4.dp)
+                                    .padding(horizontal = 0.dp),
+                                color = Color.White
+                            )
+                        },
+                        modifier = Modifier.padding(horizontal = 0.dp)
+                    ) {
+                        Tab(
+                            selected = selectedTabIndex == 0,
+                            onClick = { selectedTabIndex = 0 },
+                            text = {
+                                Text(
+                                    "Ongoing Event",
+                                    fontSize = 16.sp,
+                                    fontWeight = if (selectedTabIndex == 0) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                            },
+                            selectedContentColor = Color.White,
+                            unselectedContentColor = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .background(if (selectedTabIndex == 0) gradientBrush else transparentBrush)
+                        )
+
+                        Tab(
+                            selected = selectedTabIndex == 1,
+                            onClick = { selectedTabIndex = 1 },
+                            text = {
+                                Text(
+                                    "Expired Event",
+                                    fontSize = 16.sp,
+                                    fontWeight = if (selectedTabIndex == 1) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                            },
+                            selectedContentColor = Color.White,
+                            unselectedContentColor = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .background(if (selectedTabIndex == 1) gradientBrush else transparentBrush)
                         )
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            when (eventsState) {
+                UiState.Empty -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = "No Event available",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.align(Alignment.Center),
+                            color = BtnColor
+                        )
+                    }
+                }
+
+                is UiState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = (eventsState as UiState.Error).message,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.align(Alignment.Center),
+                            color = BtnColor
+                        )
+                    }
+                }
+
+                UiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(
+                            color = BtnColor,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+
+                is UiState.Success -> {
+                    val eventList = (eventsState as UiState.Success).data
+
+// Filter based on selectedTabIndex
+                    val filteredEventsByTab = if (selectedTabIndex == 0) {
+                        eventList.filter { !it.expire }
+                    } else {
+                        eventList.filter { it.expire }
+                    }
+
+// Further filter based on search query
+                    val filteredList = filteredEventsByTab.filter {
+                        it.title.contains(searchQuery, ignoreCase = true)
+                    }
+
+
+                    // Events count with improved styling
+                    Text(
+                        text = if (selectedTabIndex == 0) "${filteredList.size} ONGOING EVENT" else "${filteredList.size} EXPIRED EVENT",
+                        fontSize = 16.sp,
+                        fontFamily = satoshi_regular,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.Gray,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Events List with improved padding
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(filteredList) { event ->
+                            EventCard(
+                                event, onClick = {
+                                    event_detail_click(it.id)
+                                },
+                                showBottomSheet = {
+                                    when (it) {
+                                        is EditDelete.DELETE -> {
+                                            showDeleteDialog = true
+                                            showBottomSheet=false
+                                            selectedId = it.offerId
+                                        }
+
+                                        is EditDelete.EDIT -> {
+                                            selectedId = it.offerId
+                                            showBottomSheet = true
+
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+
         }
-
-
     }
 }
 @Composable

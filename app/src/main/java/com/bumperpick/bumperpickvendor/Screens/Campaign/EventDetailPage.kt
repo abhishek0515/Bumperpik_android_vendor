@@ -1,13 +1,11 @@
-package com.bumperpick.bumperpickvendor.Screens.Events
+package com.bumperpick.bumperpickvendor.Screens.Campaign
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +15,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -37,6 +33,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -63,10 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXX
 import com.bumperpick.bumperpickvendor.API.FinalModel.Registration
-import com.bumperpick.bumperpickvendor.Screens.Event2.Events2Viewmodel
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
-import com.bumperpick.bumperpickvendor.ui.theme.grey
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.max
 
@@ -115,46 +109,50 @@ fun EventParticipantScreen(
     eventData: DataXXXXXXXX,
     onBackClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFF8F9FA),
-                        Color(0xFFE9ECEF)
+    Scaffold {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFFF8F9FA),
+                            Color(0xFFE9ECEF)
+                        )
                     )
                 )
-            )
-    ) {
-        // Original Header
-        EventDetailHeader(
-            title = eventData.title,
-            onBackClick = onBackClick
         )
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
+        {
+            // Original Header
+            EventDetailHeader(
+                title = eventData.title,
+                onBackClick = onBackClick
+            )
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(0.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
 
-            // Event Statistics Cards
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                EventStatisticsSection(eventData = eventData)
-            }
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
+                // Event Statistics Cards
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    EventStatisticsSection(eventData = eventData)
+                }
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                // Event Info Cards
-                EventInfoSection(eventData = eventData)
-            }
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
+                    // Event Info Cards
+                    EventInfoSection(eventData = eventData)
+                }
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                // Participants Section
-                ParticipantsSection(
-                    registrations = eventData.registrations
-                )
+                    // Participants Section
+                    ParticipantsSection(
+                        registrations = eventData.registrations
+                    )
+                }
             }
         }
     }

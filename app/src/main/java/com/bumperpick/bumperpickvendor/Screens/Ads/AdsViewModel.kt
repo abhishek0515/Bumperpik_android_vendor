@@ -211,7 +211,8 @@ class AdsViewModel(val adsRepository: AdsRepository) : ViewModel() {
             else true
 
     }
-
+    fun createPartFromString(value: String): RequestBody =
+        value.toRequestBody("text/plain".toMediaTypeOrNull())
     fun updateAd(id: Int,context: Context) {
         viewModelScope.launch {
             try {
@@ -219,8 +220,8 @@ class AdsViewModel(val adsRepository: AdsRepository) : ViewModel() {
                 val dataMap = mutableMapOf<String, RequestBody>()
 
                 // Add dates to the request
-                dataMap["start_date"] = updatedStartDate.toRequestBody()
-                dataMap["end_date"] = updatedEndDate.toRequestBody()
+                dataMap["start_date"] =createPartFromString( updatedStartDate)
+                dataMap["end_date"] =createPartFromString(  updatedEndDate)
 
                 // Prepare banner image
                 val bannerPart =if(updatedBannerUri!=null){

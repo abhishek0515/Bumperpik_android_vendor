@@ -54,9 +54,9 @@ enum class BillingCycle(val displayName: String) {
 }
 enum class MarketingOption(val title: String) {
     OFFERS("Offers"),
-    CONTEST_FOR_CUSTOMERS("Contest for customers"),
+   /* CONTEST_FOR_CUSTOMERS("Contest for customers"),
     SCRATCH_AND_WIN("Scratch & win"),
-    LUCKY_DRAW("Lucky draw"),
+    LUCKY_DRAW("Lucky draw"),*/
     CAMPAIGNS("Campaigns"),
     EVENTS("Events");
 
