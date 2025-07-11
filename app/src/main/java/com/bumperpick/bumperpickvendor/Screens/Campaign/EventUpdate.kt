@@ -178,7 +178,7 @@ fun EditEventScreen(
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Normal,
                             fontFamily = satoshi_medium,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp)
                         )
                     }
                     Spacer(Modifier.height(10.dp))
@@ -234,7 +234,7 @@ fun EditEventScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Campaign address",
+                        text = "Campaign Address",
                         fontSize = 14.sp,
                         fontFamily = satoshi_regular,
                         fontWeight = FontWeight.Bold,
@@ -251,7 +251,7 @@ fun EditEventScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Maximum number of participants",
+                        text = "Maximum Number of Participants",
                         fontSize = 14.sp,
                         fontFamily = satoshi_regular,
                         fontWeight = FontWeight.Bold,

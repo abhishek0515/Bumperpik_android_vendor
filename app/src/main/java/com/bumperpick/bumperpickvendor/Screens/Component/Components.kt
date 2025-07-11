@@ -1629,7 +1629,91 @@ private fun drawVerticalDots(
         )
     }
 }
+@Composable
+fun AdPackagesBottomSheet(
+    buyNew:()->Unit={},
+    viewCurrent:()->Unit={},
+    onDismiss: () -> Unit = {},
+){
 
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Color.White,
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            )
+            .padding(bottom = 16.dp)
+    ) {
+        // Handle bar for visual feedback
+        Box(
+            modifier = Modifier
+                .width(40.dp)
+                .height(4.dp)
+                .background(
+                    Color.Gray.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(2.dp)
+                )
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Header
+        Text(
+            text = "Choose an Option",
+            fontSize = 20.sp,
+            fontFamily = satoshi,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Edit option
+        BottomSheetItem(
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.star_circle_svgrepo_com),
+                    contentDescription = "Buy New Package",
+                    modifier = Modifier.size(24.dp),
+                    tint = BtnColor
+                )
+            },
+            title = "Buy New Package",
+
+            onClick = buyNew
+        )
+
+        // Divider
+        Divider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = Color.Gray.copy(alpha = 0.2f),
+            thickness = 0.5.dp
+        )
+
+        // Delete option
+        BottomSheetItem(
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.star_circle_svgrepo_com),
+                    contentDescription = "Buy New Package",
+                    modifier = Modifier.size(24.dp),
+                    tint = BtnColor
+                )
+            },
+            title = "View Current Package",
+
+            onClick = viewCurrent,
+            titleColor = Color.Red
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+        ButtonView(text = "Cancel", onClick = onDismiss,)
+    }
+}
 @Composable
 fun EditDeleteBottomSheet(
     onEditClick: () -> Unit = {},

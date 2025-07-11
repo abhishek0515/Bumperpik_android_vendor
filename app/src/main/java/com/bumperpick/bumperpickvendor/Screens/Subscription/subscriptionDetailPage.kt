@@ -229,7 +229,7 @@ fun SubscriptionXCard(
                         ) {
                             if (!subscription.time_period.isNullOrEmpty()) {
                                 Text(
-                                    text = "Subscription Type:- ${subscription.time_period}",
+                                    text = "Subscription Type: ${subscription.time_period}",
                                     fontSize = 18.sp,
                                     fontFamily = satoshi_bold,
                                     color = Color.Black,

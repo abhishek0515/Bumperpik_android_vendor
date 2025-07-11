@@ -361,6 +361,7 @@ fun CreateAdScreen(navController: NavController, viewmodel: AdsViewModel) {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 OfferDateSelector(
+                    text="Ads",
                     offerStartDate = startDateString,
                     offerEndDate = endDateString,
                     onStartClick = { showStartCalendar = true },

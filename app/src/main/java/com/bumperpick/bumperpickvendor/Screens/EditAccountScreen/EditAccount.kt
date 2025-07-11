@@ -191,6 +191,15 @@ fun EditAccount(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = viewModel.getId(),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = satoshi_regular,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(

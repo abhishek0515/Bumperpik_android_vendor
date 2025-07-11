@@ -186,7 +186,7 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
                         Spacer(modifier = Modifier.height(12.dp))
                         Box(modifier = Modifier.fillMaxWidth()){
                         Text(
-                            text = "Offer quantity",
+                            text = "Offer Quantity",
                             fontSize = 14.sp,
                             fontFamily = satoshi_regular,
                             fontWeight = FontWeight.Bold,
@@ -243,7 +243,7 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
 
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            text = "Offer sub category",
+                            text = "Offer Sub Category",
                             fontSize = 14.sp,
                             fontFamily = satoshi_regular,
                             fontWeight = FontWeight.Bold,
@@ -412,7 +412,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
         })
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Heading size",
+            text = "Heading Size",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -425,7 +425,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
         })
         Spacer(Modifier.height(10.dp))
         Text(
-            text = "Enter discount",
+            text = "Enter Discount",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -440,7 +440,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
 
         Box(modifier = Modifier.fillMaxWidth()){
             Text(
-                text = "Offer quantity",
+                text = "Offer Quantity",
                 fontSize = 14.sp,
                 fontFamily = satoshi_regular,
                 fontWeight = FontWeight.Bold,
@@ -496,7 +496,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
         Spacer(Modifier.height(10.dp))
 
         Text(
-            text = "Offer sub category",
+            text = "Offer Sub Category",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -515,7 +515,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
 
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Sub heading",
+            text = "Sub Heading",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -528,7 +528,7 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Brand name",
+            text = "Brand Name",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -822,7 +822,7 @@ fun OfferDateSelector(
             .padding(vertical = 16.dp)
     ) {
         Text(
-            text = "$text start date",
+            text = "$text Start Date",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -865,7 +865,7 @@ fun OfferDateSelector(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "$text end date",
+            text = "$text End Date",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,

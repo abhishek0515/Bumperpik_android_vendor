@@ -252,6 +252,7 @@ fun adsEditScreen(
 
                             // Date Selector
                             OfferDateSelector(
+                                text = "Ads",
                                 offerStartDate = viewmodel.getCurrentStartDate().ifEmpty { data.start_date },
                                 offerEndDate = viewmodel.getCurrentEndDate().ifEmpty { data.end_date },
                                 onStartClick = {

@@ -102,7 +102,7 @@ fun HomeScreen(onClick:(HomeScreenClicked) -> Unit) {
             val navItems = listOf(
                 NavigationItem("Home", icon = Icons.Outlined.Home, contentDescription = "Home"),
                 NavigationItem("Create offers", icon = Icons.Default.List, contentDescription = "Create offers"),
-                NavigationItem("More", icon_draw = R.drawable.more_vertical_square_svgrepo_com, contentDescription = "Account")
+                NavigationItem("More", icon_draw = R.drawable.more_horizontal_square_svgrepo_com, contentDescription = "Account")
             )
           //  RazorpayPaymentButton(amountInPaise = 1000, email = "anuj@gmail.com", contact = "1234567889")
             BottomNavigationBar(

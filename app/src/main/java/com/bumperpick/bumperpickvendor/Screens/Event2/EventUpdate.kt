@@ -297,7 +297,7 @@ private fun EditFormContent(
 
         // Title field
         EditFormField(
-            label = "Event title",
+            label = "Event Title",
             placeholder = "Enter event title",
             value = eventDetails.title,
             onValueChange = { viewmodel.updateTitle(it) }
@@ -319,7 +319,7 @@ private fun EditFormContent(
 
         // Facebook live field
         EditFormField(
-            label = "Facebook live",
+            label = "Facebook Live",
             placeholder = "Enter facebook live link",
             value = eventDetails.facebookLiveLink,
             onValueChange = { viewmodel.updatefacebookLiveLink(it) }
@@ -328,7 +328,7 @@ private fun EditFormContent(
         Spacer(modifier = Modifier.height(8.dp))
         // YouTube live field
         EditFormField(
-            label = "Instagram live",
+            label = "Instagram Live",
             placeholder = "Enter instagram live link",
             value = eventDetails.instagramLiveLink, // Fixed: was using facebookLiveLink
             onValueChange = { viewmodel.updateInstagramLink(it) }
@@ -336,7 +336,7 @@ private fun EditFormContent(
         Spacer(modifier = Modifier.height(8.dp))
         // YouTube live field
         EditFormField(
-            label = "Youtube live",
+            label = "Youtube Live",
             placeholder = "Enter youtube live Id",
             value = eventDetails.youtubeLiveLink, // Fixed: was using facebookLiveLink
             onValueChange = { viewmodel.updateYoutubeLiveLink(it) }
@@ -380,7 +380,7 @@ private fun EditFormContent(
 
         // Address field
         EditFormField(
-            label = "Event address",
+            label = "Event Address",
             placeholder = "Enter event address",
             value = eventDetails.address,
             onValueChange = { viewmodel.updateAddress(it) }
@@ -390,7 +390,7 @@ private fun EditFormContent(
 
         // Description field
         EditFormField(
-            label = "Event description",
+            label = "Event Description",
             placeholder = "Enter event description",
             value = eventDetails.description,
             onValueChange = { viewmodel.updateDescription(it) },

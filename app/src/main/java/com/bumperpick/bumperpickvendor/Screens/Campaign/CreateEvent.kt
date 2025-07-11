@@ -339,7 +339,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Campaign title",
+                    text = "Campaign Title",
                     fontSize = 14.sp,
                     fontFamily = satoshi_regular,
                     fontWeight = FontWeight.Bold,
@@ -355,7 +355,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                     })
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Campaign description",
+                    text = "Campaign Description",
                     fontSize = 14.sp,
                     fontFamily = satoshi_regular,
                     fontWeight = FontWeight.Bold,
@@ -371,7 +371,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                     })
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Campaign address",
+                    text = "Campaign Address",
                     fontSize = 14.sp,
                     fontFamily = satoshi_regular,
                     fontWeight = FontWeight.Bold,
@@ -387,7 +387,7 @@ fun CreateCampaignScreen(navController: NavController, viewmodel: EventsViewmode
                     })
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Maximum number of participants",
+                    text = "Maximum Number of Participants",
                     fontSize = 14.sp,
                     fontFamily = satoshi_regular,
                     fontWeight = FontWeight.Bold,

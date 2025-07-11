@@ -1,6 +1,7 @@
 package com.bumperpick.bumperpickvendor.Screens.Event2
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -277,6 +279,11 @@ fun Event2PreviewScreen(
                 }
             }
             item {
+                LabelledSection(label = "Instagram live") {
+                    Text(Event2Details.instagramLiveLink?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
+                }
+            }
+            item {
                 LabelledSection(label = "Youtube live") {
                     Text(Event2Details.youtubeLiveLink ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
@@ -443,6 +450,7 @@ private fun FormContent(
     navController: NavController,
 
 ) {
+    val context= LocalContext.current
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
@@ -463,7 +471,7 @@ private fun FormContent(
 
         // Title field
         FormField(
-            label = "Event title",
+            label = "Event Title",
             placeholder = "Enter Event Title",
             value = eventDetails.title,
             onValueChange = { viewmodel.updateTitle(it) }
@@ -485,7 +493,7 @@ private fun FormContent(
 
         // Facebook live field
         FormField(
-            label = "Facebook live",
+            label = "Facebook Live",
             placeholder = "Enter Facebook live link",
             value = eventDetails.facebookLiveLink,
             onValueChange = { viewmodel.updatefacebookLiveLink(it) }
@@ -494,7 +502,7 @@ private fun FormContent(
         Spacer(modifier = Modifier.height(8.dp))
         // YouTube live field
         FormField(
-            label = "Instagram live",
+            label = "Instagram Live",
             placeholder = "Enter instagram live link",
             value = eventDetails.instagramLiveLink, // Fixed: was using facebookLiveLink
             onValueChange = { viewmodel.updateInstagramLink(it) }
@@ -502,7 +510,7 @@ private fun FormContent(
         Spacer(modifier = Modifier.height(4.dp))
         // YouTube live field
         FormField(
-            label = "Youtube live",
+            label = "Youtube Live",
             placeholder = "Enter Youtube live link",
             value = eventDetails.youtubeLiveLink,
             onValueChange = { viewmodel.updateYoutubeLiveLink(it) }
@@ -543,7 +551,7 @@ private fun FormContent(
 
         // Address field
         FormField(
-            label = "Event address",
+            label = "Event Address",
             placeholder = "Enter Event Address",
             value = eventDetails.address,
             onValueChange = { viewmodel.updateAddress(it) }
@@ -553,7 +561,7 @@ private fun FormContent(
 
         // Description field
         FormField(
-            label = "Event description",
+            label = "Event Description",
             placeholder = "Enter Event Description",
             value = eventDetails.description,
             onValueChange = { viewmodel.updateDescription(it) },
@@ -564,7 +572,10 @@ private fun FormContent(
 
         // Next button
         ButtonView(text = "Next", horizontal_padding = 0.dp) {
-            if (viewmodel.validateEventDetails()) {
+            if(eventDetails.bannerImage==null){
+                Toast.makeText(context,"Please choose banner image", Toast.LENGTH_SHORT).show()
+            }
+            else if (viewmodel.validateEventDetails()) {
                 navController.navigate(CreateEvent2ScreenViews.Event2Preview.route) {
                     popUpTo(CreateEvent2ScreenViews.CreateEvent2.route)
                 }
@@ -616,7 +627,7 @@ fun StartDateTimeSelector(
     ) {
         // Start Date Section
         Text(
-            text = "Event start date",
+            text = "Event Start Date",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -635,7 +646,7 @@ fun StartDateTimeSelector(
 
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Event end date",
+            text = "Event End Date",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -656,7 +667,7 @@ fun StartDateTimeSelector(
 
         // Start Time Section
         Text(
-            text = "Event time",
+            text = "Event Time",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,

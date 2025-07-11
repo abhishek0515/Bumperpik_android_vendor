@@ -29,11 +29,14 @@ import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,6 +62,7 @@ import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXX
 import com.bumperpick.bumperpickvendor.API.FinalModel.SubscriptionX
 import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Repository.MarketingOption
+import com.bumperpick.bumperpickvendor.Screens.Component.AdPackagesBottomSheet
 import com.bumperpick.bumperpickvendor.Screens.Component.ButtonView
 import com.bumperpick.bumperpickvendor.Screens.Component.SignOutDialog
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
@@ -88,7 +92,12 @@ sealed class AccountClick(){
     data class EngagementClick(val marketingOption: MarketingOption):AccountClick()
     data class AdsClick(val gotosub:Boolean):AccountClick()
 
+    data object buyAdsSbus: AccountClick()
+
+    data object viewCurrentAds: AccountClick()
+
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koinViewModel()){
         val context= LocalContext.current
@@ -99,7 +108,32 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
     LaunchedEffect(Unit) {
         viewmodel.fetchProfile()
     }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    if(showBottomSheet){
+        ModalBottomSheet(
+            containerColor = Color.White, // Change this color
+            contentColor = Color.Black,
+            dragHandle = null,
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState
+        ) {
+            AdPackagesBottomSheet(
+                onDismiss = {
+                    showBottomSheet=false
+                },
+                buyNew = {
+                    showBottomSheet=false
+                  onClick(AccountClick.buyAdsSbus)
+                },
+                viewCurrent = {
+                    showBottomSheet=false
+                    onClick(AccountClick.viewCurrentAds)
 
+                }
+            )
+        }
+    }
 
     if (show_signoutDialog){
         SignOutDialog(onConfirm = {
@@ -227,6 +261,21 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            Box (modifier = Modifier.fillMaxWidth().clickable {
+            showBottomSheet=true
+
+            }.background(Color.White), )
+            {
+                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                    Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = "Purchase Ads Package", color = Color.Black, fontSize = 16.sp,)
+                }
+
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+
+            }
+            Spacer(modifier = Modifier.height(12.dp))
 
             Box (modifier = Modifier.fillMaxWidth().background(Color.White),){
                 Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){

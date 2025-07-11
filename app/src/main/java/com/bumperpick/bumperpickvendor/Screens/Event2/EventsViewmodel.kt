@@ -143,10 +143,6 @@ class Events2Viewmodel(val eventRepository: Event2Repository) : ViewModel() {
             showError("Please select event time")
             return false
         }
-     else if(_eventDetails.value.bannerImage==null){
-         showError("Please select banner image")
-         return false
-     }
      else
             return true
     }
@@ -234,7 +230,9 @@ class Events2Viewmodel(val eventRepository: Event2Repository) : ViewModel() {
                             startTime = data.start_time?:"",
                             endDate  =if(data.end_date.isNullOrEmpty())"" else   formatDate( data.end_date),
                             facebookLiveLink = data.facebook_link?:"",
-                            youtubeLiveLink = data.youtube_link?:""
+                            youtubeLiveLink = data.youtube_link?:"",
+                            instagramLiveLink = data.instagram_link?:""
+
 
                       )
                         _uiEvent_Detail.value = UiState.Success(result.data.data)

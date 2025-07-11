@@ -15,5 +15,6 @@ data class DataXXXXXXXXXX(
     val status: String? = "",
     val title: String? = "",
     val vendor_id: Int? = 0,
-    val youtube_link: String?= ""
+    val youtube_link: String?= "",
+    val instagram_link:String?= ""
 )

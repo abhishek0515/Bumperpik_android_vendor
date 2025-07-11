@@ -280,6 +280,8 @@ class EditAccountViewModel(val vendorRepository: VendorRepository): ViewModel() 
     // Getter methods for UI
     fun getEstablishName(): String = _uiState.value.vendorDetails?.Vendor_EstablishName ?: ""
     fun getBrand(): String = _uiState.value.vendorDetails?.Vendor_brand ?: ""
+
+    fun getId(): String = _uiState.value.vendorDetails?.Vendor_Id ?: ""
     fun getEmail(): String = _uiState.value.vendorDetails?.Vendor_Email ?: ""
     fun getMobile(): String = _uiState.value.vendorDetails?.Vendor_Mobile ?: ""
     fun getEstablishmentAddress(): String = _uiState.value.vendorDetails?.Establisment_Adress ?: ""

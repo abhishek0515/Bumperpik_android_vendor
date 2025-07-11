@@ -133,12 +133,12 @@ fun SubscriptionPage(
             else -> { /* No action needed */ }
         }
     }
-    Scaffold (){
+
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+
                 .background(grey)
         ) {
             Column(
@@ -201,7 +201,7 @@ fun SubscriptionPage(
                 )
             }
         }
-    }
+
 }
 
 @Composable
@@ -211,7 +211,8 @@ fun SubscriptionPage(
             .fillMaxWidth()
 
             .background(Color.White)
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
+            .statusBarsPadding()
+            .padding(start = 16.dp, end = 16.dp, top =0.dp, bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

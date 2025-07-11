@@ -35,6 +35,7 @@ class EventRepository2Impl(val dataStoreManager: DataStoreManager,val apiService
         map["start_time"] = eventModel.startTime.toString().toRequestBody("text/plain".toMediaType())
         map["token"] = token.toRequestBody("text/plain".toMediaType())
         map["facebook_link"]=eventModel.facebookLiveLink.toString().toRequestBody("text/plain".toMediaType())
+        map["instagram_link"]=eventModel.instagramLiveLink.toString().toRequestBody("text/plain".toMediaType())
         map["youtube_link"]=eventModel.youtubeLiveLink.toString().toRequestBody("text/plain".toMediaType())
         map["vendor_id"]=vendorid.toString().toRequestBody("text/plain".toMediaType())
         val addEvent= safeApiCall(api = {
@@ -128,6 +129,7 @@ class EventRepository2Impl(val dataStoreManager: DataStoreManager,val apiService
         map["start_time"] = eventModel.startTime.toString().toRequestBody("text/plain".toMediaType())
         map["token"] = token.toRequestBody("text/plain".toMediaType())
         map["facebook_link"]=eventModel.facebookLiveLink.toString().toRequestBody("text/plain".toMediaType())
+        map["instagram_link"]=eventModel.instagramLiveLink.toString().toRequestBody("text/plain".toMediaType())
         map["youtube_link"]=eventModel.youtubeLiveLink.toString().toRequestBody("text/plain".toMediaType())
         map["vendor_id"]=vendorid.toString().toRequestBody("text/plain".toMediaType())
         val event= safeApiCall(api = {

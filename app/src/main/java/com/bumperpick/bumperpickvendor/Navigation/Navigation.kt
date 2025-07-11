@@ -239,6 +239,13 @@ fun AppNavigation() {
                               }
 
                           }
+
+                          AccountClick.buyAdsSbus -> {
+                              navController.navigate(Screen.AdsSubscription.route)
+                          }
+                          AccountClick.viewCurrentAds -> {
+
+                          }
                       }
                   }
 

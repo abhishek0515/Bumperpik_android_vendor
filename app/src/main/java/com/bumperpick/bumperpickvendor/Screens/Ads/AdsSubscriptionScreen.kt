@@ -5,6 +5,8 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXXXXXXXX
 import com.bumperpick.bumperpickvendor.API.FinalModel.FeatureXXXXXX
 import com.bumperpick.bumperpickvendor.API.FinalModel.ads_package_model
+import com.bumperpick.bumperpickvendor.Screens.Component.getMetalBrush
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.Screens.Subscription.ErrorContent
 import com.bumperpick.bumperpickvendor.Screens.Subscription.LoadingContent
@@ -165,13 +168,7 @@ fun EnhancedHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(
-                        Color(0xFFE8E8E8),
-                        Color(0xFFF5F5F5),
-                        Color(0xFFE8E8E8)
-                    )
-                )
+                Color.White
             )
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
@@ -244,12 +241,13 @@ fun SubscriptionContent(
                 modifier = Modifier.fillMaxWidth(),
                 pageSpacing = 16.dp,
                 contentPadding = PaddingValues(horizontal = 0.dp)
-            ) { page ->
+            )
+            { page ->
                 if (page < plans.size) {
                     EnhancedAdsSubscriptionCard(
                         plan = plans[page],
                         isSelected = page == pagerState.currentPage,
-                        modifier = Modifier.fillMaxSize()
+
                     )
                 }
             }
@@ -310,56 +308,57 @@ fun EnhancedAdsSubscriptionCard(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isSelected) 8.dp else 4.dp
+            defaultElevation = if (isSelected) 8.dp else 2.dp
         ),
         border = if (isSelected) BorderStroke(2.dp, Color(0xFFD32F2F)) else null
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Plan Header
-            PlanHeader(planName = plan.name)
-
-            // Features Content
-            FeaturesContent(
-                features = plan.features,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-fun PlanHeader(planName: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(bottomEnd = 20.dp, bottomStart = 20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Box(
             modifier = Modifier
-                .fillMaxWidth()
+
                 .background(
-                    brush = getMetalBrush(planName)
+                    brush = getMetalBrush1(plan.name)
                 )
-                .padding(8.dp)
+                .clip(shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
         ) {
-            Text(
-                text = planName,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            // Plan name header
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = (plan.name).toUpperCase(),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            // Features content with improved visibility
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f), // This makes it take up remaining space
+                shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 4.dp
+                )
+            ) {
+                FeaturesContent(
+                    features = plan.features,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
+
 @Composable
 fun FeaturesContent(
     features: List<FeatureXXXXXX>,
@@ -367,46 +366,48 @@ fun FeaturesContent(
 ) {
     Column(
         modifier = modifier
+            .fillMaxSize()
+            .background(Color.White) // Ensure white background
             .padding(20.dp)
-            .verticalScroll(rememberScrollState())
     ) {
+        // Features header
         Text(
             text = "Features",
-            fontSize = 18.sp,
+            fontSize = 20.sp, // Increased font size
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = Color.Black,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // Divider
         Divider(
             color = Color.Gray.copy(alpha = 0.3f),
-            thickness = 1.dp
+            thickness = 1.dp,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        // Scrollable features list
+        LazyColumn (
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            itemsIndexed(features) { index, feature ->
+                FeatureItem(
+                    feature = FeatureUI(
+                        id = feature.id,
+                        name = feature.name,
+                        isIncluded = when (feature.type) {
+                            "boolean" -> FeatureValue.BooleanValue(feature.value == "1")
+                            else -> FeatureValue.StringValue(feature.value)
+                        },
+                        type = feature.type
+                    ),
 
-        // Features List
-        features.forEachIndexed { index, feature ->
-            FeatureItem(
-                feature = FeatureUI(
-                    id = feature.id,
-                    name = feature.name,
-                    isIncluded = when (feature.type) {
-                        "boolean" -> FeatureValue.BooleanValue(feature.value == "1")
-                        else -> FeatureValue.StringValue(feature.value)
-                    },
-                    type = feature.type
                 )
-            )
-
-            if (index < features.size - 1) {
-                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
 }
-
 @Composable
 fun BottomActionBar(
     selectedPlan: DataXXXXXXXXXXXXXX?,
@@ -415,24 +416,24 @@ fun BottomActionBar(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        shape = RectangleShape,
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+
     ) {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(9.dp)
         ) {
             selectedPlan?.let { plan ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(modifier = Modifier.padding(horizontal = 12.dp)) {
                         Text(
-                            text = "₹${plan.price}",
-                            fontSize = 24.sp,
+                            text = "₹ ${plan.price}",
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
                         )
@@ -472,14 +473,7 @@ fun BottomActionBar(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.ShoppingCart,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
+                                  Text(
                                     text = "Subscribe",
                                     color = Color.White,
                                     fontSize = 16.sp,
@@ -567,7 +561,7 @@ fun FeatureStatusIcon(isIncluded: Boolean) {
 }
 
 // Helper function to create metallic gradient based on plan name
-fun getMetalBrush(planName: String): Brush {
+fun getMetalBrush1(planName: String): Brush {
     return when (planName.toUpperCase()) {
         "STARTER" -> Brush.horizontalGradient(
             colors = listOf(
