@@ -12,6 +12,7 @@ import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.Subcategory
 import com.bumperpick.bumperpickvendor.API.FinalModel.error_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.getOfferDetailsModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 import com.bumperpick.bumperpickvendor.API.Provider.ApiResult
@@ -45,7 +46,7 @@ class OfferRepositoryImpl(
             if (vendorDetails != null) {
                 Log.d("Offer_vendorId", vendorDetails.vendor_id.toString())
             }
-
+            map["is_unlimited"]=(if(offerModel?.toogleStockLast==true)"1" else "0").toRequestBody("text/plain".toMediaType())
             map["vendor_id"] = vendorDetails?.vendor_id.toString().toRequestBody("text/plain".toMediaType())
             map["offer_template"] = offerModel.gradientType?.name.toString().toRequestBody("text/plain".toMediaType())
             map["heading"] = offerModel.heading?.text.toString().toRequestBody("text/plain".toMediaType())
@@ -366,4 +367,29 @@ if(mediaListMulti.isEmpty()) {
         }
 
     }
+
+    override suspend fun getOfferReview(id: String): Result<getOfferDetailsModel> {
+        return try {
+            val data = dataStoreManager.getToken()?.token ?: ""
+            val result = safeApiCall(
+                api = { apiService.getRatings(id, data) },
+                errorBodyParser = { json ->
+                    try {
+                        Gson().fromJson(json, error_model::class.java)
+                    } catch (e: Exception) {
+                        error_model(message = "Unknown error format: $json")
+                    }
+                }
+            )
+            when (result) {
+                is ApiResult.Error -> Result.Error(result.error.message)
+                is ApiResult.Success -> Result.Success(result.data)
+            }
+
+
+        } catch (e: Exception) {
+            Result.Error("Failed to get offer review offer: ${e.message}")
+        }
+    }
+
 }

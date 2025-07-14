@@ -1,6 +1,7 @@
 package com.bumperpick.bumperpickvendor.Screens.Event2
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXX
@@ -27,6 +28,7 @@ data class CreateEventModel(
     val startDate:String="",
     val startTime:String="",
     val endDate: String="",
+    val endTime: String="",
     val facebookLiveLink:String="",
     val youtubeLiveLink:String="",
     val instagramLiveLink:String="",
@@ -112,6 +114,9 @@ class Events2Viewmodel(val eventRepository: Event2Repository) : ViewModel() {
    fun updateStartTime(time:String){
        _eventDetails.value=eventDetails.value.copy(startTime = time)
    }
+    fun updateEndTime(time: String){
+        _eventDetails.value=eventDetails.value.copy(endTime = time)
+    }
     fun updatefacebookLiveLink(facebookLiveLink:String){
         _eventDetails.value=eventDetails.value.copy(facebookLiveLink = facebookLiveLink)
     }
@@ -226,6 +231,7 @@ class Events2Viewmodel(val eventRepository: Event2Repository) : ViewModel() {
                             title=data.title?:"",
                             description=data.description?:"",
                             address=data.address?:"",
+                            endTime = data.end_time?:"",
                             startDate=if(data.start_date.isNullOrEmpty())"" else   formatDate( data.start_date),
                             startTime = data.start_time?:"",
                             endDate  =if(data.end_date.isNullOrEmpty())"" else   formatDate( data.end_date),
@@ -235,6 +241,7 @@ class Events2Viewmodel(val eventRepository: Event2Repository) : ViewModel() {
 
 
                       )
+                        Log.d("_eventDetails",_eventDetails.value.toString())
                         _uiEvent_Detail.value = UiState.Success(result.data.data)
 
                     } else {

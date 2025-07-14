@@ -4,6 +4,7 @@ import android.net.Uri
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.Subcategory
+import com.bumperpick.bumperpickvendor.API.FinalModel.getOfferDetailsModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 
@@ -23,4 +24,6 @@ interface offerRepository {
 
     suspend fun OfferRedeem(customer_id: String, offer_id: String): Result<offerRedeemModel>
     suspend fun getSubcategory(): Result<List<Subcategory>>
+
+    suspend fun getOfferReview(id:String): Result<getOfferDetailsModel>
 }

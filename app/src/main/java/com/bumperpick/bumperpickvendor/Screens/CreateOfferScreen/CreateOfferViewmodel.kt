@@ -249,6 +249,10 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
         _offerDetails.value=offerDetails.value.copy(discount = name)
     }
 
+    fun updateStockLast(boolean: Boolean){
+        _offerDetails.value=offerDetails.value.copy(toogleStockLast = boolean)
+    }
+
     fun AddDatatoServer() {
         viewModelScope.launch {
                 _loading.value=true

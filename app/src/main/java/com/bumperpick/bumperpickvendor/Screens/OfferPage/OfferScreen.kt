@@ -89,7 +89,7 @@ fun List<HomeOffer>.get_ActiveOffers()=this.filter { it.offerValid==OfferValidat
 fun List<HomeOffer>.getExpiredOffers()=this.filter { it.offerValid==OfferValidation.Expired }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String)->Unit) {
+fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String)->Unit,viewRating:(id:String)->Unit) {
     val vendorDetailViewmodel= koinViewModel<VendorDetailViewmodel>()
     val savedetail=vendorDetailViewmodel.savedVendorDetail.collectAsState()
     val delete by viewmodel.delete.collectAsState()
@@ -276,7 +276,12 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
                             showBottomSheet=true
                         }
                     }
-                })
+                },
+                    viewRating = {
+                        viewRating(it)
+
+
+                    })
             }
         }
     }

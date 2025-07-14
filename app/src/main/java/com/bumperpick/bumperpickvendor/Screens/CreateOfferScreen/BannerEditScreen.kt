@@ -230,7 +230,9 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
                             Switch(
                                 modifier = Modifier.align(Alignment.CenterEnd),
                                 checked = quantity_enabled,
-                                onCheckedChange = { quantity_enabled = it },
+                                onCheckedChange = { quantity_enabled = it
+                                                  viewmodel.updateStockLast(it)
+                                                  },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
                                     checkedTrackColor = BtnColor,

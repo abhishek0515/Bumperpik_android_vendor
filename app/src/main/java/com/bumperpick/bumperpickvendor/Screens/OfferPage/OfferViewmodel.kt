@@ -2,12 +2,14 @@ package com.bumperpick.bumperpickvendor.Screens.OfferPage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bumperpick.bumperpickvendor.API.FinalModel.getOfferDetailsModel
 import com.bumperpick.bumperpickvendor.Repository.HomeOffer
 import com.bumperpick.bumperpickvendor.Repository.OfferModel
 import com.bumperpick.bumperpickvendor.Repository.OfferValidation
 import com.bumperpick.bumperpickvendor.Repository.Result
 import com.bumperpick.bumperpickvendor.Repository.VendorRepository
 import com.bumperpick.bumperpickvendor.Repository.offerRepository
+import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,6 +21,11 @@ class OfferViewmodel(val offerRepository: offerRepository): ViewModel() {
 
     private val _delete=MutableStateFlow<String>("")
     val delete: StateFlow<String> =_delete
+
+
+    private val _offerDetails =MutableStateFlow<UiState<getOfferDetailsModel>>(UiState.Empty)
+   val offerDetails: StateFlow<UiState<getOfferDetailsModel>> =_offerDetails
+
 
 
    private val _loading = MutableStateFlow(false)
@@ -42,6 +49,23 @@ class OfferViewmodel(val offerRepository: offerRepository): ViewModel() {
             }
         }
 
+    }
+
+    fun getOfferDetails(id: String){
+        viewModelScope.launch {
+            val result=offerRepository.getOfferReview(id)
+          _offerDetails.value=  when(result){
+                is Result.Error ->{
+                    UiState.Error(result.message)
+                }
+                Result.Loading -> {
+                    UiState.Loading
+                }
+                is Result.Success -> {
+                    UiState.Success(result.data)
+                }
+          }
+        }
     }
 
     fun deleteOffer(selectedId: String, it: String) {

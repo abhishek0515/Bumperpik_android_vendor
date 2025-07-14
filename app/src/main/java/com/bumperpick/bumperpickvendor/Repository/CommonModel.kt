@@ -98,6 +98,7 @@ data class OfferModel(
     val heading:TextType?=null,
     val HeadingSize:HeadingSize?=null,
     val discount:TextType=TextType(text = ""),
+    val toogleStockLast:Boolean?=null,
     val brandName:TextType?=null,
     val logo:Uri?=null,
     val subcat_id:Int?=null,

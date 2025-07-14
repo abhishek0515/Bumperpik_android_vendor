@@ -3,6 +3,8 @@ package com.bumperpick.bumperpickvendor.Repository
 import DataStoreManager
 import android.util.Log
 import com.bumperpick.bumperpickvendor.API.FinalModel.Data
+import com.bumperpick.bumperpickvendor.API.FinalModel.ads_subs_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.dasboard_modek
 import com.bumperpick.bumperpickvendor.API.FinalModel.error_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
@@ -213,6 +215,7 @@ class VendorRepositoryImpl(
         }
     }
 
+
     override suspend fun getProfile(): Result<vendor_details_model> {
         return try {
             val token = dataStoreManager.getToken()!!.token
@@ -241,6 +244,68 @@ class VendorRepositoryImpl(
 
         } catch (e: Exception) {
             Result.Error("Failed to fetch profile: ${e.message}")
+        }
+    }
+    override suspend fun getAdsSubs(): Result<ads_subs_model> {
+        return try {
+            val token = dataStoreManager.getToken()!!.token
+            val add_subs = safeApiCall(
+                api = { apiService.fetchAdsSubs( token = token) },
+                errorBodyParser = { json ->
+                    try {
+                        Gson().fromJson(json, error_model::class.java)
+                    } catch (e: Exception) {
+                        error_model(message = "Unknown error format: $json")
+                    }
+                }
+            )
+
+            when (add_subs) {
+                is ApiResult.Error -> Result.Error(add_subs.error.message)
+                is ApiResult.Success -> {
+                    if (add_subs.data.code == 200)
+                        return Result.Success(add_subs.data)
+                    else {
+                        return Result.Error(add_subs.data.message)
+                    }
+                }
+            }
+
+
+        } catch (e: Exception) {
+            Result.Error("Failed to fetch profile: ${e.message}")
+        }
+    }
+
+    override suspend fun getDashboard(): Result<dasboard_modek> {
+        return try {
+            val token = dataStoreManager.getToken()!!.token
+            val add_subs = safeApiCall(
+                api = { apiService.dashboard( token = token) },
+                errorBodyParser = { json ->
+                    try {
+                        Gson().fromJson(json, error_model::class.java)
+                    } catch (e: Exception) {
+                        Log.d("Error","Unknown error format: $json")
+                        error_model(message = "Unknown error format: $json")
+                    }
+                }
+            )
+
+            when (add_subs) {
+                is ApiResult.Error -> Result.Error(add_subs.error.message)
+                is ApiResult.Success -> {
+                    if (add_subs.data.code == 200)
+                        return Result.Success(add_subs.data)
+                    else {
+                        return Result.Error(add_subs.data.message)
+                    }
+                }
+            }
+
+
+        } catch (e: Exception) {
+            Result.Error("Failed to fetch dashboard: ${e.message}")
         }
     }
 

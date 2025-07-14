@@ -2,22 +2,29 @@ package com.bumperpick.bumperpickvendor.Screens.Ads
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.Uri
 import com.bumperpick.bumperpickvendor.API.FinalModel.AdsDetailModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.AdsSubscription
 import com.bumperpick.bumperpickvendor.API.FinalModel.ads_package_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.ads_subs_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.subs_ads_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.vendorAdsModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.vendor_details_model
 import com.bumperpick.bumperpickvendor.API.Model.success_model
 import com.bumperpick.bumperpickvendor.API.Provider.toMultipartPart
 import com.bumperpick.bumperpickvendor.Repository.AdsRepository
 import com.bumperpick.bumperpickvendor.Repository.Result
+import com.bumperpick.bumperpickvendor.Repository.VendorRepository
 import com.bumperpick.bumperpickvendor.Repository.uriToFile
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.UIntArraySerializer
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -25,7 +32,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
-class AdsViewModel(val adsRepository: AdsRepository) : ViewModel() {
+class AdsViewModel(val adsRepository: AdsRepository,val vendorRepository: VendorRepository) : ViewModel() {
 
     // State for ads package
     private val _adsSubsUiState = MutableStateFlow<UiState<ads_package_model>>(UiState.Empty)
@@ -60,6 +67,28 @@ class AdsViewModel(val adsRepository: AdsRepository) : ViewModel() {
     private var updatedStartDate: String = ""
     private var updatedEndDate: String = ""
 
+    private val _user_ad_sub =MutableStateFlow<UiState<AdsSubscription?>>(UiState.Empty)
+    val user_ad_sub= _user_ad_sub.asStateFlow()
+
+    fun AdsSub(){
+        viewModelScope.launch {
+            _user_ad_sub.value= UiState.Loading
+            try {
+                val result=vendorRepository.getProfile()
+                _user_ad_sub.value=when(result){
+                    is Result.Error -> UiState.Error(result.message)
+                    Result.Loading -> UiState.Loading
+                    is Result.Success -> UiState.Success(result.data.data.adsSubscription)
+                }
+
+            }catch (e: Exception) {
+                _user_ad_sub.value = UiState.Error(e.message ?: "Unknown error")
+            }
+
+        }
+
+    }
+
     fun getAdsSub() {
         viewModelScope.launch {
             _adsSubsUiState.value = UiState.Loading
@@ -75,17 +104,24 @@ class AdsViewModel(val adsRepository: AdsRepository) : ViewModel() {
             }
         }
     }
+    private val ad_id =MutableStateFlow("")
+    fun setadId(adId:String){
+        ad_id.value=adId
 
-    fun subscribePackage( adsSubscriptionId: String, paymentTransactionId: String) {
+    }
+    fun subscribePackage( paymentTransactionId: String) {
         viewModelScope.launch {
             _subscribePackageUiState.value = UiState.Loading
             try {
-                val result = adsRepository.subscribePackage( adsSubscriptionId, paymentTransactionId)
+                val result = adsRepository.subscribePackage( ad_id.value, paymentTransactionId)
                 _subscribePackageUiState.value = when (result) {
-                    is Result.Error -> UiState.Error(result.message)
+
+                    is Result.Error ->{
+                        UiState.Error(result.message) }
                     Result.Loading -> UiState.Loading
                     is Result.Success -> UiState.Success(result.data)
                 }
+                ad_id.value=""
             } catch (e: Exception) {
                 _subscribePackageUiState.value = UiState.Error(e.message ?: "Unknown error")
             }

@@ -1,6 +1,8 @@
 package com.bumperpick.bumperpickvendor.Repository
 
 import com.bumperpick.bumperpickvendor.API.FinalModel.Data
+import com.bumperpick.bumperpickvendor.API.FinalModel.ads_subs_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.dasboard_modek
 import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
 import com.bumperpick.bumperpickvendor.API.FinalModel.subscription_model
@@ -19,7 +21,9 @@ interface VendorRepository {
     suspend fun updateProfile(
         vendorDetails: Vendor_Details
     ):Result<update_profile_model>
+    suspend fun getAdsSubs(): Result<ads_subs_model>
 
+    suspend fun getDashboard(): Result<dasboard_modek>
 
 
 

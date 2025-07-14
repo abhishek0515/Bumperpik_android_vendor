@@ -484,7 +484,9 @@ fun EventCard(
             EventDetails(
                 title = events.title,
                 startDate = events.start_date,
-                deadline = events.start_time,
+                endDate=events.end_date,
+                starttime=events.start_time,
+                deadline = events.end_time,
                 isExpired = events.expire
             )
         }
@@ -575,6 +577,8 @@ private fun EventDetails(
     title: String,
     startDate: String,
     deadline: String,
+    endDate:String,
+    starttime:String,
     isExpired: Boolean
 ) {
     Column(
@@ -604,10 +608,26 @@ private fun EventDetails(
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-
         InfoRow(
             icon = painterResource(R.drawable.clock),
-            text = "Deadline: $deadline",
+            text = "Start Time: $starttime",
+            isExpired = isExpired
+        )
+        // Event Info
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+
+        InfoRow(
+            icon = painterResource(R.drawable.calendar_alt),
+            text = "End Date: ${formatDate(endDate)}",
+            isExpired = isExpired
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        InfoRow(
+            icon = painterResource(R.drawable.clock),
+            text = "End Time: $deadline",
             isExpired = isExpired
         )
 

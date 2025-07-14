@@ -359,7 +359,7 @@ fun OfferPreviewScreen(navController: NavController, viewmodel: CreateOfferViewm
                         }
                     } else {
                         PrimaryButton(
-                            text = "Publish your Offer",
+                            text = "Publish",
                             onClick = {
                                 Log.d("userType", userChoosedBanner.toString())
                                 loading = true

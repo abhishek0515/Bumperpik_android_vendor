@@ -73,7 +73,7 @@ fun EditEventScreen2(
     var showStartTime by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var selectedEndDate by remember { mutableStateOf<LocalDate?>(null) }
-
+    var showEndtimeCalendar by remember { mutableStateOf(false) }
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
     val error by viewmodel.error.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -175,9 +175,12 @@ fun EditEventScreen2(
                     onStartTimeClick = { showStartTime = true },
                     onBackClick = onBackClick,
                     onEndTimeClick = {
-                        showEndCalendar=true}
+                        showEndtimeCalendar=true},
+                    onEndDateClick = {showEndCalendar=true},
 
-                )
+
+
+                    )
             }
 
             // Bottom sheets and dialogs
@@ -212,7 +215,19 @@ fun EditEventScreen2(
                     showEndCalendar = false
                 }
             )
+            if(showEndtimeCalendar){
+                TimePickerDialog(
+                    onTimeSelected = {
+                            time->
+                        viewmodel.updateEndTime(time)
+                        showEndtimeCalendar =false
 
+                    },
+                    onDismiss = {
+                        showEndtimeCalendar=false
+                    }
+                )
+            }
             if (showStartTime) {
                 TimePickerDialog(
                     onTimeSelected = { time ->
@@ -275,6 +290,7 @@ private fun EditFormContent(
     onStartDateClick: () -> Unit,
     onStartTimeClick: () -> Unit,
     onEndTimeClick:()->Unit,
+    onEndDateClick:()->Unit,
     onBackClick: () -> Unit
 ) {
     Column(
@@ -309,10 +325,12 @@ private fun EditFormContent(
         StartDateTimeSelector(
             offerStartDate = eventDetails.startDate,
             offerStartTime = eventDetails.startTime,
-            offerEndTime = eventDetails.endDate,
+            offerEndTime = eventDetails.endTime,
+            offerEndDate = eventDetails.endDate,
             onStartDateClick = onStartDateClick,
             onStartTimeClick = onStartTimeClick,
-            onEndTimeClick = onEndTimeClick
+            onEndTimeClick = onEndTimeClick,
+            onEndDateClick = onEndDateClick
         )
 
         Spacer(modifier = Modifier.height(8.dp))

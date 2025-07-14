@@ -12,7 +12,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -49,7 +49,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -111,11 +111,13 @@ import com.bumperpick.bumperpickvendor.ui.theme.grey
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
@@ -1316,7 +1318,7 @@ sealed class EditDelete(){
 }
 
 @Composable
-fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={},){
+fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={},viewRating:(id:String)->Unit){
 
     Card (
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -1374,13 +1376,28 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
 
             Column(modifier = Modifier.padding(12.dp)) {
                 Spacer(Modifier.height(5.dp))
-                Text(
-                    text = offerModel.offerTitle?:"",
-                    fontSize = 22.sp,
-                    fontFamily = satoshi_regular,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
-                )
+                Box(modifier = Modifier.fillMaxWidth(),) {
+                    Text(
+                        text = offerModel.offerTitle ?: "",
+                        fontSize = 22.sp,
+                        modifier= Modifier.align(Alignment.CenterStart),
+                        fontFamily = satoshi_regular,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = "View Rating",
+                        modifier=Modifier.
+                        align(Alignment.CenterEnd)
+                        .clickable{
+                            viewRating(offerModel.offerId?:"")
+                        },
+                        fontSize = 16.sp,
+                        fontFamily = satoshi_regular,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BtnColor
+                    )
+                }
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = offerModel.offerDescription?:"",
@@ -2277,12 +2294,15 @@ fun getPlatinumBrush(): Brush = Brush.horizontalGradient(
     )
 )
 
-fun formatDate(inputDate: String): String {
+fun formatDate(inputDate: String?): String {
     return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-        val date = inputFormat.parse(inputDate)
-        outputFormat.format(date!!)
+        if(inputDate==null) ""
+        else {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            val date = inputFormat.parse(inputDate)
+            outputFormat.format(date!!)
+        }
     } catch (e: Exception) {
         "Invalid date"
     }

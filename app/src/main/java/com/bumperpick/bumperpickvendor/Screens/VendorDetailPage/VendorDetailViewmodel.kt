@@ -58,6 +58,7 @@ import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImage
 import com.bumperpick.bumperpickvendor.API.FinalModel.Data
 import com.bumperpick.bumperpickvendor.API.FinalModel.Media
+import com.bumperpick.bumperpickvendor.API.FinalModel.dasboard_modek
 import com.bumperpick.bumperpickvendor.R
 import com.bumperpick.bumperpickvendor.Repository.HomeOffer
 import com.bumperpick.bumperpickvendor.Repository.Result
@@ -71,6 +72,8 @@ import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOfferViewmo
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.OfferDateSelector
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.VideoThumbnail
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.isVideoFile
+import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
+import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionViewModel
 import com.bumperpick.bumperpickvendor.ui.theme.BtnColor
 import com.bumperpick.bumperpickvendor.ui.theme.grey
 import com.bumperpick.bumperpickvendor.ui.theme.satoshi_medium
@@ -94,6 +97,22 @@ class VendorDetailViewmodel(val vendorRepository: VendorRepository) : ViewModel(
     private val _savedVendorDetail=MutableStateFlow<Data?>(null)
     val savedVendorDetail:StateFlow<Data?> = _savedVendorDetail.asStateFlow()
 
+    private val _dashboard =MutableStateFlow< UiState<dasboard_modek>>(
+       UiState.Empty)
+    val dashboardStats:StateFlow<UiState<dasboard_modek>> =_dashboard.asStateFlow()
+
+    fun get_dashboard(){
+        viewModelScope.launch {
+            val result=vendorRepository.getDashboard()
+          _dashboard.value=  when(result){
+              is Result.Error ->{
+                  UiState.Error(result.message)
+              }
+              Result.Loading ->UiState.Loading
+              is Result.Success -> UiState.Success(result.data)
+          }
+        }
+    }
     fun getSavedVendorDetail() {
         viewModelScope.launch {
             val result = vendorRepository.getSavedVendorDetail()

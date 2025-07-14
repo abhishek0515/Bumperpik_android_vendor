@@ -308,14 +308,21 @@ fun EditOffer(
                 // Banner Image
 
                     println("offer image :- ${offerDetail.brand_logo_url}")
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp) // Set your desired fixed height
+                ) {
                     AsyncImage(
                         model = offerDetail.brand_logo_url,
                         contentDescription = "Banner Image",
                         modifier = Modifier
-                           // .fillMaxSize()
+                            .fillMaxSize()
                             .clip(RoundedCornerShape(16.dp)),
                         contentScale = ContentScale.Crop
                     )
+                }
 
 
                 Spacer(modifier = Modifier.height(16.dp))

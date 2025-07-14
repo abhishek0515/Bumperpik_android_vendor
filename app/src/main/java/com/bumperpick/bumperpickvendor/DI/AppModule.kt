@@ -100,7 +100,7 @@ val appModule = module {
     viewModel { EditAccountViewModel(get()) }
     viewModel { EventsViewmodel(get()) }
     viewModel { Events2Viewmodel(get())}
-    viewModel { AdsViewModel(get()) }
+    viewModel { AdsViewModel(get(),get()) }
 
 
 

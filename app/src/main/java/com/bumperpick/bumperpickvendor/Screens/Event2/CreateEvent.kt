@@ -254,48 +254,53 @@ fun Event2PreviewScreen(
             }
 
             item {
-                LabelledSection(label = "Event title") {
+                LabelledSection(label = "Event Title") {
                     Text(Event2Details.title ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "Start date") {
+                LabelledSection(label = "Start Date") {
                     Text(Event2Details.startDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "End date") {
+                LabelledSection(label = "End Date") {
                     Text(Event2Details.endDate ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "Start time") {
+                LabelledSection(label = "Start Time") {
                     Text(Event2Details.startTime ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "Facebook live") {
+                LabelledSection(label = "End Time") {
+                    Text(Event2Details.endTime ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
+                }
+            }
+            item {
+                LabelledSection(label = "Facebook Live Link") {
                     Text(Event2Details.facebookLiveLink?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "Instagram live") {
+                LabelledSection(label = "Instagram Live Link") {
                     Text(Event2Details.instagramLiveLink?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "Youtube live") {
+                LabelledSection(label = "Youtube Live Id") {
                     Text(Event2Details.youtubeLiveLink ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
             item {
-                LabelledSection(label = "Event address") {
+                LabelledSection(label = "Event Address") {
                     Text(Event2Details.address ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
 
             item {
-                LabelledSection(label = "Event description") {
+                LabelledSection(label = "Event Description") {
                     Text(Event2Details.description ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
@@ -333,6 +338,7 @@ fun CreateEvent2Screen(
     var showStartTime by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showEndCalendar by remember { mutableStateOf(false) }
+    var showEndtimeCalendar by remember { mutableStateOf(false) }
     var selectedEndDate by remember { mutableStateOf<LocalDate?>(null) }
 
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
@@ -358,7 +364,8 @@ fun CreateEvent2Screen(
                 viewmodel = viewmodel,
                 onStartDateClick = { showStartCalendar = true },
                 onStartTimeClick = { showStartTime = true },
-                onEndTimeClick = {showEndCalendar=true},
+                onEndTimeClick = {showEndtimeCalendar=true},
+                onEndDateClick = {showEndCalendar=true},
                 navController = navController
             )
         }
@@ -406,6 +413,19 @@ fun CreateEvent2Screen(
                 onDismiss = { showStartTime = false }
             )
         }
+        if(showEndtimeCalendar){
+            TimePickerDialog(
+                onTimeSelected = {
+                    time->
+                    viewmodel.updateEndTime(time)
+                    showEndtimeCalendar =false
+
+                },
+                onDismiss = {
+                    showEndtimeCalendar=false
+                }
+            )
+        }
     }
 }
 
@@ -446,7 +466,8 @@ private fun FormContent(
     viewmodel: Events2Viewmodel,
     onStartDateClick: () -> Unit,
     onStartTimeClick: () -> Unit,
-    onEndTimeClick:()->Unit,
+    onEndTimeClick: () -> Unit,
+    onEndDateClick:()->Unit,
     navController: NavController,
 
 ) {
@@ -485,8 +506,10 @@ private fun FormContent(
             offerStartTime = eventDetails.startTime,
             onStartDateClick = onStartDateClick,
             onStartTimeClick = onStartTimeClick,
-            offerEndTime = eventDetails.endDate,
-            onEndTimeClick = onEndTimeClick
+            offerEndDate = eventDetails.endDate,
+            onEndTimeClick = onEndTimeClick,
+            offerEndTime = eventDetails.endTime,
+            onEndDateClick=onEndDateClick
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -616,8 +639,10 @@ fun StartDateTimeSelector(
     offerStartDate: String?,
     offerStartTime: String?,
     offerEndTime:String?,
+    offerEndDate:String?,
     onStartDateClick: () -> Unit,
     onStartTimeClick: () -> Unit,
+    onEndDateClick:()->Unit,
     onEndTimeClick:() -> Unit
 ) {
     Column(
@@ -645,6 +670,7 @@ fun StartDateTimeSelector(
         )
 
         Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = "Event End Date",
             fontSize = 14.sp,
@@ -656,18 +682,18 @@ fun StartDateTimeSelector(
         Spacer(modifier = Modifier.height(8.dp))
 
         DateTimeCard(
-            text = offerEndTime ?: "Select end date",
-            isSelected = offerEndTime != null,
+            text = offerEndDate ?: "Select end date",
+            isSelected = offerEndDate != null,
             iconRes = R.drawable.calendar_alt,
             contentDescription = "Calendar Icon",
-            onClick = onEndTimeClick
+            onClick = onEndDateClick
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Start Time Section
         Text(
-            text = "Event Time",
+            text = "Event Start Time",
             fontSize = 14.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.Bold,
@@ -682,6 +708,26 @@ fun StartDateTimeSelector(
             iconRes = R.drawable.clock,
             contentDescription = "Clock Icon",
             onClick = onStartTimeClick
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Start Time Section
+        Text(
+            text = "Event End Time",
+            fontSize = 14.sp,
+            fontFamily = satoshi_regular,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        DateTimeCard(
+            text = offerEndTime ?: "Select end time",
+            isSelected = offerEndTime != null,
+            iconRes = R.drawable.clock,
+            contentDescription = "Clock Icon",
+            onClick = onEndTimeClick
         )
     }
 }

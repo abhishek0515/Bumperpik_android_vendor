@@ -24,6 +24,7 @@ import com.bumperpick.bumperpickvendor.Screens.Account.AccountClick
 import com.bumperpick.bumperpickvendor.Screens.Ads.AdsScreen
 import com.bumperpick.bumperpickvendor.Screens.Ads.AdsSubscriptionScreen
 import com.bumperpick.bumperpickvendor.Screens.Ads.CreateAd
+import com.bumperpick.bumperpickvendor.Screens.Ads.adsCurrentPackage
 import com.bumperpick.bumperpickvendor.Screens.Ads.adsEditScreen
 import com.bumperpick.bumperpickvendor.Screens.Campaigns.CreateCampaign
 import com.bumperpick.bumperpickvendor.Screens.CreateOfferScreen.EditOffer
@@ -35,6 +36,7 @@ import com.bumperpick.bumperpickvendor.Screens.Campaign.EditEventScreen
 
 import com.bumperpick.bumperpickvendor.Screens.Campaign.EventDetailPage
 import com.bumperpick.bumperpickvendor.Screens.Campaign.EventScreen
+import com.bumperpick.bumperpickvendor.Screens.OfferPage.ratingPage
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.QRScannerScreen
 import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionXDetailPage
 
@@ -232,7 +234,7 @@ fun AppNavigation() {
                           is AccountClick.AdsClick -> {
                               val gotosub=accountclick.gotosub
                               if (gotosub){
-                                  navController.navigate(Screen.AdsSubscription.route)
+                                  navController.navigate(Screen.AdsSubscription.from_subs(true))
                               }
                               else{
                                   navController.navigate(Screen.AdsScreen.route)
@@ -241,10 +243,10 @@ fun AppNavigation() {
                           }
 
                           AccountClick.buyAdsSbus -> {
-                              navController.navigate(Screen.AdsSubscription.route)
+                              navController.navigate(Screen.AdsSubscription.from_subs(false))
                           }
                           AccountClick.viewCurrentAds -> {
-
+                              navController.navigate(Screen.UserAdsSubsScreen.route)
                           }
                       }
                   }
@@ -252,9 +254,26 @@ fun AppNavigation() {
 
 
                     HomeScreenClicked.ScanQR -> navController.navigate(Screen.ScanQR.route)
+                    is HomeScreenClicked.ViewRating -> {
+                        navController.navigate(Screen.Rating.withofferId(it.offerId))
+
+                    }
                 }
             }
         }
+
+        composable(Screen.Rating.route,
+            arguments = listOf(navArgument(Screen.offerId)
+            {type= NavType.StringType})){
+                backStackEntry->
+            val offerid = backStackEntry.arguments?.getString(Screen.offerId) ?: ""
+
+            ratingPage(id = offerid, onBackClick = {
+                navController.popBackStack()
+            })
+
+        }
+
         composable(Screen.Mysubs.route){
             SubscriptionXDetailPage(onBackPressed = {navController.popBackStack()})
         }
@@ -372,20 +391,28 @@ fun AppNavigation() {
                     navController.navigate(Screen.Add_AD.route)
                 })
         }
-        composable(Screen.AdsSubscription.route) {
+        composable(Screen.AdsSubscription.route,
+            arguments = listOf(navArgument(Screen.from, builder = {type= NavType.BoolType})))
+        {navBackStackEntry ->
+            val from=navBackStackEntry.arguments?.getBoolean(Screen.from)
             AdsSubscriptionScreen(
+                from=from?:true,
                 onBackClick = {
                     navController.popBackStack()
                 },
                 gotoAds = {
                     navController.navigate(Screen.AdsScreen.route) {
-                        // Pop the current AdsSubscription screen from the stack
+
                         popUpTo(Screen.AdsSubscription.route) {
                             inclusive = true
                         }
                     }
                 }
             )
+        }
+
+        composable(Screen.UserAdsSubsScreen.route){
+            adsCurrentPackage(onBackClick = {navController.popBackStack()})
         }
 
 

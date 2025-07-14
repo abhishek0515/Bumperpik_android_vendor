@@ -186,8 +186,8 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                 }
                 is AccountUi_state.GetProfile ->{
                     val data=uiState.vendorDetail
-                    Log.d("adsSubscription",data.data.adsSubscription!!.created_at.toString().equals("null").toString())
-                    is_user_ads_subscribed=!data.data.adsSubscription!!.created_at.toString().equals("null")
+                    Log.d("adsSubscription", (data.data.adsSubscription?.payment_transaction_id == null).toString())
+                    is_user_ads_subscribed = data.data.adsSubscription?.payment_transaction_id != null
                     Log.d("DATA",data.toString())
                     Card(
                         modifier = Modifier.padding(16.dp).height(100.dp),

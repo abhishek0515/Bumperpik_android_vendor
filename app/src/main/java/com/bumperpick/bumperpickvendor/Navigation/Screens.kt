@@ -21,6 +21,7 @@ sealed class Screen(val route: String) {
         const val IS_MOBILE="isMobile"
         const val offerId="offerId"
         const val campaignId="campaignId"
+        const val from="from"
         const val eventId="eventId"
 
     }
@@ -56,8 +57,14 @@ sealed class Screen(val route: String) {
 
     object AddEvent:Screen("addEvent")
     object Event:Screen("event")
-    object AdsSubscription:Screen("AdsSubs")
+    object AdsSubscription:Screen("AdsSubs/{$from}"){
+        fun from_subs(from: Boolean):String{
+            return "AdsSubs/$from"
+        }
+
+    }
     object AdsScreen:Screen("AdsScreen")
+    object UserAdsSubsScreen:Screen("user_ads_subs")
     object Add_AD:Screen("addAD")
     object AdsEdit:Screen("AdsEditScreen/{$eventId}"){
         fun withAdId(adId:String):String{
@@ -71,6 +78,11 @@ sealed class Screen(val route: String) {
         }
     }
 
+    object Rating:Screen("ratings/{$offerId}"){
+        fun withofferId(offerID: String): String{
+            return "ratings/$offerID"
+        }
+    }
 
 
 }

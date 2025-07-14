@@ -1,6 +1,10 @@
 package com.bumperpick.bumperpickvendor.Screens.Ads
 
+import android.app.Activity
+import android.content.Intent
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -32,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataXXXXXXXXXXXXXX
 import com.bumperpick.bumperpickvendor.API.FinalModel.FeatureXXXXXX
 import com.bumperpick.bumperpickvendor.API.FinalModel.ads_package_model
+import com.bumperpick.bumperpickvendor.Misc.RazorpayActivity
 import com.bumperpick.bumperpickvendor.Screens.Component.getMetalBrush
 import com.bumperpick.bumperpickvendor.Screens.QrScreen.UiState
 import com.bumperpick.bumperpickvendor.Screens.Subscription.ErrorContent
@@ -41,6 +46,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AdsSubscriptionScreen(
+    from:Boolean=false,
     viewModel: AdsViewModel = koinViewModel(),
     onBackClick: () -> Unit,
     gotoAds: () -> Unit
@@ -48,6 +54,18 @@ fun AdsSubscriptionScreen(
     val adsSubsState by viewModel.adsSubsUiState.collectAsState()
     val subscribePackageUiState by viewModel.subscribePackageUiState.collectAsState()
     val context = LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val paymentId = result.data?.getStringExtra("payment_id")
+            viewModel.subscribePackage( paymentId.toString())
+
+            //     Toast.makeText(context, "Success: $paymentId", Toast.LENGTH_LONG).show()
+        } else {
+            val error = result.data?.getStringExtra("error") ?: "Cancelled"
+                Toast.makeText(context, "Failed: $error", Toast.LENGTH_LONG).show()
+        }
+    }
 
     // Handle subscription state changes
     LaunchedEffect(subscribePackageUiState) {
@@ -60,13 +78,18 @@ fun AdsSubscriptionScreen(
                 ).show()
             }
             is UiState.Success -> {
-                gotoAds()
+                if(from) {
+                    gotoAds()
+                }
+                else{
+                    onBackClick()
+                }
             }
             else -> { /* Handle other states if needed */ }
         }
     }
 
-    // Load ads subscriptions on first composition
+    // Load ads subscriptions  on first composition
     LaunchedEffect(Unit) {
         viewModel.getAdsSub()
     }
@@ -108,9 +131,14 @@ fun AdsSubscriptionScreen(
                         SubscriptionContent(
                             plans = data,
                             isLoading = subscribePackageUiState is UiState.Loading,
-                            onSubscribe = { planId ->
-                                viewModel.subscribePackage(planId, "TEST12345")
-                            }
+                            onSubscribe = { planId,price ->
+                                viewModel.setadId(planId)
+
+                                val intent = Intent(context, RazorpayActivity::class.java)
+                                val price = price.toDouble()
+                                intent.putExtra("amount", price.toInt()) // ₹100
+                                launcher.launch(intent)
+                                       }
                         )
                     } else {
                         EmptyState(onRetry = { viewModel.getAdsSub() })
@@ -212,7 +240,7 @@ fun EnhancedHeader(
 fun SubscriptionContent(
     plans: List<DataXXXXXXXXXXXXXX>,
     isLoading: Boolean,
-    onSubscribe: (String) -> Unit
+    onSubscribe: (String,String) -> Unit
 ) {
     // Only create pager state if plans are not empty
     if (plans.isEmpty()) {
@@ -317,7 +345,6 @@ fun EnhancedAdsSubscriptionCard(
     ) {
         Column(
             modifier = Modifier
-
                 .background(
                     brush = getMetalBrush1(plan.name)
                 )
@@ -341,7 +368,7 @@ fun EnhancedAdsSubscriptionCard(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f), // This makes it take up remaining space
+                    .wrapContentHeight(), // Changed from weight(1f) to wrapContentHeight()
                 shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
@@ -352,7 +379,7 @@ fun EnhancedAdsSubscriptionCard(
             ) {
                 FeaturesContent(
                     features = plan.features,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.wrapContentHeight() // Changed from fillMaxSize() to wrapContentHeight()
                 )
             }
         }
@@ -366,7 +393,7 @@ fun FeaturesContent(
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
+            .wrapContentHeight() // Changed from fillMaxSize() to wrapContentHeight()
             .background(Color.White) // Ensure white background
             .padding(20.dp)
     ) {
@@ -386,12 +413,12 @@ fun FeaturesContent(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Scrollable features list
-        LazyColumn (
-            modifier = Modifier.fillMaxSize(),
+        // Features list - Changed from LazyColumn to Column for content-based sizing
+        Column(
+            modifier = Modifier.wrapContentHeight(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            itemsIndexed(features) { index, feature ->
+            features.forEachIndexed { index, feature ->
                 FeatureItem(
                     feature = FeatureUI(
                         id = feature.id,
@@ -402,7 +429,6 @@ fun FeaturesContent(
                         },
                         type = feature.type
                     ),
-
                 )
             }
         }
@@ -412,7 +438,7 @@ fun FeaturesContent(
 fun BottomActionBar(
     selectedPlan: DataXXXXXXXXXXXXXX?,
     isLoading: Boolean,
-    onSubscribe: (String) -> Unit
+    onSubscribe: (String,String) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -449,7 +475,7 @@ fun BottomActionBar(
                     Button(
                         onClick = {
                             if (!isLoading) {
-                                onSubscribe(plan.id.toString())
+                                onSubscribe(plan.id.toString(),plan.price.toString())
                             }
                         },
                         modifier = Modifier

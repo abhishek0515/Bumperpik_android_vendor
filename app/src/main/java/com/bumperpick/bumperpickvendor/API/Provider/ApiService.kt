@@ -10,6 +10,9 @@ import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.VendorLoginModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.ads_package_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.ads_subs_model
+import com.bumperpick.bumperpickvendor.API.FinalModel.dasboard_modek
+import com.bumperpick.bumperpickvendor.API.FinalModel.getOfferDetailsModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.select_subs_model
@@ -93,6 +96,10 @@ interface ApiService {
    ):Response<success_model>
    @GET("api/vendor/offers")
    suspend fun homeOffers(@Query("token")token: String):Response<HomeOfferModel>
+
+   @GET("api/vendor/offers-show/{id}")
+   suspend fun getRatings(@Path("id")id:String,@Query("token")token: String):Response<getOfferDetailsModel>
+
     @FormUrlEncoded
    @POST("api/vendor/cart-offers/details")
    suspend fun getQrOfferDetail(@Field("offer_id") offer_id:String,@Field("token")token:String,@Field("customer_id")customer_id:String):Response<QrModel>
@@ -106,6 +113,10 @@ interface ApiService {
 
     @GET("api/vendor/profile")
     suspend fun FetchProfile(@Query("token")token: String):Response<vendor_details_model>
+
+    @GET("api/vendor/ads-packages/active")
+    suspend fun fetchAdsSubs(@Query("token")token: String):Response<ads_subs_model>
+
     @Multipart
     @POST("api/vendor/profile/update")
     suspend fun UpdateProfile(
@@ -235,6 +246,7 @@ interface ApiService {
     suspend fun ads_dewstroy(@Path("id")id:String,@Query("token")token: String,):Response<success_model>
 
 
-
+    @GET("api/vendor/vendor-dashboard")
+   suspend fun dashboard(@Query("token") token: String): Response<dasboard_modek>
 
 }
