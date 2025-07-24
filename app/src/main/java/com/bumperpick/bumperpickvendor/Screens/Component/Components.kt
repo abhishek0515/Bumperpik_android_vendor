@@ -1409,7 +1409,10 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
                    Icon(painter = painterResource(R.drawable.clock), contentDescription = "clock",Modifier.size(20.dp))
                    Spacer(modifier = Modifier.width(6.dp))
                    Text(
-                       text = "Offer valid from ${ formatDate(offerModel.startDate!!)} to ${formatDate(offerModel.endDate!!)}",
+                       text =
+                           if(offerModel.endDate!=null){
+                           "Offer valid from ${ formatDate(offerModel.startDate)} to ${formatDate(offerModel.endDate)}"}else
+                           {  "Offer valid from ${ formatDate(offerModel.startDate)} "},
                        fontSize = 15.sp,
                        fontFamily = satoshi_regular,
                    )

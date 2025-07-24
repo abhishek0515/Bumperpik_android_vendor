@@ -21,6 +21,7 @@ sealed class Screen(val route: String) {
         const val IS_MOBILE="isMobile"
         const val offerId="offerId"
         const val campaignId="campaignId"
+        const val TICKET_ID="ticket_id"
         const val from="from"
         const val eventId="eventId"
 
@@ -83,7 +84,14 @@ sealed class Screen(val route: String) {
             return "ratings/$offerID"
         }
     }
+    object Faq: Screen("faq")
 
+
+    object emailadmin: Screen("emailadmin")
+
+    object ticketdetail: Screen("ticket_detail/{$TICKET_ID}"){
+        fun withid(id: String): String="ticket_detail/$id"
+    }
 
 }
 

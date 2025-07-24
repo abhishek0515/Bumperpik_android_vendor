@@ -2,6 +2,10 @@ package com.bumperpick.bumperpickvendor.DI
 
 // AppModule.kt
 import DataStoreManager
+import com.bumperpick.bumperickUser.Repository.SupportRepository
+import com.bumperpick.bumperickUser.Repository.SupportRepositoryImpl
+import com.bumperpick.bumperickUser.Screens.Faq.FaqViewmodel
+import com.bumperpick.bumperickUser.Screens.Support.SupportViewModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.Feature
 import com.bumperpick.bumperpickvendor.API.FinalModel.FeatureDeserializer
 import com.bumperpick.bumperpickvendor.API.Provider.ApiService
@@ -67,7 +71,7 @@ val appModule = module {
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://13.50.109.14/")
+            .baseUrl("http://13.235.83.148/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
@@ -85,6 +89,7 @@ val appModule = module {
     single <EventRepository>{EventRepositoryImpl(get(),get(),get())}
     single <Event2Repository>{ EventRepository2Impl(get(),get(),get()) }
     single <AdsRepository>{ AdsRepositoryImpl(get(),get()) }
+    single <SupportRepository>{ SupportRepositoryImpl(get(),get(),get()) }
     // ViewModel
     viewModel { SplashViewmodel(get()) }
     viewModel { LoginViewmodel(get(),get()) }
@@ -101,8 +106,8 @@ val appModule = module {
     viewModel { EventsViewmodel(get()) }
     viewModel { Events2Viewmodel(get())}
     viewModel { AdsViewModel(get(),get()) }
-
-
+    viewModel { FaqViewmodel(get()) }
+    viewModel { SupportViewModel(get()) }
 
 
 }

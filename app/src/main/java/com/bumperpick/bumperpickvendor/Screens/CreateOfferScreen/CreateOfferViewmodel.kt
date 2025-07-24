@@ -256,6 +256,8 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
     fun AddDatatoServer() {
         viewModelScope.launch {
                 _loading.value=true
+            val templateData=_templateData.value
+            _offerDetail.value=_offerDetail.value.copy(heading = templateData.heading, subHeading = templateData.subHeading)
             val result = offerRepository.AddOffer(offerDetails.value)
 
             Log.d("result",result.toString())

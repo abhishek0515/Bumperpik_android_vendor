@@ -20,6 +20,9 @@ import com.bumperpick.bumperpickvendor.Screens.Subscription.SubscriptionPage
 import com.bumperpick.bumperpickvendor.Screens.VendorDetailPage.VendorDetailPage
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.bumperpick.bumperickUser.Screens.Faq.faq
+import com.bumperpick.bumperickUser.Screens.Support.SupportTicketsScreen
+import com.bumperpick.bumperickUser.Screens.Support.TicketDetailsScreen
 import com.bumperpick.bumperpickvendor.Screens.Account.AccountClick
 import com.bumperpick.bumperpickvendor.Screens.Ads.AdsScreen
 import com.bumperpick.bumperpickvendor.Screens.Ads.AdsSubscriptionScreen
@@ -96,9 +99,13 @@ fun AppNavigation() {
             },
                 gotoHome = {
                     navController.navigate(Screen.HomePage.route) {
-                        popUpTo(0) { inclusive = true }
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
                     }
-                })
+                }
+            )
         }
 
         // OTP
@@ -213,6 +220,7 @@ fun AppNavigation() {
 
                           }
 
+
                           is AccountClick.EngagementClick -> {
                               val marketingOption=accountclick.marketingOption
                               when(marketingOption){
@@ -248,6 +256,12 @@ fun AppNavigation() {
                           AccountClick.viewCurrentAds -> {
                               navController.navigate(Screen.UserAdsSubsScreen.route)
                           }
+                          AccountClick.FaqClick -> {
+                              navController.navigate(Screen.Faq.route)
+                          }
+                          AccountClick.mailToAdmin -> {
+                              navController.navigate(Screen.emailadmin.route)
+                          }
                       }
                   }
 
@@ -260,6 +274,9 @@ fun AppNavigation() {
                     }
                 }
             }
+        }
+        composable(route= Screen.Faq.route){
+            faq(onBackClick = {navController.popBackStack()})
         }
 
         composable(Screen.Rating.route,
@@ -416,7 +433,31 @@ fun AppNavigation() {
         }
 
 
+        composable(route= Screen.emailadmin.route){
 
+            SupportTicketsScreen(onBackPressed = {navController.popBackStack()},
+                gototicketdetail ={id->
+                    navController.navigate(Screen.ticketdetail.withid(id))
+
+                })
+        }
+
+        composable(route= Screen.ticketdetail.route,
+            arguments = listOf(
+                navArgument(Screen.TICKET_ID,
+                    builder ={ NavType.StringType}
+                )
+            )
+        )
+        { navBackStackEntry->
+            val ticketId=navBackStackEntry.arguments?.getString(Screen.TICKET_ID)?:""
+
+            TicketDetailsScreen(ticketId = ticketId,
+                onBackPressed = {
+                    navController.popBackStack()
+                })
+
+        }
 
     }
 

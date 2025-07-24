@@ -204,20 +204,6 @@ fun OfferDetailsPage(
             Text(offerDetail.description, fontSize = 16.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(18.dp))
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    "Offer ID: ${offerDetail.id}",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
-                Text(
-                    "Customer ID: ${customer.customer_id}",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                )
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
             Divider(thickness = 0.5.dp, color = Color.LightGray)
@@ -232,8 +218,15 @@ fun OfferDetailsPage(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                "Phone Number: ${customer.phone_number}",
+                "Customer Name: ${customer.customer_name}",
                 fontSize = 16.sp,
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                "Phone Number: ${customer.phone_number}",
+                fontSize = 14.sp,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )

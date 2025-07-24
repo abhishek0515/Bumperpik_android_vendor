@@ -223,7 +223,8 @@ fun EventScreen2(
                         .fillMaxWidth()
                         .then(backgroundModifier)
                         .padding(bottom = 0.dp)
-                ) {
+                )
+                {
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Top App Bar with improved spacing
@@ -231,7 +232,8 @@ fun EventScreen2(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp)
-                    ) {
+                    )
+                    {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.align(Alignment.CenterStart)

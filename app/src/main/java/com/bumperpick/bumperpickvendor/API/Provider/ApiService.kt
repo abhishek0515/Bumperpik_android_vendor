@@ -1,8 +1,12 @@
 package com.bumperpick.bumperpickvendor.API.Provider
 
+import com.bumperpick.bumperickUser.API.New_model.tickerdetails
+import com.bumperpick.bumperickUser.API.New_model.ticket_add_model
+import com.bumperpick.bumperickUser.API.New_model.ticketmessage
 import com.bumperpick.bumperpickvendor.API.FinalModel.AdsDetailModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.EventModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.EventRegisterModel
+import com.bumperpick.bumperpickvendor.API.FinalModel.Faqmodel
 import com.bumperpick.bumperpickvendor.API.FinalModel.HomeOfferModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.NewEventDetailModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.NewEventmodel
@@ -248,5 +252,22 @@ interface ApiService {
 
     @GET("api/vendor/vendor-dashboard")
    suspend fun dashboard(@Query("token") token: String): Response<dasboard_modek>
+
+    @GET("api/vendor/faqs")
+    suspend fun faqs(@Query("token")token: String): Response<Faqmodel>
+    @POST("api/vendor/tickets/store")
+    @FormUrlEncoded
+    suspend fun ticketAdd(@FieldMap map: Map<String, String>): Response<ticket_add_model>
+
+    @GET("api/vendor/tickets")
+    suspend fun tickets(@Query("token")token: String): Response<ticketmessage>
+
+    @GET("api/vendor/tickets/{id}")
+    suspend fun ticket_detail(@Path("id")id: String, @Query("token")token: String): Response<tickerdetails>
+
+    @POST("api/vendor/tickets/{id}/reply")
+    @FormUrlEncoded
+    suspend fun ticket_reply(@Path("id")id: String,@FieldMap map: Map<String, String>): Response<success_model>
+
 
 }

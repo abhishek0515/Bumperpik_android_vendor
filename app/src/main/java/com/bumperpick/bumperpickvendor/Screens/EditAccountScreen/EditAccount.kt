@@ -194,7 +194,7 @@ fun EditAccount(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = viewModel.getId(),
+                        text = "Vendor ID: ${viewModel.getId()}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
                         fontFamily = satoshi_regular,

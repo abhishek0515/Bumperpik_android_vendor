@@ -349,7 +349,7 @@ private fun ReviewCard(review: Review) {
                     modifier = Modifier.weight(1f)
                 ) {
                     androidx.compose.material3.Text(
-                        text = "Customer #${review.customer_id}",
+                        text = "Customer Name: ${review.customer_name}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black

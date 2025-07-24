@@ -8,6 +8,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import androidx.compose.ui.platform.LocalContext
 import com.bumperpick.bumperpickvendor.API.FinalModel.DataX
+import com.bumperpick.bumperpickvendor.API.FinalModel.Faqmodel
 import com.bumperpick.bumperpickvendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpickvendor.API.FinalModel.Subcategory
@@ -22,6 +23,7 @@ import com.bumperpick.bumperpickvendor.API.Provider.safeApiCall
 import com.bumperpick.bumperpickvendor.API.Provider.toMultipartPart
 import com.bumperpick.bumperpickvendor.Screens.Component.formatDate
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.firstOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -50,6 +52,7 @@ class OfferRepositoryImpl(
             map["vendor_id"] = vendorDetails?.vendor_id.toString().toRequestBody("text/plain".toMediaType())
             map["offer_template"] = offerModel.gradientType?.name.toString().toRequestBody("text/plain".toMediaType())
             map["heading"] = offerModel.heading?.text.toString().toRequestBody("text/plain".toMediaType())
+            map["sub_heading"] = offerModel.subHeading?.text.toString().toRequestBody("text/plain".toMediaType())
             map["discount"] = offerModel.discount.text.toString().toRequestBody("text/plain".toMediaType())
             map["brand_name"] = offerModel.brandName?.text.toString().toRequestBody("text/plain".toMediaType())
             map["title"] = offerModel.productTittle.toString().toRequestBody("text/plain".toMediaType())
@@ -168,7 +171,9 @@ class OfferRepositoryImpl(
                 val homeOffer = results.data.find {
                     it.offerId.equals(id)
                 }
-                val changedoffer=homeOffer?.copy(startDate = formatDate(homeOffer?.startDate!!), endDate = formatDate(homeOffer?.endDate!!))
+
+                val changedoffer=homeOffer?.copy(startDate = formatDate(homeOffer?.startDate), endDate = formatDate(homeOffer?.endDate))
+                Log.d("offer of $id",changedoffer.toString())
                 Result.Success(changedoffer)
             }
         }
@@ -389,6 +394,26 @@ if(mediaListMulti.isEmpty()) {
 
         } catch (e: Exception) {
             Result.Error("Failed to get offer review offer: ${e.message}")
+        }
+    }
+
+    override suspend fun FaqModel(): Result<Faqmodel> {
+        val token=dataStoreManager.getToken()?.token?:""
+        val response = safeApiCall(
+            api = { apiService.faqs(token) },
+            errorBodyParser = { json ->
+                try {
+                    Gson().fromJson(json, error_model::class.java)
+                } catch (e: Exception) {
+                    error_model(message = "Unknown error format: $json")
+                }
+            }
+        )
+        return when(response){
+            is ApiResult.Error -> {
+                Result.Error(response.error.message)
+            }
+            is ApiResult.Success ->Result.Success(response.data)
         }
     }
 

@@ -96,6 +96,7 @@ data class OfferModel(
     val gradientType: OfferTemplateType?=null,
     val colorType: ColorType= ColorType.BLUE,
     val heading:TextType?=null,
+    val subHeading: TextType?=null,
     val HeadingSize:HeadingSize?=null,
     val discount:TextType=TextType(text = ""),
     val toogleStockLast:Boolean?=null,

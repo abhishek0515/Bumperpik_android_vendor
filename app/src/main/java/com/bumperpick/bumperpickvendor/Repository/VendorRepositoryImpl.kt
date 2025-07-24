@@ -87,25 +87,34 @@ class VendorRepositoryImpl(
 
             val vendorId = dataStoreManager.get_Vendor_Details()?.vendor_id.toString()
 
-            map["establishment_name"] = newDetails.Vendor_EstablishName.toRequestBody("text/plain".toMediaType())
+            map["establishment_name"] =
+                newDetails.Vendor_EstablishName.toRequestBody("text/plain".toMediaType())
             map["brand_name"] = newDetails.Vendor_brand.toRequestBody("text/plain".toMediaType())
             map["email"] = newDetails.Vendor_Email.toRequestBody("text/plain".toMediaType())
             map["phone_number"] = number.toRequestBody("text/plain".toMediaType())
-            map["category_id"] = newDetails.Vendor_Category.cat_id.toRequestBody("text/plain".toMediaType())
-            map["establishment_address"] = newDetails.Establisment_Adress.toRequestBody("text/plain".toMediaType())
-            map["outlet_address"] = newDetails.Outlet_Address.toRequestBody("text/plain".toMediaType())
-            map["gst_number"] = newDetails.GstNumber.toRequestBody("text/plain".toMediaType())
+            map["category_id"] =
+                newDetails.Vendor_Category.cat_id.toRequestBody("text/plain".toMediaType())
+            map["establishment_address"] =
+                newDetails.Establisment_Adress.toRequestBody("text/plain".toMediaType())
+            map["outlet_address"] =
+                newDetails.Outlet_Address.toRequestBody("text/plain".toMediaType())
+            if (newDetails.GstNumber.isNotEmpty()) {
+                map["gst_number"] = newDetails.GstNumber.toRequestBody("text/plain".toMediaType())
+            }
             map["vendor_id"] = vendorId.toRequestBody("text/plain".toMediaType())
 
-            val image = prepareImagePart(name ="Gst_pic_url", file = details.GstPicUrl!!)
             Log.d("MAP", map.toString())
 
             val submitDetail = safeApiCall(
                 api = {
-                    if(image!=null) {
+                    if (details.GstPicUrl != null){
+                        val image = prepareImagePart(name = "Gst_pic_url", file = details.GstPicUrl)!!
                         apiService.register_vendor(map, image)
                     }
-                    apiService.register_vendorWOimage(map)
+                    else{
+                        apiService.register_vendorWOimage(map)
+                    }
+
                       },
                 errorBodyParser = { json ->
                     try {

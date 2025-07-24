@@ -234,30 +234,27 @@ class VendorDetailViewmodel(val vendorRepository: VendorRepository) : ViewModel(
         gstNumber: String,
         gstImage:File?
     ) {
-        when {
-            establishmentAddress.isBlank() -> {
-                _error.value = "Establishment address cannot be empty."
-            }
-            outletAddress.isBlank() -> {
-                _error.value = "Outlet address cannot be empty."
-            }
-            gstNumber.isBlank() -> {
-                _error.value = "GST number cannot be empty."
-            }
-            !gstNumber.matches(Regex("^[A-Za-z0-9]{15}$")) -> {
-                _error.value = "GST number must be 15 alphanumeric characters only."
-            }
-            gstImage==null->{
-                _error.value ="GST Image is not selected"
-            }
+         when {
+             establishmentAddress.isBlank() -> {
+                 _error.value = "Establishment address cannot be empty."
+             }
 
-            else -> {
-                _error.value = null
-            }
-        }
-    }
+             outletAddress.isBlank() -> {
+                 _error.value = "Outlet address cannot be empty."
+             }
 
-    fun clearError(){
+             gstNumber.isNotBlank() && !gstNumber.matches(Regex("^[A-Za-z0-9]{15}$")) -> {
+                 _error.value = "GST number must be 15 alphanumeric characters only."
+             }
+
+             else -> {
+                 _error.value = null // No error
+             }
+         }
+     }
+
+
+         fun clearError(){
 
     _error.value = null
 }

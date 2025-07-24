@@ -95,6 +95,9 @@ sealed class AccountClick(){
     data object buyAdsSbus: AccountClick()
 
     data object viewCurrentAds: AccountClick()
+    object FaqClick: AccountClick()
+
+    object mailToAdmin: AccountClick()
 
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -389,8 +392,38 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                 Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
 
             }
-            Spacer(modifier = Modifier.height(12.dp))
 
+            Spacer(modifier = Modifier.height(12.dp))
+            Box (modifier = Modifier.fillMaxWidth().clickable {
+                onClick(AccountClick.FaqClick)
+            }.background(Color.White), )
+            {
+                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                    Image(painter = painterResource(R.drawable.faq_svgrepo_com), contentDescription = null, modifier = Modifier.size(24.dp),)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = "FAQs", color = Color.Black, fontSize = 16.sp, modifier = Modifier.align(
+                        Alignment.CenterVertically))
+                }
+
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Box (modifier = Modifier.fillMaxWidth().clickable {
+                onClick(AccountClick.mailToAdmin)
+            }.background(Color.White), )
+            {
+                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                    Image(painter = painterResource(R.drawable.email_9_svgrepo_com), contentDescription = null, modifier = Modifier.size(24.dp),)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = "Email to admin", color = Color.Black, fontSize = 16.sp, modifier = Modifier.align(
+                        Alignment.CenterVertically))
+                }
+
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+
+            }
+            Spacer(modifier = Modifier.height(12.dp))
             Box (modifier = Modifier.fillMaxWidth().clickable {
                 show_signoutDialog=true
 

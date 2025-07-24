@@ -505,10 +505,7 @@ class EditOfferViewmodel(
                 showError("Start date is required")
                 return false
             }
-            offer.endDate.isNullOrBlank() -> {
-                showError("End date is required")
-                return false
-            }
+
         }
         return true
     }
