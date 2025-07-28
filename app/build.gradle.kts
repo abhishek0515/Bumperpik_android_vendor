@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.bumperpick.bumperpickvendor"
+    namespace = "com.bumperpick.bumperpick_Vendor"
     compileSdk = 35
     applicationVariants.all {
         if (buildType.name == "debug") {
@@ -52,6 +52,16 @@ android {
 }
 
 dependencies {
+    // Firebase BOM (Bill of Materials) - Recommended
+    // This helps manage versions of Firebase libraries consistently
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0")) // Check for the latest version
+
+    // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
+    // Firebase Analytics (Optional, but recommended for FCM message delivery reporting)
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
     implementation ("com.auth0:java-jwt:4.4.0")
     implementation ("androidx.camera:camera-camera2:1.3.0")
     implementation ("androidx.camera:camera-lifecycle:1.3.0")

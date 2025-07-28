@@ -1,26 +1,95 @@
 {
   "project_info": {
-    "project_number": "228726042025",
-    "project_id": "bumperpick-36489",
-    "storage_bucket": "bumperpick-36489.firebasestorage.app"
+    "project_number": "6617870675",
+    "project_id": "bumperpick-4f802",
+    "storage_bucket": "bumperpick-4f802.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:228726042025:android:51a647fbe56586238a28b8",
+        "mobilesdk_app_id": "1:6617870675:android:751dc94c531c3de67331a6",
         "android_client_info": {
           "package_name": "com.bumperpick.bumperpickvendor"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "6617870675-nkv3lrprven5kf4a1apur50c2gongcna.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bumperpick.bumperpickvendor",
+            "certificate_hash": "5002506826c8c9349dfc6d01a3a8c0dafe24ec9f"
+          }
+        },
+        {
+          "client_id": "6617870675-5e2as1tc3op02p9ctcrl2cd9fcl8b8cv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyDH7G5sjEI8PQcR_GOsuImeBBZW6Xdh_GQ"
+          "current_key": "AIzaSyC3P3R1vzq1bSPpOdAhcDsH5mRAFVBnq0k"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "6617870675-5e2as1tc3op02p9ctcrl2cd9fcl8b8cv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "6617870675-vpgvg5f2gf6unh2ccv3g17me3vnm8klj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.BumperPick.com"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:6617870675:android:b45e91bee828f5027331a6",
+        "android_client_info": {
+          "package_name": "com.bumperpick.bumperpick_Vendor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "6617870675-078kld8309t0sjkk810hjk4tkffmdofr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bumperpick.bumperpick_Vendor",
+            "certificate_hash": "5002506826c8c9349dfc6d01a3a8c0dafe24ec9f"
+          }
+        },
+        {
+          "client_id": "6617870675-5e2as1tc3op02p9ctcrl2cd9fcl8b8cv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3P3R1vzq1bSPpOdAhcDsH5mRAFVBnq0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "6617870675-5e2as1tc3op02p9ctcrl2cd9fcl8b8cv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "6617870675-vpgvg5f2gf6unh2ccv3g17me3vnm8klj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.BumperPick.com"
+              }
+            }
+          ]
         }
       }
     }
