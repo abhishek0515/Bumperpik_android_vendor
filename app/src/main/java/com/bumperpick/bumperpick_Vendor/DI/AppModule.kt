@@ -30,6 +30,7 @@ import com.bumperpick.bumperpick_Vendor.Screens.CreateOfferScreen.EditOfferViewm
 import com.bumperpick.bumperpick_Vendor.Screens.EditAccountScreen.EditAccountViewModel
 import com.bumperpick.bumperpick_Vendor.Screens.Event2.Events2Viewmodel
 import com.bumperpick.bumperpick_Vendor.Screens.Campaign.EventsViewmodel
+import com.bumperpick.bumperpick_Vendor.Screens.Home.HomePageviewmodel
 import com.bumperpick.bumperpick_Vendor.Screens.Login.GoogleSignInViewModel
 import com.bumperpick.bumperpick_Vendor.Screens.Login.LoginViewmodel
 import com.bumperpick.bumperpick_Vendor.Screens.OTP.OtpViewModel
@@ -71,7 +72,7 @@ val appModule = module {
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://3.110.88.80/")
+            .baseUrl("http://15.207.249.12/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
@@ -108,6 +109,7 @@ val appModule = module {
     viewModel { AdsViewModel(get(),get()) }
     viewModel { FaqViewmodel(get()) }
     viewModel { SupportViewModel(get()) }
+    viewModel { HomePageviewmodel() }
 
 
 }

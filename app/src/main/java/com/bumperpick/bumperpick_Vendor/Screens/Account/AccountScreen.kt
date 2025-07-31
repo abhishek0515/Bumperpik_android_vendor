@@ -533,7 +533,7 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                             }
                         , textDecoration = TextDecoration.Underline)
 
-                    if(true) {
+                    if(show_renewbtn) {
 
                         Spacer(modifier = Modifier.height(12.dp))
                         ButtonView(text = "Renew now") {
@@ -564,7 +564,7 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                 Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "Purchase Ads Package", color = Color.Black, fontSize = 16.sp,)
+                    Text(text = "Purchase ads package", color = Color.Black, fontSize = 16.sp,)
                 }
 
                 Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)

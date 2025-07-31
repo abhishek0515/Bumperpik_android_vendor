@@ -39,6 +39,9 @@ import com.bumperpick.bumperpick_Vendor.ui.theme.satoshi
 import com.bumperpick.bumperpick_Vendor.ui.theme.satoshi_regular
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -54,6 +57,7 @@ import com.bumperpick.bumperpick_Vendor.Screens.Component.EditDeleteBottomSheet
 import com.bumperpick.bumperpick_Vendor.Screens.Component.HomeOfferView
 import com.bumperpick.bumperpick_Vendor.Screens.Component.RemoveOfferBottomSheet
 import com.bumperpick.bumperpick_Vendor.Screens.VendorDetailPage.VendorDetailViewmodel
+import com.bumperpick.bumperpick_Vendor.ui.theme.BtnColor
 import org.koin.androidx.compose.koinViewModel
 fun List<HomeOffer>.get_ActiveOffers()=this.filter { it.offerValid==OfferValidation.Valid }
 fun List<HomeOffer>.getExpiredOffers()=this.filter { it.offerValid==OfferValidation.Expired }
@@ -64,6 +68,7 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
     val savedetail=vendorDetailViewmodel.savedVendorDetail.collectAsState()
     val delete by viewmodel.delete.collectAsState()
     val offer by viewmodel.listOfOffers.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
         vendorDetailViewmodel.getSavedVendorDetail()
     }
@@ -137,31 +142,49 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
         // LocationCard and TabRow remain unchanged (as per original code)
         LocationCard(
             content = {
-            Card(
-                border = BorderStroke(1.dp, Color.Black),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Search,
-                        tint = Color.Black,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Outlined.Search,
+                            contentDescription = "Search",
+                            tint = Color.Gray.copy(alpha = 0.7f)
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(
+                                onClick = { searchQuery = "" }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear",
+                                    tint = Color.Gray.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    },
+                    placeholder = {
+                        Text(
+                            text = "Search Offers",
+                            color = Color.Gray.copy(alpha = 0.6f)
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = BtnColor,
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        focusedBorderColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = Color.White
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Search for Reliance Mart",
-                        color = Color.Gray,
-                        fontFamily = satoshi,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(18.dp))
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
             val gradientBrush = Brush.verticalGradient(
                 colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.05f), Color.White.copy(alpha = 0.07f), Color.White.copy(alpha = 0.1f), Color.White.copy(alpha = 0.2f))
             )
@@ -214,10 +237,11 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
 
             )
 
+        val search_list=list.filter { (it.offerTitle?:"").contains(searchQuery) }
         // Display the number of offers based on selectedTabIndex
         Spacer(modifier = Modifier.height(18.dp))
         Text(
-            text = if (selectedTabIndex == 0) "${list.size} CURRENT OFFERS" else "${list.size} EXPIRED OFFERS",
+            text = if (selectedTabIndex == 0) "${search_list.size} CURRENT OFFERS" else "${search_list.size} EXPIRED OFFERS",
             fontSize = 16.sp,
             fontFamily = satoshi_regular,
             fontWeight = FontWeight.SemiBold,
@@ -229,7 +253,8 @@ fun OfferScreen(viewmodel: OfferViewmodel = koinViewModel(),EditOffer:(id:String
 
         // Display the offers in LazyColumn
         LazyColumn {
-            items(list) {
+
+            items(search_list) {
                 HomeOfferView(it, showBottomSheet = {
                     when(it){
                         is EditDelete.DELETE ->{

@@ -24,6 +24,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = remoteMessage.notification?.title ?: "Title"
         val message = remoteMessage.notification?.body ?: "Message"
 
+
         showNotification(title, message)
     }
 

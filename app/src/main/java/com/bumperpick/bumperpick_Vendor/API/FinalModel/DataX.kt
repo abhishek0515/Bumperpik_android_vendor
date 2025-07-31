@@ -16,6 +16,7 @@ data class DataX(
     val status: String,
     val subheading: Any,
     val terms: String,
+    val is_unlimited: Int,
     val title: String,
     val vendor_id: Int
 )

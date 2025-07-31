@@ -72,6 +72,7 @@ import com.bumperpick.bumperpick_Vendor.ui.theme.satoshi_regular
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.collections.plus
 
 @Composable
 fun ProductDetailsSection(
@@ -215,6 +216,31 @@ fun EditOffer(
     val deletedUrlMediaList by viewmodel.deletedUrlMediaList.collectAsState()
     val context = LocalContext.current
     var showMediaTypeDialog by remember { mutableStateOf(false) }
+    val cameraImageUri = remember { mutableStateOf<Uri?>(null) }
+
+    val takePictureLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            cameraImageUri.value?.let { uri ->
+                val size = context.contentResolver.openInputStream(uri)?.available()?.toLong() ?: 0L
+                val currentImages = newLocalMediaList.filter { isImageFile(context, it) }
+
+                when {
+                    size > 10 * 1024 * 1024 -> {
+                        Toast.makeText(context, "Captured image size exceeds 10MB", Toast.LENGTH_SHORT).show()
+                    }
+                    currentImages.size >= 10 -> {
+                        Toast.makeText(context, "Maximum 10 images allowed", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                    
+
+                        viewmodel.addNewLocalMedia(uri)
+                    }
+                }
+            }
+        }
+        showMediaTypeDialog = false
+    }
 
     // Media picker launchers
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -431,7 +457,7 @@ fun EditOffer(
 
     // Media Type Selection Dialog
     if (showMediaTypeDialog) {
-        EditMediaTypeSelectionDialog(
+        MediaTypeSelectionDialog(
             onImageSelected = {
                 showMediaTypeDialog = false
                 imagePickerLauncher.launch("image/*")
@@ -439,6 +465,11 @@ fun EditOffer(
             onVideoSelected = {
                 showMediaTypeDialog = false
                 videoPickerLauncher.launch("video/*")
+            },
+            onCameraSelected = {
+                val uri = createImageUri(context)
+                cameraImageUri.value = uri
+                takePictureLauncher.launch(uri)
             },
             onDismiss = { showMediaTypeDialog = false },
             currentImageCount = viewmodel.getTotalMediaCount(),

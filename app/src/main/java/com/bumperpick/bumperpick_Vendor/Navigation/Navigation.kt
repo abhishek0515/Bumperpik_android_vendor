@@ -39,9 +39,11 @@ import com.bumperpick.bumperpick_Vendor.Screens.Campaign.EditEventScreen
 
 import com.bumperpick.bumperpick_Vendor.Screens.Campaign.EventDetailPage
 import com.bumperpick.bumperpick_Vendor.Screens.Campaign.EventScreen
+import com.bumperpick.bumperpick_Vendor.Screens.Home.HomePageviewmodel
 import com.bumperpick.bumperpick_Vendor.Screens.OfferPage.ratingPage
 import com.bumperpick.bumperpick_Vendor.Screens.QrScreen.QRScannerScreen
 import com.bumperpick.bumperpick_Vendor.Screens.Subscription.SubscriptionXDetailPage
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun snackbarHostExample(
@@ -61,6 +63,7 @@ fun snackbarHostExample(
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val homescreenViewmodel: HomePageviewmodel= koinViewModel ()
     val (snackbarHostState, showSnackbar) = snackbarHostExample()
 
     var message by remember { mutableStateOf("") }
@@ -170,7 +173,7 @@ fun AppNavigation() {
 
         // Home Page
         composable(Screen.HomePage.route) {
-            HomeScreen {
+            HomeScreen(homescreenViewmodel = homescreenViewmodel) {
                 when (it) {
                    
                     is HomeScreenClicked.CreateOffer -> {

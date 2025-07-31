@@ -565,10 +565,10 @@ private fun EventBanner(
 @Composable
 private fun EventDetails(
     title: String,
-    startDate: String,
-    deadline: String,
-    endDate:String,
-    starttime:String,
+    startDate: String?,
+    deadline: String?,
+    endDate:String?,
+    starttime:String?,
     isExpired: Boolean
 ) {
     Column(
@@ -590,37 +590,42 @@ private fun EventDetails(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+       startDate?.let {
+           InfoRow(
+               icon = painterResource(R.drawable.calendar_alt),
+               text = "Start Date: ${formatDate(startDate)}",
+               isExpired = isExpired
+           )
+       }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        starttime?.let {
+            InfoRow(
+                icon = painterResource(R.drawable.clock),
+                text = "Start Time: $starttime",
+                isExpired = isExpired
+            )
+        }
         // Event Info
-        InfoRow(
-            icon = painterResource(R.drawable.calendar_alt),
-            text = "Start Date: ${formatDate(startDate)}",
-            isExpired = isExpired
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-        InfoRow(
-            icon = painterResource(R.drawable.clock),
-            text = "Start Time: $starttime",
-            isExpired = isExpired
-        )
-        // Event Info
 
         Spacer(modifier = Modifier.height(8.dp))
 
-
-        InfoRow(
-            icon = painterResource(R.drawable.calendar_alt),
-            text = "End Date: ${formatDate(endDate)}",
-            isExpired = isExpired
-        )
+        endDate?.let {
+            InfoRow(
+                icon = painterResource(R.drawable.calendar_alt),
+                text = "End Date: ${formatDate(endDate)}",
+                isExpired = isExpired
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
-        InfoRow(
-            icon = painterResource(R.drawable.clock),
-            text = "End Time: $deadline",
-            isExpired = isExpired
-        )
-
+        deadline?.let {
+            InfoRow(
+                icon = painterResource(R.drawable.clock),
+                text = "End Time: $deadline",
+                isExpired = isExpired
+            )
+        }
         // Expiry Status
         if (isExpired) {
             Spacer(modifier = Modifier.height(12.dp))

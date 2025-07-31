@@ -150,7 +150,7 @@ class OfferRepositoryImpl(
                                 endDate = it.end_date,
                                 active = if (it.status == "inactive") "in-active" else "active",
                                 offerTitle = it.title,
-                                offerTag = it.quantity.toString() + " left",
+                                offerTag =if(it.is_unlimited ==1) "Until stock last" else it.quantity.toString() + " left",
                                 offerDescription = it.description,
                                 termsAndCondition = it.terms,
                             )

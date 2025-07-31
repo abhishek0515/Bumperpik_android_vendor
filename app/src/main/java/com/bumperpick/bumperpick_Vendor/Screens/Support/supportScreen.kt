@@ -571,8 +571,8 @@ fun TicketItem(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = 2,
+
                 )
 
                 Row(
@@ -696,7 +696,7 @@ fun TicketDetailsScreen(
                             modifier = Modifier.padding(end = 16.dp)
                         ) {
                             Text(
-                                text = "Open",
+                                text = ticket.data.status.replaceFirstChar { it.uppercase() },
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                                 fontSize = 12.sp,
                                 color = Color(0xFF856404),
@@ -713,7 +713,8 @@ fun TicketDetailsScreen(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                ) {
+                )
+                {
                     // Messages List
                     LazyColumn(
                         modifier = Modifier
@@ -733,12 +734,13 @@ fun TicketDetailsScreen(
                         }
                     }
 
-                    // Reply Section
+
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         color = Color.White,
                         shadowElevation = 8.dp
-                    ) {
+                    )
+                    {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -748,11 +750,15 @@ fun TicketDetailsScreen(
                             Row(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                val keyboardController = LocalSoftwareKeyboardController.current
+                                val keyboardController =
+                                    LocalSoftwareKeyboardController.current
 
                                 OutlinedTextField(
+                                    enabled =!ticket.data.status.equals("closed",true) ,
                                     value = replyMessage,
-                                    onValueChange = { replyMessage = it },
+                                    onValueChange = {
+
+                                        replyMessage = it },
                                     placeholder = {
                                         Text(
                                             "Type your reply...",
@@ -772,9 +778,12 @@ fun TicketDetailsScreen(
                                                 contentDescription = "Send",
                                                 tint = if (replyMessage.isNotBlank() && ticketReplyState !is UiState.Loading)
                                                     PrimaryRed else DarkGray.copy(alpha = 1f),
-                                                modifier = Modifier.size(18.dp).clickable{
+                                                modifier = Modifier.size(18.dp).clickable {
                                                     if (replyMessage.isNotBlank()) {
-                                                        viewModel.replyToTicket(ticketId, replyMessage)
+                                                        viewModel.replyToTicket(
+                                                            ticketId,
+                                                            replyMessage
+                                                        )
                                                         keyboardController?.hide()
                                                     }
                                                 }
@@ -795,7 +804,10 @@ fun TicketDetailsScreen(
                                     keyboardActions = KeyboardActions(
                                         onSend = {
                                             if (replyMessage.isNotBlank()) {
-                                                viewModel.replyToTicket(ticketId, replyMessage)
+                                                viewModel.replyToTicket(
+                                                    ticketId,
+                                                    replyMessage
+                                                )
                                                 keyboardController?.hide()
                                             }
                                         }
@@ -810,6 +822,7 @@ fun TicketDetailsScreen(
                             }
                         }
                     }
+
                 }
             }
             is UiState.Error -> {
@@ -912,7 +925,7 @@ private fun MessageCard(
                             error = errorpainter,
                             contentDescription = null,
                             modifier = Modifier.align(Alignment.CenterHorizontally),
-                            contentScale = ContentScale.FillBounds
+                            contentScale = ContentScale.Fit
                         )
 
                     }

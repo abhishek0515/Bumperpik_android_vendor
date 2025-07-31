@@ -174,6 +174,10 @@ fun Dashboard(){
                             expiredCount = data.expired_offers_count,
 
                             )
+
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
 
 

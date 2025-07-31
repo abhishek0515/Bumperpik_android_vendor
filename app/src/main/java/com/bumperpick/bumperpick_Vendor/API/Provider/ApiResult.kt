@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import com.bumperpick.bumperpick_Vendor.API.Model.DataXXXXX
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -11,6 +12,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
+import kotlin.text.contains
 
 sealed class ApiResult<out T, out E> {
     data class Success<out T>(val data: T) : ApiResult<T, Nothing>()
@@ -32,6 +34,9 @@ suspend fun <T, E> safeApiCall(
             val errorBody = response.errorBody()?.string().orEmpty()
             val parsedError = errorBodyParser(errorBody)
             Log.d("Error", errorBody)
+            if(errorBody.contains("Unauthenticated", true) || response.code()==401){
+
+            }
             ApiResult.Error(parsedError, response.code())
         }
     } catch (e: Exception) {
