@@ -40,6 +40,7 @@ import com.bumperpick.bumperpick_Vendor.Screens.Campaign.EditEventScreen
 import com.bumperpick.bumperpick_Vendor.Screens.Campaign.EventDetailPage
 import com.bumperpick.bumperpick_Vendor.Screens.Campaign.EventScreen
 import com.bumperpick.bumperpick_Vendor.Screens.Home.HomePageviewmodel
+import com.bumperpick.bumperpick_Vendor.Screens.NotificationScreen.NotificationScreen
 import com.bumperpick.bumperpick_Vendor.Screens.OfferPage.ratingPage
 import com.bumperpick.bumperpick_Vendor.Screens.QrScreen.QRScannerScreen
 import com.bumperpick.bumperpick_Vendor.Screens.Subscription.SubscriptionXDetailPage
@@ -275,6 +276,10 @@ fun AppNavigation() {
                         navController.navigate(Screen.Rating.withofferId(it.offerId))
 
                     }
+
+                    HomeScreenClicked.NotifyClicked -> {
+                        navController.navigate(Screen.Notification.route)
+                    }
                 }
             }
         }
@@ -459,6 +464,12 @@ fun AppNavigation() {
                 onBackPressed = {
                     navController.popBackStack()
                 })
+
+        }
+        composable(route= Screen.Notification.route){
+          NotificationScreen {
+                navController.popBackStack()
+            }
 
         }
 

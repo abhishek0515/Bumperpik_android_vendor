@@ -3,6 +3,7 @@ package com.bumperpick.bumperpick_Vendor.Screens.Account
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -124,7 +125,10 @@ fun OfferNotificationBottomSheet(
     onSendNotification: (List<HomeOffer>) -> Unit
 ) {
     var selectedOfferId by remember { mutableStateOf<String?>(null) }
+
+    val context=LocalContext.current
     val offers_uiState=viewmodel.offer_fetch_uistate.collectAsState().value
+
     LaunchedEffect(Unit) {
         viewmodel.fetchOffer()
     }
@@ -203,8 +207,12 @@ fun OfferNotificationBottomSheet(
                     )
                     {    if(offers.isEmpty()){
                         item {
-                            Box(modifier = Modifier.fillMaxWidth().padding(12.dp)){
-                                Text(text = "No offer available", color = BtnColor, fontSize = 18.sp, modifier = Modifier.fillMaxWidth().align(Alignment.Center), textAlign = TextAlign.Center)
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp)){
+                                Text(text = "No offer available", color = BtnColor, fontSize = 18.sp, modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.Center), textAlign = TextAlign.Center)
                             }
                         }
                     }
@@ -394,7 +402,21 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
     var showBottomSheet by remember { mutableStateOf(false) }
     var shownotificationReminder by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    val reminder_uiState=viewmodel.send_remineder_uistate.collectAsState().value
+    LaunchedEffect(reminder_uiState) {
+        when(reminder_uiState){
+            UiState.Empty ->{}
+            is UiState.Error -> {
+                Toast.makeText(context, "Error to send reminder", Toast.LENGTH_SHORT).show()
+            }
+            UiState.Loading -> {}
+            is UiState.Success-> {
+                Toast.makeText(context, "Reminder sent successfully", Toast.LENGTH_SHORT).show()
+                viewmodel.setReminderEmpty()
 
+            }
+        }
+    }
 
     if(shownotificationReminder){
         OfferNotificationBottomSheet(viewmodel=viewmodel,
@@ -402,6 +424,8 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                 shownotificationReminder=false
             }, onSendNotification = {
                 Log.d("SELECTED NOTIFY",it.toString())
+                if(it.isNotEmpty()){
+                viewmodel.sendReminder(it[0].offerId.toString())}
                 shownotificationReminder=false
             })
     }
@@ -449,7 +473,9 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
 
 
     Scaffold(containerColor = grey) {paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues).verticalScroll(rememberScrollState())) {
+        Column(modifier = Modifier
+            .padding(paddingValues)
+            .verticalScroll(rememberScrollState())) {
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
@@ -485,14 +511,24 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                     is_user_ads_subscribed = data.data.adsSubscription?.payment_transaction_id != null
                     Log.d("DATA",data.toString())
                     Card(
-                        modifier = Modifier.padding(16.dp).height(100.dp),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .height(100.dp),
                         colors = CardDefaults.cardColors(containerColor = BtnColor)
                     ) {
-                        Box(modifier = Modifier.padding(12.dp).fillMaxWidth(),){
-                            Row(modifier = Modifier.align(Alignment.CenterStart).fillMaxHeight()){
-                                Card(shape = CircleShape, modifier = Modifier.size(60.dp).align(Alignment.CenterVertically)) {
+                        Box(modifier = Modifier
+                            .padding(12.dp)
+                            .fillMaxWidth(),){
+                            Row(modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .fillMaxHeight()){
+                                Card(shape = CircleShape, modifier = Modifier
+                                    .size(60.dp)
+                                    .align(Alignment.CenterVertically)) {
                                     AsyncImage(
-                                        modifier = Modifier.fillMaxSize().align(Alignment.CenterHorizontally),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .align(Alignment.CenterHorizontally),
                                         model = data.data.image_url,
                                         contentScale = ContentScale.FillBounds, contentDescription = null)
                                 }
@@ -506,13 +542,17 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
 
                                 }
                             }
-                            Box( modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)){
+                            Box( modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(6.dp)){
 
 
                                 Icon(painter = painterResource(R.drawable.pencil_svgrepo_com),
                                     contentDescription = null,
                                     tint = Color.White,
-                                    modifier = Modifier.size(27.dp).clickable { onClick(AccountClick.EditProfile) },)
+                                    modifier = Modifier
+                                        .size(27.dp)
+                                        .clickable { onClick(AccountClick.EditProfile) },)
                             }
                         }
                     }
@@ -527,7 +567,9 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(text = "View Membership", color = BtnColor, fontSize = 14.sp, fontFamily = satoshi_medium,
-                        modifier = Modifier.align(Alignment.End).padding(vertical = 2.dp, horizontal = 16.dp)
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(vertical = 2.dp, horizontal = 16.dp)
                             .clickable {
                                 onClick(AccountClick.My_subs)
                             }
@@ -545,8 +587,12 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
 
                 }
                 AccountUi_state.Loading ->{
-                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp)) {
-                        CircularProgressIndicator(color = BtnColor, modifier = Modifier.align(Alignment.Center).size(24.dp))
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 18.dp)) {
+                        CircularProgressIndicator(color = BtnColor, modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(24.dp))
                     }
 
                 }
@@ -556,24 +602,35 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-            showBottomSheet=true
+            Box (modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    showBottomSheet = true
 
-            }.background(Color.White), )
+                }
+                .background(Color.White), )
             {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                Row (modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Purchase ads package", color = Color.Black, fontSize = 16.sp,)
                 }
 
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd),)
 
             }
             Spacer(modifier = Modifier.height(12.dp))
 
-            Box (modifier = Modifier.fillMaxWidth().background(Color.White),){
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+            Box (modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White),){
+                Row (modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.bell_01), contentDescription = null, modifier = Modifier.size(30.dp))
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Send instant reminder", color = Color.Black, fontSize = 16.sp,)
@@ -589,7 +646,9 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
             Spacer(modifier = Modifier.height(12.dp))
 
 
-            Column (modifier = Modifier.fillMaxWidth().background(Color.White)){
+            Column (modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)){
                 Spacer(modifier = Modifier.height(16.dp))
                 Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()){
                     Image(painter = painterResource(R.drawable.left), contentDescription = null, modifier = Modifier.size(12.dp))
@@ -641,94 +700,136 @@ fun AccountScreen(onClick:(AccountClick)->Unit, viewmodel: AccountViewmodel= koi
 
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.EngagementClick(MarketingOption.EVENTS))
-            }.background(Color.White), )
+            Box (modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onClick(AccountClick.EngagementClick(MarketingOption.EVENTS))
+                }
+                .background(Color.White), )
             {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                Row (modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Events", color = Color.Black, fontSize = 16.sp,)
                 }
 
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd),)
 
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.EngagementClick(MarketingOption.CAMPAIGNS))
-            }.background(Color.White), )
+            Box (modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onClick(AccountClick.EngagementClick(MarketingOption.CAMPAIGNS))
+                }
+                .background(Color.White), )
             {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                Row (modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Campaigns", color = Color.Black, fontSize = 16.sp,)
                 }
 
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd),)
 
             }
 
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.AdsClick(!is_user_ads_subscribed))
-            }.background(Color.White), )
+            Box (modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onClick(AccountClick.AdsClick(!is_user_ads_subscribed))
+                }
+                .background(Color.White), )
             {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                Row (modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.star_circle_svgrepo_com), contentDescription = null, modifier = Modifier.size(30.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Ads and banner", color = Color.Black, fontSize = 16.sp,)
                 }
 
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd),)
 
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.FaqClick)
-            }.background(Color.White), )
+            Box (modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onClick(AccountClick.FaqClick)
+                }
+                .background(Color.White), )
             {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                Row (modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.faq_svgrepo_com), contentDescription = null, modifier = Modifier.size(24.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "FAQs", color = Color.Black, fontSize = 16.sp, modifier = Modifier.align(
                         Alignment.CenterVertically))
                 }
 
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd),)
 
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-                onClick(AccountClick.mailToAdmin)
-            }.background(Color.White), )
+            Box (modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onClick(AccountClick.mailToAdmin)
+                }
+                .background(Color.White), )
             {
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                Row (modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterStart)){
                     Image(painter = painterResource(R.drawable.email_9_svgrepo_com), contentDescription = null, modifier = Modifier.size(24.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Email to admin", color = Color.Black, fontSize = 16.sp, modifier = Modifier.align(
                         Alignment.CenterVertically))
                 }
 
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd),)
 
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Box (modifier = Modifier.fillMaxWidth().clickable {
-                show_signoutDialog=true
+            Box (modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    show_signoutDialog = true
 
-            }.background(Color.White), ){
-                Row (modifier = Modifier.padding(12.dp).align(Alignment.CenterStart)){
+                }
+                .background(Color.White), ){
+                Row (modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.CenterStart)){
                     Image(imageVector = Icons.Outlined.ExitToApp, contentDescription = null, modifier = Modifier.size(30.dp),)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Sign out", color = Color.Black, fontSize = 16.sp,)
                 }
 
-                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(24.dp).align(Alignment.CenterEnd),)
+                Image(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = null, modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd),)
 
             }
 

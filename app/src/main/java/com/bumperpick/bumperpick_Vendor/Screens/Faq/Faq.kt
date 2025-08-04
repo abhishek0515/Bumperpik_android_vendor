@@ -240,7 +240,8 @@ fun ExpandCollapseButton(isExpanded: Boolean, onClick: () -> Unit) {
 fun FaqCard(question: String, answer: String) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    Card(modifier = Modifier.padding(8.dp), elevation = CardDefaults.cardElevation(defaultElevation = 10.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+    Card(modifier = Modifier.padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

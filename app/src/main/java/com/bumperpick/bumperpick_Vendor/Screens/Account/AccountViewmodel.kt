@@ -4,6 +4,7 @@ import DataStoreManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.vendor_details_model
+import com.bumperpick.bumperpick_Vendor.API.Model.success_model
 import com.bumperpick.bumperpick_Vendor.Repository.HomeOffer
 import com.bumperpick.bumperpick_Vendor.Repository.OfferRepositoryImpl
 import com.bumperpick.bumperpick_Vendor.Repository.Result
@@ -34,6 +35,23 @@ class AccountViewmodel(
     private val _offer_fetch_uiState= MutableStateFlow<UiState<List<HomeOffer>>>(UiState.Empty)
     val offer_fetch_uistate: StateFlow<UiState<List<HomeOffer>>> =_offer_fetch_uiState
 
+
+    private val _send_remineder_uiState= MutableStateFlow<UiState<success_model>>(UiState.Empty)
+    val send_remineder_uistate: StateFlow<UiState<success_model>> =_send_remineder_uiState
+
+    fun sendReminder(offer_id:String) {
+        viewModelScope.launch {
+            _send_remineder_uiState.value = UiState.Loading
+            val result = OfferRepository.send_reminder(offer_id)
+
+            _send_remineder_uiState.value = when (result) {
+                is Result.Error -> UiState.Error(result.message)
+                Result.Loading -> UiState.Loading
+                is Result.Success -> UiState.Success(result.data)
+            }
+
+        }
+    }
 
     fun fetchOffer(){
         viewModelScope.launch {
@@ -69,6 +87,12 @@ class AccountViewmodel(
                 is Result.Success-> _uiState.value=AccountUi_state.GetProfile(data.data)
             }
         }
+    }
+
+    fun setReminderEmpty() {
+   viewModelScope.launch {
+       _send_remineder_uiState.value=UiState.Empty
+   }
     }
 
 }

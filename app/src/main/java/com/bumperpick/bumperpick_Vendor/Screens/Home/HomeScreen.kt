@@ -48,6 +48,8 @@ sealed class HomeScreenClicked() {
     data object ScanQR:HomeScreenClicked()
     data class AccountClicked(val AccountClick:AccountClick):HomeScreenClicked()
 
+    data object NotifyClicked: HomeScreenClicked()
+
 
 
 }
@@ -102,16 +104,19 @@ fun HomeScreen(
                         println(it)
                         onClick(HomeScreenClicked.EditOffer(it))
                     },
+                        notifocation = {   onClick(HomeScreenClicked.NotifyClicked)
+                                       },
                         viewRating = {
                             onClick(HomeScreenClicked.ViewRating(it))
                         })
                 }
                 1-> {
-                    Dashboard()
+                    Dashboard(onNotificationClick =  {   onClick(HomeScreenClicked.NotifyClicked)},)
 
                 }
                 2->{
-                    No_offer(onSelectedOffer = {marketingOption, islater ->
+                    No_offer(onNotificationClick =  {   onClick(HomeScreenClicked.NotifyClicked)},
+                        onSelectedOffer = {marketingOption, islater ->
                         onClick(HomeScreenClicked.CreateOffer(marketingOption,islater))
                     })
                 }

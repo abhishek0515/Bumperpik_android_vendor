@@ -247,6 +247,11 @@ fun CampaignPreviewScreen(
                     Text(CampaignDetails.description ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
                 }
             }
+            item {
+                LabelledSection(label = "Number of participant") {
+                    Text(CampaignDetails.numberOfParticipant ?: "", fontSize = 16.sp, fontFamily = satoshi_medium)
+                }
+            }
 
             item {
                 LabelledSection(label = "Campaign address") {

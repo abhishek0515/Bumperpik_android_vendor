@@ -82,7 +82,9 @@ dependencies {
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 // DataStore for SharedPreferences
     implementation("androidx.datastore:datastore-preferences:1.1.6")
+    implementation("androidx.media3:media3-exoplayer:1.5.0")
 
+    implementation("androidx.media3:media3-ui:1.5.0")
 // ViewModel
     implementation("io.coil-kt:coil-compose:2.5.0")
 // Retrofit

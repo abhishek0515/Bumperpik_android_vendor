@@ -187,7 +187,7 @@ fun EventDetailHeader(title: String, onBackClick: () -> Unit) {
                 .fillMaxWidth()
                 .then(backgroundModifier)
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Box(
                 modifier = Modifier

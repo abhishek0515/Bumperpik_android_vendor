@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.Faqmodel
+import com.bumperpick.bumperpick_Vendor.API.FinalModel.Notification_model
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.Subcategory
@@ -411,6 +412,49 @@ if(mediaListMulti.isEmpty()) {
             }
         )
         return when(response){
+            is ApiResult.Error -> {
+                Result.Error(response.error.message)
+            }
+            is ApiResult.Success ->Result.Success(response.data)
+        }
+    }
+
+    override suspend fun send_reminder(offer_id: String): Result<success_model> {
+        val token=dataStoreManager.getToken()?.token?:""
+        val response=safeApiCall(
+            api={apiService.reminder_offer(offer_id,token)},
+            errorBodyParser = { json ->
+                try {
+                    Gson().fromJson(json, error_model::class.java)
+                } catch (e: Exception) {
+                    error_model(message = "Unknown error format: $json")
+                }
+            }
+        )
+        return when(response){
+            is ApiResult.Error -> {
+                Result.Error(response.error.message)
+            }
+            is ApiResult.Success ->Result.Success(response.data)
+        }
+
+    }
+
+    override suspend fun notification(): Result<Notification_model> {
+        val token=dataStoreManager.getToken()?.token?:""
+
+        val response=safeApiCall(
+            api = {apiService.notification(token)},
+            errorBodyParser = { json ->
+                try {
+                    Gson().fromJson(json, error_model::class.java)
+                } catch (e: Exception) {
+                    error_model(message = "Unknown error format: $json")
+                }
+            }
+        )
+        return when(response)
+        {
             is ApiResult.Error -> {
                 Result.Error(response.error.message)
             }

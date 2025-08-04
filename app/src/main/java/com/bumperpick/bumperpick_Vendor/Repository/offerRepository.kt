@@ -2,6 +2,7 @@ package com.bumperpick.bumperpick_Vendor.Repository
 
 import android.net.Uri
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.Faqmodel
+import com.bumperpick.bumperpick_Vendor.API.FinalModel.Notification_model
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.Subcategory
@@ -29,4 +30,8 @@ interface offerRepository {
     suspend fun getOfferReview(id:String): Result<getOfferDetailsModel>
 
     suspend fun FaqModel(): Result<Faqmodel>
+
+    suspend fun send_reminder(offer_id: String): Result<success_model>
+
+    suspend fun notification(): Result<Notification_model>
 }

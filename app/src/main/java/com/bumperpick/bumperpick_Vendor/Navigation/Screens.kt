@@ -93,5 +93,7 @@ sealed class Screen(val route: String) {
         fun withid(id: String): String="ticket_detail/$id"
     }
 
+    object Notification: Screen("notification")
+
 }
 

@@ -120,6 +120,7 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
     }
     fun update_Logo(Logo:Uri?){
         _templateData.value=templateData.value.copy( Logo= Logo)
+        updateBrandName(newTextType = TextType(text = ""))
     }
     fun updateBrandName(newTextType: TextType) {
         _templateData.value = _templateData.value.copy(brandName = newTextType)

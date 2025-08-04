@@ -1,3 +1,5 @@
+@file:kotlin.OptIn(ExperimentalMaterial3Api::class)
+
 package com.bumperpick.bumperpick_Vendor.Screens.Component
 
 import android.Manifest
@@ -7,6 +9,7 @@ import android.view.Surface
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -108,13 +111,25 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
+import com.bumperpick.bumperpick_Vendor.API.FinalModel.Media
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.Subcategory
 import com.bumperpick.bumperpick_Vendor.Screens.VendorDetailPage.VendorDetailViewmodel
 import com.bumperpick.bumperpick_Vendor.ui.theme.satoshi
@@ -665,9 +680,10 @@ fun BottomNavigationBar(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class
+)
 @Composable
-fun No_offer(onSelectedOffer:(marketingOption:MarketingOption,islater:Boolean)->Unit){
+fun No_offer(onSelectedOffer:(marketingOption:MarketingOption,islater:Boolean)->Unit,onNotificationClick: () -> Unit){
     val viewmodel=koinViewModel<VendorDetailViewmodel>()
     val savedetail=viewmodel.savedVendorDetail.collectAsState()
     LaunchedEffect(Unit) {
@@ -683,7 +699,8 @@ fun No_offer(onSelectedOffer:(marketingOption:MarketingOption,islater:Boolean)->
         modifier = Modifier.fillMaxSize()
     ) {
 
-        LocationCard(   locationTitle = if(savedetail.value!=null) {
+        LocationCard(  onNotificationClick = onNotificationClick,
+            locationTitle = if(savedetail.value!=null) {
             savedetail.value!!.establishment_name }
         else{""},
             locationSubtitle =if(savedetail.value!=null) {
@@ -1095,6 +1112,7 @@ fun SimpleImagePicker(
                     )
                 }
             } else {
+
                 AsyncImage(
                     model = selectedImageUri,
                     contentDescription = "Selected Image",
@@ -1448,7 +1466,8 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
     ){
         Column() {
             Box(modifier = Modifier.fillMaxWidth()){
-                AutoImageSlider(imageUrls = offerModel.Media_list)
+
+                MediaSlider(mediaList = offerModel.media)
                 Box(
                     modifier = Modifier
 
@@ -1607,33 +1626,32 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
 }
 
 @Composable
-fun AutoImageSlider(
-    imageUrls: List<String>,
-    modifier: Modifier = Modifier,
-    slideAnimationDuration: Int = 800 // Optional: Can remove if unused
+fun MediaSlider(
+    mediaList: List<Media>,
+    height: Dp = 180.dp,
+    modifier: Modifier = Modifier
 ) {
-    if (imageUrls.isEmpty()) return
+    if (mediaList.isEmpty()) return
 
     val pagerState = rememberPagerState(
         initialPage = 0,
-        pageCount = { imageUrls.size }
+        pageCount = { mediaList.size }
     )
 
     Box(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
-        // User-scrollable Image Pager
+        // Media Pager
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .height(200.dp),
-            pageSpacing = 8.dp,
-            userScrollEnabled = true // ✅ Allow user scroll
+                .height(height),
+            pageSpacing = 8.dp
         ) { page ->
-            ImageSliderItem(
-                imageUrl = imageUrls[page],
+            MediaSliderItem(
+                media = mediaList[page],
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -1646,7 +1664,7 @@ fun AutoImageSlider(
                 .align(Alignment.BottomCenter)
                 .padding(8.dp)
         ) {
-            repeat(imageUrls.size) { index ->
+            repeat(mediaList.size) { index ->
                 val isSelected = pagerState.currentPage == index
                 Box(
                     modifier = Modifier
@@ -1660,6 +1678,110 @@ fun AutoImageSlider(
         }
     }
 }
+
+@Composable
+fun MediaSliderItem(
+    media: Media,
+    modifier: Modifier = Modifier
+) {
+    when (media.type.lowercase()) {
+        "image" -> {
+          ImageSliderItem(
+                imageUrl = media.url,
+                modifier = modifier
+            )
+        }
+        "video" -> {
+            VideoSliderItem(
+                videoUrl = media.url,
+                modifier = modifier
+            )
+        }
+        else -> {
+            // Fallback to image for unknown types
+          ImageSliderItem(
+                imageUrl = media.url,
+                modifier = modifier
+            )
+        }
+    }
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+fun VideoSliderItem(
+    videoUrl: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Create ExoPlayer instance
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context)
+
+            .build()
+            .apply {
+                // Mute the video
+                volume = 0f
+                // Set to loop
+                repeatMode = Player.REPEAT_MODE_ONE
+            }
+    }
+
+    // Prepare media source
+    LaunchedEffect(videoUrl) {
+        val mediaItem = MediaItem.fromUri(videoUrl)
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare()
+    }
+
+    // Handle lifecycle
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> {
+                    exoPlayer.play()
+                }
+
+                Lifecycle.Event.ON_STOP -> {
+                    exoPlayer.pause()
+                }
+
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            exoPlayer.release()
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(8.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        AndroidView(
+            factory = { ctx ->
+                PlayerView(ctx).apply {
+                    player = exoPlayer
+                    // Hide controls for cleaner look
+                    useController = false
+                    // Set resize mode
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+
+
+    }
+}
+
 
 
 @Composable
@@ -2160,7 +2282,7 @@ fun BottomSheetItem(
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RemoveOfferBottomSheet(
     onDismiss: () -> Unit = {},

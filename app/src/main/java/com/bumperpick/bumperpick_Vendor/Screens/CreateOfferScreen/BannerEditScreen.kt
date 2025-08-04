@@ -332,7 +332,8 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
 fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplateType,subcategories:List<Subcategory>) {
     val templateData by viewmodel.templateData.collectAsState()
     val offerDetails by viewmodel.offerDetails.collectAsState()
-    var brandnameenabled by remember {  mutableStateOf(false)}
+    Log.d("BannerImage",offerDetails.BannerImage.toString())
+    var brandnameenabled by remember {  mutableStateOf(offerDetails.BannerImage!=null)}
     var quantity_enabled by remember { mutableStateOf(offerDetails.quantity.equals("until stock last")) }
     LaunchedEffect(quantity_enabled) {
         if(quantity_enabled){
@@ -340,14 +341,6 @@ fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplate
         }
         else{
            // viewmodel.updateQuantity(null)
-        }
-    }
-    LaunchedEffect(offerDetails) {
-        if(offerDetails.BannerImage!=null){
-            brandnameenabled=false
-        }
-        else{
-            brandnameenabled=true
         }
     }
     Column {

@@ -10,6 +10,7 @@ import com.bumperpick.bumperpick_Vendor.API.FinalModel.Faqmodel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.HomeOfferModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.NewEventDetailModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.NewEventmodel
+import com.bumperpick.bumperpick_Vendor.API.FinalModel.Notification_model
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.OfferUpdateModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.QrModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.VendorLoginModel
@@ -266,10 +267,17 @@ interface ApiService {
     @FormUrlEncoded
     suspend fun ticket_reply(@Path("id")id: String,@FieldMap map: Map<String, String>): Response<success_model>
 
+    @POST("api/vendor/cart-offers/reminder")
+    @FormUrlEncoded
+    suspend fun reminder_offer(@Field("offer_id")offer_id: String,@Field("token")token: String): Response<success_model>
     @POST("api/vendor/device-token/update")
     @FormUrlEncoded
     suspend fun send_token(
         @Field("token")token: String,
         @Field("vendor_id")vendorId: String,
         @Field("device_token")device_token: String,): Response<success_model>
+
+
+    @GET("api/vendor/notifications")
+    suspend fun notification(@Query("token")token: String): Response<Notification_model>
 }

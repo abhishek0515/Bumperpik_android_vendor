@@ -35,7 +35,7 @@ import com.bumperpick.bumperpick_Vendor.ui.theme.BtnColor
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun Dashboard(){
+fun Dashboard(onNotificationClick: () -> Unit){
     val viewmodel = koinViewModel<VendorDetailViewmodel>()
     val savedetail by viewmodel.savedVendorDetail.collectAsState()
     val dashboardStats by viewmodel.dashboardStats.collectAsState()
@@ -85,6 +85,7 @@ fun Dashboard(){
                     item {
                         // Header Section
                         LocationCard(
+                            onNotificationClick = onNotificationClick,
                             locationTitle = if (savedetail != null) {
                                 savedetail!!.establishment_name
                             } else {
