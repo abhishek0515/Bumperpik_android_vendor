@@ -92,14 +92,14 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-    var quantity_enabled by remember { mutableStateOf(offerDetails.quantity.equals("until stock last")) }
+    var quantity_enabled by remember { mutableStateOf(offerDetails.quantity.equals("Until stock last",false)) }
     Log.d("quantity_enabled",quantity_enabled.toString())
     LaunchedEffect(quantity_enabled) {
         if(quantity_enabled){
-            viewmodel.updateQuantity("until stock last")
+            viewmodel.updateQuantity("Until stock last")
         }
         else {
-           // viewmodel.updateQuantity(null)
+            viewmodel.updateQuantity(null)
 
         }
     }
@@ -202,7 +202,7 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
 
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = "Until stock last",
+                                text = "Until Stock Last",
                                 fontSize = 16.sp,
                                 fontFamily = satoshi_regular,
                                 fontWeight = FontWeight.Bold,
@@ -332,15 +332,16 @@ fun BannerEditScreen(navController: NavController,viewmodel: CreateOfferViewmode
 fun EditTemplate(viewmodel: CreateOfferViewmodel, choosedTemplate: OfferTemplateType,subcategories:List<Subcategory>) {
     val templateData by viewmodel.templateData.collectAsState()
     val offerDetails by viewmodel.offerDetails.collectAsState()
+    val brandnameenabled by viewmodel.brand_name_enabled.collectAsState()
     Log.d("BannerImage",offerDetails.BannerImage.toString())
-    var brandnameenabled by remember {  mutableStateOf(offerDetails.BannerImage!=null)}
-    var quantity_enabled by remember { mutableStateOf(offerDetails.quantity.equals("until stock last")) }
+  //  var brandnameenabled by remember {  mutableStateOf(offerDetails.BannerImage!=null)}
+    var quantity_enabled by remember { mutableStateOf(offerDetails.quantity.equals("until stock last",false)) }
     LaunchedEffect(quantity_enabled) {
         if(quantity_enabled){
             viewmodel.updateQuantity("Until stock last")
         }
         else{
-           // viewmodel.updateQuantity(null)
+            viewmodel.updateQuantity(null)
         }
     }
     Column {

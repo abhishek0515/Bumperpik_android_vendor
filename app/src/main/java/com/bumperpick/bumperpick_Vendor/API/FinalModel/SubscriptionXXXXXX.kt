@@ -1,0 +1,3 @@
+package com.bumperpick.bumperpick_Vendor.API.FinalModel
+
+class SubscriptionXXXXXX

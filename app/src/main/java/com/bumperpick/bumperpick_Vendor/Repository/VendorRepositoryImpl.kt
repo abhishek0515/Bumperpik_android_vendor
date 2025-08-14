@@ -79,7 +79,7 @@ class VendorRepositoryImpl(
             Log.d("NUMBER", number)
 
             val newDetails = details.copy(
-                Vendor_Id = (1..1000).random().toString(),
+                //Vendor_Id = (1..1000).random().toString(),
                 Vendor_Mobile = number
 
             )
@@ -368,8 +368,14 @@ class VendorRepositoryImpl(
           when(update){
               is ApiResult.Error -> Result.Error(update.error.message)
               is ApiResult.Success -> {
-                  if (update.data.code == 200)
+                  if (update.data.code == 200) {
+                      val data=update.data
+
+                 //     dataStoreManager.save_Vendor_Details(data.data)
+                      update_profile(data)
                       return Result.Success(update.data)
+                  }
+
                   else {
                       return Result.Error(update.data.message)
                   }
@@ -382,5 +388,18 @@ class VendorRepositoryImpl(
       catch (e: Exception) {
           Result.Error("Failed to fetch profile: ${e.message}")
       }
+    }
+    private suspend  fun update_profile(data: update_profile_model){
+        val previous=dataStoreManager.get_Vendor_Details()
+        if (previous != null) {
+            dataStoreManager.save_Vendor_Details(
+                previous.copy(
+                establishment_name = data.data.establishment_name,
+                establishment_address = data.data.establishment_address,
+                    brand_name = data.data.brand_name,
+                    outlet_address = data.data.outlet_address,
+
+                    ))
+        }
     }
 }

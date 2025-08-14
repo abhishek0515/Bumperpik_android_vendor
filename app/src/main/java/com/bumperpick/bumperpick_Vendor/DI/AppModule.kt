@@ -65,7 +65,8 @@ val appModule = module {
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor { chain ->
                 val original = chain.request()
-                val requestBuilder = original.newBuilder()
+                val requestBuilder = original
+                    .newBuilder()
                     .header("Content-Type", "application/x-www-form-urlencoded")
                 val request = requestBuilder.build()
                 chain.proceed(request)
@@ -73,7 +74,7 @@ val appModule = module {
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://13.200.242.189/")
+            .baseUrl("http://65.0.78.200/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
@@ -102,7 +103,7 @@ val appModule = module {
     viewModel { CreateOfferViewmodel(get()) }
     viewModel { OfferViewmodel(get()) }
     viewModel { EditOfferViewmodel(get(),get(),get()) }
-    viewModel { AccountViewmodel(get(),get (),get()) }
+    viewModel { AccountViewmodel(get(),get (),get(),get()) }
     viewModel { QrScreenViewmodel(get(),get ()) }
     viewModel { EditAccountViewModel(get()) }
     viewModel { EventsViewmodel(get()) }

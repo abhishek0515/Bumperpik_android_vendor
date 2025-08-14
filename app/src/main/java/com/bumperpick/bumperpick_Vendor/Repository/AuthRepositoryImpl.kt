@@ -6,6 +6,7 @@ import com.bumperpick.bumperpick_Vendor.API.FinalModel.error_model
 import com.bumperpick.bumperpick_Vendor.API.Provider.ApiResult
 import com.bumperpick.bumperpick_Vendor.API.Provider.ApiService
 import com.bumperpick.bumperpick_Vendor.API.Provider.safeApiCall
+import com.bumperpick.bumperpick_Vendor.Repository.Result.*
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
@@ -156,5 +157,34 @@ class AuthRepositoryImpl(
         } catch (e: Exception) {
             Result.Error("Failed to resend OTP", e)
         }
+    }
+
+    override suspend fun refresh_token(
+        token: String,
+    ): Result<String> {
+        return try {
+            val response = safeApiCall(
+                api = { apiService.token_refresh(token) },
+                errorBodyParser = { json ->
+                    try {
+                        Gson().fromJson(json, error_model::class.java)
+                    } catch (e: Exception) {
+                        error_model(message = "Unknown error format: $json")
+                    }
+                }
+            )
+            when (response) {
+                is ApiResult.Success -> {
+                    if (response.data.code == 200) Result.Success(response.data.meta.token)
+                    else Result.Error(response.data.message)
+                }
+
+                is ApiResult.Error -> Result.Error(response.error.message)
+            }
+        }
+        catch (e: Exception) {
+            Result.Error("Failed to resend OTP", e)
+        }
+
     }
 }

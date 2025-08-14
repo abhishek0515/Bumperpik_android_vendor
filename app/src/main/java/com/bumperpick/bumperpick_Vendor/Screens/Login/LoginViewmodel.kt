@@ -133,6 +133,9 @@ class LoginViewmodel(val authRepository: AuthRepository,val googleSignInReposito
         _uiState.update { it.copy(error = "") }
     }
 
+    fun set_error(error: String){
+        _uiState.update { it.copy(error = error) }
+    }
     fun updateState() {
         _uiState.value=LoginUiState()
     }

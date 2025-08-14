@@ -226,6 +226,7 @@ fun NotificationListScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 12.dp),
             ) {
                 items(
                     items = notifications,
@@ -275,12 +276,13 @@ fun NotificationCard(
             // Top right icon
 
             Row {
-                Image(
-                    painter =painterResource(R.drawable.percentage_red),
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notification Icon",
+                    tint =BtnColor,
                     modifier = Modifier
                         .align(Alignment.Top)
-                        .size(36.dp)
+                        .size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
 

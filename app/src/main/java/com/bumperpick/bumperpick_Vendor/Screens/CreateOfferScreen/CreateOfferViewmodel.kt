@@ -2,6 +2,7 @@ package com.bumperpick.bumperpick_Vendor.Screens.CreateOfferScreen
 
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -70,6 +71,11 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
     private val _templateData= MutableStateFlow(Template_Data(gradientType = offerDetails.value.colorType))
     val templateData: StateFlow<Template_Data> = _templateData
 
+    private val _brand_name_enabled= MutableStateFlow(true)
+
+    val brand_name_enabled: StateFlow<Boolean> = _brand_name_enabled
+
+
     private val _user_choosed_banner= MutableStateFlow<startingChoose?>(null)
     val user_choosed_banner: StateFlow<startingChoose?> = _user_choosed_banner
 
@@ -121,6 +127,12 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
     fun update_Logo(Logo:Uri?){
         _templateData.value=templateData.value.copy( Logo= Logo)
         updateBrandName(newTextType = TextType(text = ""))
+        if(Logo!=null) {
+            _brand_name_enabled.value = false
+        }
+        else{
+            _brand_name_enabled.value = true
+        }
     }
     fun updateBrandName(newTextType: TextType) {
         _templateData.value = _templateData.value.copy(brandName = newTextType)
@@ -227,10 +239,10 @@ class CreateOfferViewmodel(private val offerRepository: offerRepository) : ViewM
             return false
         }
 
-        if(_offerDetails.value.medialList.isEmpty()){
+        /*if(_offerDetails.value.medialList.isEmpty()){
             showError("Please select media")
             return false
-        }
+        }*/
         return true
 
 

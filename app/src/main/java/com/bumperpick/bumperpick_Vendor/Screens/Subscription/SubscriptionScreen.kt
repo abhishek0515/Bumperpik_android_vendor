@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.Feature
@@ -88,6 +89,12 @@ data class FeatureUI(
     val isIncluded: FeatureValue,
     val featureValue: String = ""
 )
+@Preview
+@Composable
+fun previewSubs(){
+    SubscriptionPage(onBackClick = {}, gotoHome = {})
+}
+
 
 
 // Main Composable
@@ -300,7 +307,7 @@ private fun SubscriptionContent(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             HorizontalPager(
                 state = pagerState,
@@ -320,14 +327,14 @@ private fun SubscriptionContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             repeat(planGroups.size) { index ->
                 Box(
                     modifier = Modifier
-                        .size(if (index == pagerState.currentPage) 18.dp else 12.dp)
+                        .size(if (index == pagerState.currentPage) 12.dp else 8.dp)
                         .background(
                             if (index == pagerState.currentPage) Color(0xFFD32F2F) else Color(0xFFCCCCCC),
                             CircleShape
@@ -440,7 +447,7 @@ fun SubscriptionCard(
 
     Card(
         modifier = Modifier
-            .fillMaxSize()
+
             .clickable { selectedPlan?.let { onSubscriptionSelected(it.id.toString()) } },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -480,19 +487,21 @@ fun SubscriptionCard(
             ) {
                 Column(
                     modifier = Modifier
+                        .verticalScroll(rememberScrollState())
                         .fillMaxHeight()
-                        .padding(18.dp)
-                ) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+                {
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Features",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Divider(modifier = Modifier.height(1.dp), color = Color.Gray)
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     selectedPlan?.features?.forEach { feature ->
                         val featureUI = FeatureUI(
@@ -505,9 +514,9 @@ fun SubscriptionCard(
                         Spacer(modifier = Modifier.height(12.dp))
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Divider(modifier = Modifier.height(1.dp), color = Color.Gray)
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = "Select Duration",

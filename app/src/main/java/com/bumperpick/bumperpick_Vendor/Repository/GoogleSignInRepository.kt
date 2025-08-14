@@ -28,8 +28,9 @@ class GoogleSignInRepository(
 ) {
     private val _signInState = MutableStateFlow<GoogleSignInState>(GoogleSignInState.Idle)
     val signInState: StateFlow<GoogleSignInState> = _signInState.asStateFlow()
+    private val serverClientId = "6617870675-5e2as1tc3op02p9ctcrl2cd9fcl8b8cv.apps.googleusercontent.com"
 
-    private fun getGoogleSignInClient(serverClientId: String): GoogleSignInClient {
+    private fun getGoogleSignInClient(): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(serverClientId)
             .requestEmail() // Explicitly request email
@@ -38,8 +39,8 @@ class GoogleSignInRepository(
         return GoogleSignIn.getClient(context, gso)
     }
 
-    fun getSignInIntent(serverClientId: String): Intent {
-        return getGoogleSignInClient(serverClientId).signInIntent
+    fun getSignInIntent(): Intent {
+        return getGoogleSignInClient().signInIntent
     }
 
     suspend fun processSignInResult(data: Intent?) {
@@ -116,6 +117,8 @@ class GoogleSignInRepository(
                             dataStoreManager.save_Vendor_Details(vendorData)
                             _signInState.value = GoogleSignInState.Success(vendorData.email, true)
                         } else {
+                            dataStoreManager.saveToken(meta)
+                            dataStoreManager.save_Vendor_Details(vendorData)
                             _signInState.value = GoogleSignInState.Success(account.email ?: "", false)
                         }
                     } else {
@@ -132,9 +135,9 @@ class GoogleSignInRepository(
         }
     }
 
-    fun signOut(serverClientId: String) {
+    fun signOut() {
         Log.d("GoogleSignIn", "Signing out")
-        val googleSignInClient = getGoogleSignInClient(serverClientId)
+        val googleSignInClient = getGoogleSignInClient()
         googleSignInClient.signOut()
         _signInState.value = GoogleSignInState.Idle
     }

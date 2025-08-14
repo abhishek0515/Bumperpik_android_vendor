@@ -189,7 +189,7 @@ fun Offer_Banner_selector(navController: NavController,viewmodel: CreateOfferVie
 
     val offeDetails by viewmodel.offerDetails.collectAsState()
     val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
+        skipPartiallyExpanded = false
     )
     var showBottomSheet by remember { mutableStateOf(false) }
 

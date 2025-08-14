@@ -20,6 +20,7 @@ import com.bumperpick.bumperpick_Vendor.API.FinalModel.dasboard_modek
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.getOfferDetailsModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.newsubscriptionModel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.offerRedeemModel
+import com.bumperpick.bumperpick_Vendor.API.FinalModel.refresh_token_data
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.select_subs_model
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.subs_ads_model
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.update_profile_model
@@ -280,4 +281,7 @@ interface ApiService {
 
     @GET("api/vendor/notifications")
     suspend fun notification(@Query("token")token: String): Response<Notification_model>
+
+    @GET("api/vendor/refresh-token")
+    suspend fun token_refresh(@Query("token")token: String): Response<refresh_token_data>
 }

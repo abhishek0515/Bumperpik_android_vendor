@@ -1,15 +1,21 @@
 package com.bumperpick.bumperpick_Vendor.API.Provider
 
+import DataStoreManager
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
-import com.bumperpick.bumperpick_Vendor.API.Model.DataXXXXX
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.koin.compose.koinInject
+import org.koin.java.KoinJavaComponent.getKoin
 import retrofit2.Response
 import java.io.File
 import kotlin.text.contains
@@ -21,12 +27,93 @@ sealed class ApiResult<out T, out E> {
 
 
 suspend fun <T, E> safeApiCall(
+    context: Context? = getKoin().get(),
     api: suspend () -> Response<T>,
     errorBodyParser: (String) -> E
 ): ApiResult<T, E> {
     return try {
         val response = api()
         Log.d("RESPONSE", response.body().toString())
+
+        if (response.isSuccessful) {
+            response.body()?.let { ApiResult.Success(it) }
+                ?: ApiResult.Error(errorBodyParser("Empty body"), response.code())
+        } else {
+            val errorBody = response.errorBody()?.string().orEmpty()
+            val parsedError = errorBodyParser(errorBody)
+
+            Log.d("Error", errorBody)
+
+            if (errorBody.contains("Unauthenticated", true) || response.code() == 401) {
+                Log.d("API", "Received 401/Unauthenticated, attempting token refresh...")
+
+                val tokenRefreshed = refreshTokenDirectly(context)
+
+                return if (tokenRefreshed) {
+                    Log.d("API", "Token refreshed successfully, retrying API call...")
+                    val retryResponse = api()
+                    if (retryResponse.isSuccessful) {
+                        retryResponse.body()?.let { ApiResult.Success(it) }
+                            ?: ApiResult.Error(errorBodyParser("Empty body on retry"), retryResponse.code())
+                    } else {
+                        val retryErrorBody = retryResponse.errorBody()?.string().orEmpty()
+                        val retryParsedError = errorBodyParser(retryErrorBody)
+                        Log.e("API", "Retry failed after token refresh: $retryErrorBody")
+                        ApiResult.Error(retryParsedError, retryResponse.code())
+                    }
+                } else {
+                    Log.e("API", "Token refresh failed.")
+                    ApiResult.Error(parsedError, response.code())
+                }
+            } else {
+                ApiResult.Error(parsedError, response.code())
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("Exception", "API call failed with exception: ${e.localizedMessage}")
+        ApiResult.Error(errorBodyParser(e.localizedMessage ?: "Unknown error"))
+    }
+}
+
+
+
+
+suspend fun refreshTokenDirectly(context: Context?): Boolean {
+    if (context == null) return false
+
+    val dataStoreManager = DataStoreManager(context)
+    val apiService: ApiService = getKoin().get()
+
+    return try {
+        val previousToken = dataStoreManager.getToken()?.token.orEmpty()
+        val call = apiService.token_refresh(previousToken)
+
+        if (call.isSuccessful) {
+            call.body()?.meta?.let { newMeta ->
+                dataStoreManager.saveToken(newMeta)
+                Log.d("Token", "Token refreshed and saved.")
+                return true
+            }
+        } else {
+            val errorBody = call.errorBody()?.string().orEmpty()
+            Log.d("RefreshTokenError", errorBody)
+        }
+        false
+    } catch (e: Exception) {
+        Log.e("Exception", "Token refresh failed: ${e.localizedMessage}")
+        false
+    }
+}
+
+
+private suspend fun <T, E> performApiCall(
+    api: suspend () -> Response<T>,
+    errorBodyParser: (String) -> E
+): ApiResult<T, E> {
+    return try {
+        val response = api()
+        Log.d("RESPONSE", response.body().toString())
+
         if (response.isSuccessful) {
             response.body()?.let { ApiResult.Success(it) }
                 ?: ApiResult.Error(errorBodyParser("Empty body"), response.code())
@@ -34,9 +121,7 @@ suspend fun <T, E> safeApiCall(
             val errorBody = response.errorBody()?.string().orEmpty()
             val parsedError = errorBodyParser(errorBody)
             Log.d("Error", errorBody)
-            if(errorBody.contains("Unauthenticated", true) || response.code()==401){
 
-            }
             ApiResult.Error(parsedError, response.code())
         }
     } catch (e: Exception) {

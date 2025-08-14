@@ -46,7 +46,7 @@ class OfferRepositoryImpl(
 
 
             Log.d("AddOffer",offerModel.toString())
-            if(offerModel.quantity!=null && !offerModel.quantity.equals("Until stock last")){
+            if(offerModel.quantity!=null && !offerModel.quantity.equals("Until stock last",false)){
                 Log.d("Offer_quantity",offerModel.quantity.toString())
                 map["quantity"] = offerModel.quantity.toRequestBody("text/plain".toMediaType())
             }

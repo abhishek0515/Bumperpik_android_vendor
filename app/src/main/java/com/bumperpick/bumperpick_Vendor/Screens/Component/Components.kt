@@ -642,14 +642,14 @@ fun BottomNavigationBar(
                         item.icon_draw?.let {
                             Icon(painter = painterResource(it), contentDescription = item.contentDescription,
                                 tint = if (selectedTab == index) Color(0xFF3B82F6) else Color.Gray,
-                                modifier = Modifier.size(30.dp).align(Alignment.CenterHorizontally))
+                                modifier = Modifier.size(24.dp).align(Alignment.CenterHorizontally))
                         }
                         item.painter?.let {
                             Icon(
                                 painter = it,
                                 contentDescription = item.contentDescription,
                                 tint = if (selectedTab == index) Color(0xFF3B82F6) else Color.Gray,
-                                modifier = Modifier.size(30.dp).align(Alignment.CenterHorizontally)
+                                modifier = Modifier.size(24.dp).align(Alignment.CenterHorizontally)
                             )
                         }
                     }
@@ -666,7 +666,9 @@ fun BottomNavigationBar(
                     indicatorColor = Color.Transparent
                 ),
                 modifier = if (selectedTab == index) {
-                    Modifier.background(
+                    Modifier
+                        .align(Alignment.CenterVertically)
+                        .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 Color(0xFF3B82F6).copy(alpha = 0.1f),
@@ -1466,8 +1468,10 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
     ){
         Column() {
             Box(modifier = Modifier.fillMaxWidth()){
-
-                MediaSlider(mediaList = offerModel.media)
+                val media_list=if(offerModel.media.isEmpty()) offerModel.media else listOf(
+                    Media(0,type="image", url=offerModel.brand_logo_url?:"")
+                )
+                MediaSlider(mediaList = media_list)
                 Box(
                     modifier = Modifier
 
@@ -1514,19 +1518,24 @@ fun HomeOfferView(offerModel: HomeOffer,    showBottomSheet:(EditDelete)->Unit={
 
             Column(modifier = Modifier.padding(12.dp)) {
                 Spacer(Modifier.height(5.dp))
-                Box(modifier = Modifier.fillMaxWidth(),) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ){
                     Text(
                         text = offerModel.offerTitle ?: "",
                         fontSize = 22.sp,
-                        modifier= Modifier.align(Alignment.CenterStart),
                         fontFamily = satoshi_regular,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.Black
+                        color = Color.Black,
+                        modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "View Rating",
-                        modifier=Modifier.
-                        align(Alignment.CenterEnd)
+                        modifier=Modifier
+                       // align(Alignment.CenterEnd)
                         .clickable{
                             viewRating(offerModel.offerId?:"")
                         },

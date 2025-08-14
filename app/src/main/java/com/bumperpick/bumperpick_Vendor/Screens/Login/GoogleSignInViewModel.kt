@@ -25,10 +25,9 @@ class GoogleSignInViewModel(private val googleSignInRepository: GoogleSignInRepo
 
     val signInState: StateFlow<GoogleSignInState> = googleSignInRepository.signInState
 
-    private val serverClientId = "6617870675-5e2as1tc3op02p9ctcrl2cd9fcl8b8cv.apps.googleusercontent.com"
 
     fun getSignInIntent(): Intent {
-        return googleSignInRepository.getSignInIntent(serverClientId)
+        return googleSignInRepository.getSignInIntent()
     }
 
     fun processSignInResult(data: Intent?) {

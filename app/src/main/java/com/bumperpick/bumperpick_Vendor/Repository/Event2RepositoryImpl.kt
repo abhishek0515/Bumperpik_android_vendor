@@ -102,7 +102,8 @@ class EventRepository2Impl(val dataStoreManager: DataStoreManager,val apiService
                 } catch (e: Exception) {
                     error_model(message = "Unknown error format: $it")
                 }
-            })
+            }
+        )
 
         return when(event){
             is ApiResult.Error -> Result.Error(event.error.message)

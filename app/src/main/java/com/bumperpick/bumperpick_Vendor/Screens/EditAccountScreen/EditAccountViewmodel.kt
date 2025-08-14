@@ -254,6 +254,7 @@ class EditAccountViewModel(val vendorRepository: VendorRepository): ViewModel() 
                     }
                     is Result.Success ->{
                         _uiState.value = _uiState.value.copy(isLoading = false, vendorDetails = currentDetails)
+
                         onSuccess(currentDetails)
                     }
                 }

@@ -2,7 +2,7 @@ package com.bumperpick.bumperpick_Vendor.API.FinalModel
 
 data class DataXXXXXXX(
     val brand_name: String,
-    val category: String,
+    val category: CategoryX,
     val email: String,
     val establishment_address: String,
     val establishment_name: String,
@@ -14,3 +14,6 @@ data class DataXXXXXXX(
     val phone_number: String,
     val subscription: SubscriptionXX
 )
+{
+
+}

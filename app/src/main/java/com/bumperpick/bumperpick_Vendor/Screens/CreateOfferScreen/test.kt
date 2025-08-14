@@ -72,7 +72,7 @@ fun CalendarBottomSheet(
     onConfirm: (LocalDate?) -> Unit
 ){
     val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false,
+        skipPartiallyExpanded = true,
     )
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var tempSelectedDate by remember { mutableStateOf(selectedDate) }
@@ -82,12 +82,13 @@ fun CalendarBottomSheet(
             onDismissRequest = onDismiss,
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             containerColor = Color.White,
-            modifier = Modifier.fillMaxHeight(0.8f),
+          //  modifier = Modifier.fillMaxHeight(0.8f),
             sheetState = sheetState
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+
                     .padding(horizontal = 16.dp, vertical = 0.dp)
             ) {
                 // Header with title and close button
@@ -191,8 +192,7 @@ fun CalendarBottomSheet(
                         onConfirm(tempSelectedDate)
                     },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
+                        .fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = BtnColor
                     ),

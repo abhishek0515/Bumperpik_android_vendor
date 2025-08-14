@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.vendor_details_model
 import com.bumperpick.bumperpick_Vendor.API.Model.success_model
+import com.bumperpick.bumperpick_Vendor.Repository.GoogleSignInRepository
 import com.bumperpick.bumperpick_Vendor.Repository.HomeOffer
 import com.bumperpick.bumperpick_Vendor.Repository.OfferRepositoryImpl
 import com.bumperpick.bumperpick_Vendor.Repository.Result
@@ -26,7 +27,8 @@ sealed class AccountUi_state{
 class AccountViewmodel(
     private val dataStoreManager: DataStoreManager,
     private val VendorRepository: VendorRepository,
-    private val OfferRepository: offerRepository
+    private val OfferRepository: offerRepository,
+    private val GoogleSignInRepository: GoogleSignInRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<AccountUi_state>(AccountUi_state.Empty)
     val uiState:StateFlow<AccountUi_state> =_uiState
@@ -72,6 +74,7 @@ class AccountViewmodel(
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
             dataStoreManager.clearToken()
+            GoogleSignInRepository.signOut()
             _isLogout.value = true
         }
     }

@@ -144,7 +144,7 @@ fun HomeScreen(
         val navItems = listOf(
             NavigationItem("Home", icon = Icons.Outlined.Home, contentDescription = "Home"),
             NavigationItem("Dashboard", icon_draw =R.drawable.dashboard_2_svgrepo_com , contentDescription = "Dashboard"),
-            NavigationItem("Create offers", icon = Icons.Default.List, contentDescription = "Create offers"),
+            NavigationItem("Create offers", icon_draw = R.drawable.list_ul_alt_svgrepo_com, contentDescription = "Create offers"),
             NavigationItem("More", icon_draw = R.drawable.more_horizontal_square_svgrepo_com, contentDescription = "Account")
         )
         //  RazorpayPaymentButton(amountInPaise = 1000, email = "anuj@gmail.com", contact = "1234567889")
