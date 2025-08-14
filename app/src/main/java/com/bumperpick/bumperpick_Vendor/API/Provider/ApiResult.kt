@@ -130,12 +130,19 @@ private suspend fun <T, E> performApiCall(
     }
 }
 
-fun prepareImageParts(images: List<File>): List<MultipartBody.Part> {
-    return images.mapIndexed { index, file ->
-        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+fun prepareMediaParts(mediaFiles: List<File?>): List<MultipartBody.Part> {
+    return mediaFiles.filterNotNull().mapIndexed { index, file ->
+        val mediaType = when (file.extension.lowercase()) {
+            "jpg", "jpeg", "png", "gif", "webp", "bmp" -> "image/*"
+            "mp4", "mov", "avi", "mkv", "webm", "3gp" -> "video/*"
+            else -> "application/octet-stream" // fallback for unknown types
+        }
+
+        val requestFile = file.asRequestBody(mediaType.toMediaTypeOrNull())
         MultipartBody.Part.createFormData("media[]", file.name, requestFile)
     }
 }
+
 fun File.toMultipartPart(partName: String): MultipartBody.Part {
     val mediaType = when (extension.lowercase()) {
         "jpg", "jpeg" -> "image/jpeg"

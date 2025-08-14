@@ -386,6 +386,8 @@ class VendorRepositoryImpl(
 
       }
       catch (e: Exception) {
+          Log.d("update_profile",e.message.toString())
+
           Result.Error("Failed to fetch profile: ${e.message}")
       }
     }

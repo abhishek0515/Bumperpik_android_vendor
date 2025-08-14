@@ -3,7 +3,9 @@ package com.bumperpick.bumperpick_Vendor.Repository
 import DataStoreManager
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Log
+import android.webkit.MimeTypeMap
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.Faqmodel
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.Notification_model
 import com.bumperpick.bumperpick_Vendor.API.FinalModel.OfferUpdateModel
@@ -15,7 +17,8 @@ import com.bumperpick.bumperpick_Vendor.API.FinalModel.offerRedeemModel
 import com.bumperpick.bumperpick_Vendor.API.Model.success_model
 import com.bumperpick.bumperpick_Vendor.API.Provider.ApiResult
 import com.bumperpick.bumperpick_Vendor.API.Provider.ApiService
-import com.bumperpick.bumperpick_Vendor.API.Provider.prepareImageParts
+import com.bumperpick.bumperpick_Vendor.API.Provider.prepareMediaParts
+
 import com.bumperpick.bumperpick_Vendor.API.Provider.safeApiCall
 import com.bumperpick.bumperpick_Vendor.API.Provider.toMultipartPart
 import com.bumperpick.bumperpick_Vendor.Screens.Component.formatDate
@@ -27,6 +30,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.io.IOException
 
 class OfferRepositoryImpl(
     private val apiService: ApiService,
@@ -69,10 +73,11 @@ class OfferRepositoryImpl(
             val mediaList = offerModel.medialList.map { uri: Uri ->
                 uriToFile(context, uri)
             }
-            val mediaListMulti = prepareImageParts(mediaList)
+            Log.d("Offer mediaList", offerModel.medialList.toString())
+            val mediaListMulti = prepareMediaParts(mediaList)
 
             mediaList.forEach {
-                Log.d("URI", it.path.toString())
+                Log.d("URI", it?.path.toString())
             }
             Log.d("Offer add map", map.toString())
             if (banner != null) {
@@ -99,17 +104,88 @@ class OfferRepositoryImpl(
             Result.Error("Failed to add offer: ${e.message}")
         }
     }
+    fun uriToFile(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+                ?: return null
 
-     fun uriToFile(context: Context, uri: Uri): File {
-        val inputStream = context.contentResolver.openInputStream(uri)
-        val tempFile = File.createTempFile("upload_", ".png", context.cacheDir)
-        if (inputStream != null) {
-            tempFile.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
+            // Get original filename and extension
+            val (fileName, extension) = getFileNameAndExtension(context, uri)
+
+            // Create temp file with proper extension
+            val tempFile = File.createTempFile(
+                fileName.substringBeforeLast('.').ifEmpty { "upload" },
+                ".$extension",
+                context.cacheDir
+            )
+
+            inputStream.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            tempFile
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun getFileName(context: Context, uri: Uri): String? {
+        var fileName: String? = null
+
+        if (uri.scheme == "content") {
+            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex != -1) {
+                        fileName = cursor.getString(nameIndex)
+                    }
+                }
             }
         }
-        return tempFile
+
+        if (fileName == null) {
+            fileName = uri.path?.let { path ->
+                path.substring(path.lastIndexOf('/') + 1)
+            }
+        }
+
+        return fileName
     }
+
+    // Helper function to get filename and extension
+    private fun getFileNameAndExtension(context: Context, uri: Uri): Pair<String, String> {
+        val fileName = getFileName(context, uri) ?: "upload"
+        val extension = when {
+            fileName.contains('.') -> fileName.substringAfterLast('.')
+            else -> {
+                val mimeType = context.contentResolver.getType(uri)
+                getExtensionFromMimeType(mimeType) ?: "bin"
+            }
+        }
+        return Pair(fileName, extension)
+    }
+
+    // Helper function to get extension from MIME type
+    private fun getExtensionFromMimeType(mimeType: String?): String? {
+        return when (mimeType) {
+            "image/jpeg" -> "jpg"
+            "image/png" -> "png"
+            "image/gif" -> "gif"
+            "image/webp" -> "webp"
+            "image/bmp" -> "bmp"
+            "video/mp4" -> "mp4"
+            "video/quicktime" -> "mov"
+            "video/x-msvideo" -> "avi"
+            "video/x-matroska" -> "mkv"
+            "video/webm" -> "webm"
+            "video/3gpp" -> "3gp"
+            else -> MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+        }
+    }
+
 
 
 
@@ -252,7 +328,7 @@ class OfferRepositoryImpl(
             val mediaList = newLocalMedia.map { uri: Uri ->
                 uriToFile(context, uri)
             }
-            val mediaListMulti = prepareImageParts(mediaList)
+            val mediaListMulti = prepareMediaParts(mediaList)
 
 
 //
